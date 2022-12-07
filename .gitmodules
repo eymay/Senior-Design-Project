@@ -1,0 +1,6 @@
+[submodule "software"]
+	path = software
+	url = git@github.com:Eymay/CustomInstrLLVM.git
+[submodule "hardware"]
+	path = hardware
+	url = git@github.com:Eymay/Ibex_ASCON.git
