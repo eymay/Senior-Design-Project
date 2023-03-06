@@ -1,0 +1,64 @@
+\chapter{APPENDIX A.1}
+\vglue6pt
+% For Appendix A.1
+% Format the equation environment
+\renewcommand{\theequation}{A.1.\arabic{equation}}
+% Reset the counter
+\setcounter{equation}{0}
+\section{Installation of Software}
+
+As the LLVM codebase is large and has many options while building from source, finding the right options that our computers can handle easily was both essential to get started and critical as it decides the time it takes to see a change in code to get compiled. For this purpose, we accumulated the commands and created a tutorial that we can use in the future.
+
+\begin{lstlisting}[language=Bash, caption={Clone Repository and Install Necessary Packages}]
+git clone https://github.com/llvm/llvm-project
+cd llvm-project
+mkdir build
+cd build	
+sudo apt install cmake, ninja-build, clang, lld	
+\end{lstlisting}
+
+\begin{lstlisting}[language=Bash, caption={CMake Configuration We Used}]
+cmake -S ../llvm . -G Ninja -DCMAKE_BUILD_TYPE="Debug"  \
+-DBUILD_SHARED_LIBS=True -DLLVM_USE_SPLIT_DWARF=True  \
+-DLLVM_BUILD_TESTS=True   -DCMAKE_C_COMPILER=clang \
+-DCMAKE_CXX_COMPILER=clang++ -DLLVM_TARGETS_TO_BUILD="all" \
+-DLLVM_EXPERIMENTAL_TARGETS_TO_BUILD="RISCV" -DLLVM_ENABLE_LLD=ON	
+\end{lstlisting}
+With this command, we are choosing the type as debug. Shared\_libs=TRUE causes all libraries to be built shared instead of static libraries. ..SPLIT\_DWARF is set to True to minimize memory usage at link time. We want to use clang as the C compiler. Therefore, it is specified in the command as DCMAKE\_C\_COMPILER=clang. In addition to that, we want to use lld as the linker instead of gold, so we specify that as well.
+This configuration is the most efficient in terms of memory and disk usage among our previous attempts at building LLVM from source.
+\noindent
+\begin{minipage}[t]{0.35\linewidth}
+\begin{lstlisting}[language=Bash, caption={To build from scratch or to rebuild files with change, automatically}]
+Ninja
+\end{lstlisting}
+\end{minipage}
+% \hspace{2em}
+\begin{minipage}[t]{0.25\linewidth}
+\hfill
+\end{minipage}
+\begin{minipage}[t]{0.35\linewidth}
+\begin{lstlisting}[language=Bash, caption={To build llc only which is the binary we modify}]
+ninja llc	
+\end{lstlisting}
+\end{minipage}
+
+
+
+While running ninja, CPU and ram usage significantly increases. All available cores are used capacity. This may prevent doing other tasks while running ninja. In order to prevent this one may opt to use the following command instead. It allows you to choose how many cores are going to be utilized.
+\begin{lstlisting}[language=Bash]
+	ninja llc -j<number of cores to use>
+\end{lstlisting}
+
+
+%\section*{APPENDIX A.2}
+%\vglue6pt
+% For Appendix A.2
+% Format the equation environment
+%\renewcommand{\theequation}{A.2.\arabic{equation}}
+% Reset the counter
+%\setcounter{equation}{0}
+
+
+
+\newpage
+
