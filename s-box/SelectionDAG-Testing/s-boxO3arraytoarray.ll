@@ -1,5 +1,5 @@
-; ModuleID = 's-box-reg.c'
-source_filename = "s-box-reg.c"
+; ModuleID = 's-box.c'
+source_filename = "s-box.c"
 target datalayout = "e-m:e-p:32:32-i64:64-n32-S128"
 target triple = "riscv32-unknown-linux-gnu"
 
