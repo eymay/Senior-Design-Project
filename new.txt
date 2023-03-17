@@ -1,1 +1,0 @@
-/home/eymen/Documents/Compiler/llvm-project/buildFullDebug/bin/llc: error: /home/eymen/Documents/Compiler/llvm-project/buildFullDebug/bin/llc: s-box-regPtrO3.ll: error: Could not open input file: No such file or directory
