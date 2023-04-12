@@ -1,6 +1,20 @@
-# Istanbul Technical University - LaTeX Graduation Project Template (İstanbul Teknik Üniversitesi (İTÜ) - LaTeX Bitirme Projesi Şablonu)
+# Istanbul Technical University - LaTeX Graduation Project 
 
-This repo is a template for graduation projects in LaTeX format.
+## Prerequisites
+```shell
+sudo apt install latexmk texlive-full
+```
+texlive-full will install all of the LaTeX packages which will make working with LaTeX easier.
+
+## Compiling from Shell
+```shell
+cd thesis
+latexmk -pdf interimreport.tex
+```
+
+## VS Code
+LaTeX Workshop extension can be installed which runs the commands simmilar to the mentioned shell commands.
+
 
 
 
