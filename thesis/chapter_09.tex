@@ -36,7 +36,20 @@ def : Pat< (xor (shl GPR:\$src1, (i32 1)), GPR:\$src2),
 (SHLXOR GPR:\$src1, GPR:\$src2)>;
 \end{lstlisting}
 
-After doing these, we can try it with a simple C code given in \ref{fig:c_code_for_shlxor}. Let’s get an assembly output from the C code by running the following commands:
+After doing these, we can try it with a simple C code given below. 
+
+\begin{lstlisting}
+int a,b;
+
+void shlxor() {
+	a = 3;
+	b = 5;
+		
+	a = b^(a<<1);
+}
+\end{lstlisting}
+
+Let’s get an assembly output from this C code by running the following commands:
 
 \begin{lstlisting}
 clang -S -target riscv32-linux-gnu -emit-llvm -g shlxor.c
@@ -45,22 +58,48 @@ $~/CustomInstrLLVM/build/bin/llc -mtriple=riscv32 shlxor.ll$
 
 Here, CustomInstrLLVM is the folder that we built llvm in.
 
-\begin{figure}
-    \centering
-    \includegraphics{adding_new_instr/c_code_for_shlxor.png}
-    \caption{C code for SHLXOR}
-    \label{fig:c_code_for_shlxor}
-\end{figure}
+This C code basically shifts the variable a by one bit and XOR’s it with b variable. Then the result is stored in a. We can see that, the register that stores the value a is both the first source register and the destination register. The assembly output is given below.
 
-This C code basically shifts the variable a by one bit and XOR’s it with b variable. Then the result is stored in a. We can see that, the register that stores the value a is both the first source register and the destination register. The assembly output is given in figure \ref{fig:shlxor_assembly_output}.
-\begin{figure}
-    \centering
-    \includegraphics{adding_new_instr/shlxor_assembly_output.png}
-    \caption{SHLXOR assembly output}
-    \label{fig:shlxor_assembly_output}
-\end{figure}
+\begin{lstlisting}
+shlxor:                                 # @shlxor
+.Lfunc_begin0:
+	.loc	0 4 0                           # shlx.c:4:0
+	.cfi_sections .debug_frame
+	.cfi_startproc
+# %bb.0:
+	addi	sp, sp, -16
+	.cfi_def_cfa_offset 16
+.Ltmp0:
+	.loc	0 5 4 prologue_end              # shlx.c:5:4
+	sw	ra, 12(sp)                      # 4-byte Folded Spill
+	sw	s0, 8(sp)                       # 4-byte Folded Spill
+	.cfi_offset ra, -4
+	.cfi_offset s0, -8
+	addi	s0, sp, 16
+	.cfi_def_cfa s0, 0
+	lui	a0, %hi(a)
+	li	a1, 3
+	sw	a1, %lo(a)(a0)
+	.loc	0 6 4                           # shlx.c:6:4
+	lui	a1, %hi(b)
+	li	a2, 5
+	sw	a2, %lo(b)(a1)
+	.loc	0 9 6                           # shlx.c:9:6
+	lw	a1, %lo(b)(a1)
+	.loc	0 9 9 is_stmt 0                 # shlx.c:9:9
+	lw	a2, %lo(a)(a0)
+	.loc	0 9 7                           # shlx.c:9:7
+	shlxor	a1, a2, a1
+	.loc	0 9 4                           # shlx.c:9:4
+	sw	a1, %lo(a)(a0)
+	.loc	0 10 1 is_stmt 1                # shlx.c:10:1
+	lw	ra, 12(sp)                      # 4-byte Folded Reload
+	lw	s0, 8(sp)                       # 4-byte Folded Reload
+	addi	sp, sp, 16
+	ret
+\end{lstlisting}
 
-In the assembly output, we can see the SHLXOR instruction. a1 and a2 are the sources and a1 is also the destination as we can see.
+In the assembly output, we can see the SHLXOR instruction in line 29. a1 and a2 are the sources and a1 is also the destination as we can see.
 
 \section{RORI Instruction}
 One of the Instructions that we worked on is RORI instruction. The purpose of this instruction is to take the operand and rotate it to the right by the amount of the immediate value. This is different from shifting right using an immediate. When shifting a number to the right, the rightmost (least significant) bits are deleted and the leftmost (most significant) bits are filled in with zeros. On the other hand, when a number is rotated right, the least significant bits that are pushed out are not deleted but written into the most significant bits. We want to add add an instruction that performs this operation.
@@ -91,49 +130,103 @@ setOperationAction({ISD::ROTL, ISD::ROTR}, XLenVT, Expand);
 }
 \end{lstlisting}
 
-However, we need to change the “Expand” to “Legal” in here otherwise we will not see the ROTI instruction in the assembly output.  This way, we are legalizing the action. If we don’t do this, we will see the fshr (funnel shift right) intrinsic in the .ll file but ROTI won’t make it into the assembly output. After doing these, we can try it with a simple C code. As mentioned before, we used a built in rotate function in the C code given in figure \ref{fig:c_code_with_builtin_function_for_roti}.
-\begin{figure}
-    \centering
-    \includegraphics{adding_new_instr/c_code_with_builtin_function_for_roti.png}
-    \caption{C code with builtin function for RORI}
-    \label{fig:c_code_with_builtin_function_for_roti}
-\end{figure}
+However, we need to change the “Expand” to “Legal” in here otherwise we will not see the ROTI instruction in the assembly output.  This way, we are legalizing the action. If we don’t do this, we will see the fshr (funnel shift right) intrinsic in the .ll file but ROTI won’t make it into the assembly output. After doing these, we can try it with a simple C code. As mentioned before, we used a built in rotate function in the C code given below. 
+%\ref{fig:c_code_with_builtin_function_for_roti}.
 
-This code rotates 15 to the right by 2 bits. We can obtain the .ll file given in figure \ref{fig:rotill_output_for_rotic} by running the following command.
+\begin{lstlisting}
+int a;
+
+void ROT() {
+	a = 15;
+	
+	a = __builtin_rotateright32(a,2);	
+}
+\end{lstlisting}
+
+This code rotates 15 to the right by 2 bits. We can obtain the .ll file by running the following command.
 
 \begin{lstlisting}
 clang -S -target riscv32-linux-gnu -emit-llvm -g roti.c
 \end{lstlisting}
 
-\begin{figure}
-    \centering
-    \includegraphics{adding_new_instr/rotill_output_for_rotic.png}
-    \caption{roti.ll output for roti.c}
-    \label{fig:rotill_output_for_rotic}
-\end{figure}
+The contents of the .ll file is given below.
 
-The fshr intrinsic is visible in the twelfth line. After that, the assembly output can be obtained by running the following command. The assembly output is given in figure \ref{fig:roti_assembly_output}.
+\begin{lstlisting}
+; ModuleID = 'roti.c'
+source_filename = "roti.c"
+target datalayout = "e-m:e-p:32:32-i64:64-n32-S128"
+target triple = "riscv32-unknown-linux-gnu"
+
+@a = dso_local global i32 0, align 4, !dbg !0
+
+; Function Attrs: noinline nounwind optnone
+define dso_local void @ROT() #0 !dbg !15 {
+  store i32 15, i32* @a, align 4, !dbg !19
+  %1 = load i32, i32* @a, align 4, !dbg !20
+  %2 = call i32 @llvm.fshr.i32(i32 %1, i32 %1, i32 2), !dbg !21
+  store i32 %2, i32* @a, align 4, !dbg !22
+  ret void, !dbg !23
+}
+\end{lstlisting}
+
+The fshr intrinsic is visible in the twelfth line. After that, the assembly output can be obtained by running the following command. 
+%The assembly output is given in figure \ref{fig:roti_assembly_output}.
 
 \begin{lstlisting}
 $~/CustomInstrLLVM/build/bin/llc -mtriple=riscv32 roti.ll$
 \end{lstlisting}
 
-\begin{figure}
-    \centering
-    \includegraphics{adding_new_instr/roti_assembly_output.png}
-    \caption{ROTI assembly output}
-    \label{fig:roti_assembly_output}
-\end{figure}
+The obtained assembly output is given below.
 
-The ROTI instruction can be seen in the assembly output. As expected, it uses one register as both  the destination and the source alongside an immediate value.
+\begin{lstlisting}
+ROT:                                    # @ROT
+.Lfunc_begin0:
+	.loc	0 3 0                           # roti.c:3:0
+	.cfi_sections .debug_frame
+	.cfi_startproc
+# %bb.0:
+	addi	sp, sp, -16
+	.cfi_def_cfa_offset 16
+.Ltmp0:
+	.loc	0 4 4 prologue_end              # roti.c:4:4
+	sw	ra, 12(sp)                      # 4-byte Folded Spill
+	sw	s0, 8(sp)                       # 4-byte Folded Spill
+	.cfi_offset ra, -4
+	.cfi_offset s0, -8
+	addi	s0, sp, 16
+	.cfi_def_cfa s0, 0
+	lui	a0, %hi(a)
+	li	a1, 15
+	sw	a1, %lo(a)(a0)
+	.loc	0 11 30                         # roti.c:11:30
+	lw	a1, %lo(a)(a0)
+	.loc	0 11 6 is_stmt 0                # roti.c:11:6
+	roti	a1, a1, 2
+	.loc	0 11 4                          # roti.c:11:4
+	sw	a1, %lo(a)(a0)
+	.loc	0 14 1 is_stmt 1                # roti.c:14:1
+	lw	ra, 12(sp)                      # 4-byte Folded Reload
+	lw	s0, 8(sp)                       # 4-byte Folded Reload
+	addi	sp, sp, 16
+	ret
+\end{lstlisting}
 
-This way, we succesfully obtained the ROTI instruction. However, using the builtin function while writing the C code wasn’t the prettiest solution. Therefore, we looked further into how we can implement this. After that, we realized that there is a bit manipulation extension for RISCV and what we need was in the RISCVInstrInfoZb.td file. This file contains the instruction extensions for bit manipulations. These instructions operate on the bits of the data and RORI is one of those instructions. However, in order to utilize this extension, we need to add some flags to the command while running clang in order to get an assembly output from the C code we write. The simple C code for RORI is given in figure \ref{fig:c_code_for_rori}.
-\begin{figure}
-    \centering
-    \includegraphics{adding_new_instr/c_code_for_rori.png}
-    \caption{C code for RORI}
-    \label{fig:c_code_for_rori}
-\end{figure}
+The ROTI instruction can be seen in the assembly output in line 23. As expected, it uses one register as both  the destination and the source alongside an immediate value.
+
+This way, we succesfully obtained the ROTI instruction. However, using the builtin function while writing the C code wasn’t the prettiest solution. Therefore, we looked further into how we can implement this. After that, we realized that there is a bit manipulation extension for RISCV and what we need was in the RISCVInstrInfoZb.td file. This file contains the instruction extensions for bit manipulations. These instructions operate on the bits of the data and RORI is one of those instructions. However, in order to utilize this extension, we need to add some flags to the command while running clang in order to get an assembly output from the C code we write. The simple C code for RORI is given below .%in figure \ref{fig:c_code_for_rori}.
+
+\begin{lstlisting}
+#define XLEN 32
+#include <stdint.h>
+#define uint_xlen_t uint32_t
+
+uint_xlen_t rotimm(uint_xlen_t rs1)
+{
+uint_xlen_t a = 0;
+a = ((rs1>>2) | (rs1<<(XLEN-2)));
+return a;
+}
+\end{lstlisting}
 
 Here, we use 32 as the length because our target is 32 bit and the rotation is implemented in the eighth line. After that, we run the following command with additional flags as mentioned before.
 
@@ -141,13 +234,26 @@ Here, we use 32 as the length because our target is 32 bit and the rotation is i
 $clang --target=riscv32 -O -S rori.c -march=rv32imaczbb$
 \end{lstlisting}
 
-Here, -O defines the level of optimization. -S is used for getting an assembly file as an output. rori.c is the name of our simple C code. -march=rv32imaczbb designates that we want to utilize the zbb subgroup of the bit manipulation extension. The assembly output is given in figure \ref{fig:rori_assembly_output}.
-\begin{figure}
-    \centering
-    \includegraphics{adding_new_instr/rori_assembly_output.png}
-    \caption{RORI assembly output}
-    \label{fig:rori_assembly_output}
-\end{figure}
+Here, -O defines the level of optimization. -S is used for getting an assembly file as an output. rori.c is the name of our simple C code. -march=rv32imaczbb designates that we want to utilize the zbb subgroup of the bit manipulation extension. The assembly output is given below.%in figure \ref{fig:rori_assembly_output}.
+
+\begin{lstlisting}
+	.text
+	.attribute	4, 16
+	.attribute	5, "rv32i2p0_m2p0_a2p0_c2p0_zbb1p0"
+	.file	"rori.c"
+	.globl	rotimm
+	.p2align	1
+	.type	rotimm,@function
+rotimm:
+	rori	a0, a0, 2
+	ret
+.Lfunc_end0:
+	.size	rotimm, .Lfunc_end0-rotimm
+
+	.ident	"Ubuntu clang version 14.0.0-1ubuntu1"
+	.section	".note.GNU-stack","",@progbits
+	.addrsig
+\end{lstlisting}
 
 This way, we managed to succesfully obtain RORI instruction in the assembly output.
 

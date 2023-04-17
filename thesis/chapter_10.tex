@@ -17,14 +17,14 @@ Before adding a new instruction, check its byte sequence. LLVM-MC is going to be
 Here is a working test file:
 
 \begin{lstlisting}
-\# RUN: llvm-mc %s -triple=riscv32 -riscv-no-aliases -show-encoding \ 
-\# RUN: 	| FileCheck -check-prefixes=CHECK-ASM,CHECK-ASM-AND-OBJ %s 
-\# RUN: llvm-mc -filetype=obj -triple=riscv32 < %s \ 
-\# RUN: 	| llvm-objdump -M no-aliases -d -r - \ 
-\# RUN: 	| FileCheck -check-prefixes=CHECK-ASM-AND-OBJ %s 
+# RUN: llvm-mc %s -triple=riscv32 -riscv-no-aliases -show-encoding \ 
+# RUN: 	| FileCheck -check-prefixes=CHECK-ASM,CHECK-ASM-AND-OBJ %s 
+# RUN: llvm-mc -filetype=obj -triple=riscv32 < %s \ 
+# RUN: 	| llvm-objdump -M no-aliases -d -r - \ 
+# RUN: 	| FileCheck -check-prefixes=CHECK-ASM-AND-OBJ %s 
 
-\# CHECK-ASM-AND-OBJ: shlxor s2, s2, s8 
-\# CHECK-ASM: encoding: [0x33,0x59,0x89,0x81] 
+# CHECK-ASM-AND-OBJ: shlxor s2, s2, s8 
+# CHECK-ASM: encoding: [0x33,0x59,0x89,0x81] 
 shlxor s2, s2, s8
 \end{lstlisting}
 
