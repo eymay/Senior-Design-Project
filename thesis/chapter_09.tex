@@ -150,3 +150,302 @@ Here, -O defines the level of optimization. -S is used for getting an assembly f
 \end{figure}
 
 This way, we managed to succesfully obtain RORI instruction in the assembly output.
+
+\section{NAXOR Instruction}
+
+S-box algorithm includes a certain pattern that is used repeatedly. Not and xor pattern is used five times in an s-box cycle. This pattern is lowered into one instruction using TableGen. Definition and specifications of the pattern are added to RISCVInstrInfoCrypt.td file. After matching this pattern 15 rows of the assembly file is reduced to one single instruction. For future works in this field, this pattern can be implemented in a single cycle by adding a new extension to the Ibex core.  
+
+\begin{lstlisting}
+def NAXOR : ALU_rrr<0b11, 0b100, "naxor">,
+Sched<[WriteIMul, ReadIMul, ReadIMul]>;
+\end{lstlisting}
+
+Since there are three variables in this instruction, custom ALU\_rrr class is used which is explained in section 5.3. 11 and 100 numbers are used for funct2 and funct3.
+\\\\
+\begin{lstlisting}
+def : Pat< (xor (and (not GPR:$src1), GPR:$src2), GPR:$src3),
+(NAXOR GPR:$src1, GPR:$src2, GPR:$src3)>;
+\end{lstlisting}
+
+This pattern is used 5 times in the rectangular shape of the figure x.x. NAXOR instruction reduces 15 instructions into 5 instructions.
+\\\\
+%\begin{figure}
+%    \centering
+%    \includegraphics{adding_new_instr/sbox_naxor_pattern.png}
+%    \caption{naxor patterns in sbox algorithm}
+%    \label{fig:c_code_with_builtin_function_for_roti}
+%\end{figure}
+%
+%
+%\begin{figure}
+%    \centering
+%    \includegraphics{adding_new_instr/naxor_dag_diagram.png}
+%    \caption{dag diagram output for the s-box algorithm}
+%    \label{fig:rotill_output_for_rotic}
+%\end{figure}
+
+\begin{lstlisting}
+    ; ModuleID = 's-box.c'
+    source_filename = "s-box.c"
+    target datalayout = "e-m:e-p:32:32-i64:64-n32-S128"
+    target triple = "riscv32-unknown-linux-gnu"
+    
+    ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: readwrite) uwtable
+    define dso_local void @sbox(ptr nocapture noundef \%0) local_unnamed_addr #0 {
+      \%2 = getelementptr inbounds [5 x i32], ptr \%0, i32 0, i32 4
+      \%3 = load i32, ptr \%2, align 4, !tbaa !7
+      \%4 = load i32, ptr \%0, align 4, !tbaa !7
+      \%5 = xor i32 \%4, \%3
+      \%6 = getelementptr inbounds [5 x i32], ptr \%0, i32 0, i32 3
+      \%7 = load i32, ptr \%6, align 4, !tbaa !7
+      \%8 = xor i32 \%7, \%3
+      \%9 = getelementptr inbounds [5 x i32], ptr \%0, i32 0, i32 1
+      \%10 = load i32, ptr \%9, align 4, !tbaa !7
+      \%11 = getelementptr inbounds [5 x i32], ptr \%0, i32 0, i32 2
+      \%12 = load i32, ptr \%11, align 4, !tbaa !7
+      \%13 = xor i32 \%12, \%10
+      \%14 = xor i32 \%5, -1
+      \%15 = xor i32 \%10, -1
+      \%16 = xor i32 \%13, -1
+      \%17 = xor i32 \%7, -1
+      \%18 = xor i32 \%8, -1
+      \%19 = and i32 \%10, \%14
+      \%20 = and i32 \%12, \%15
+      \%21 = and i32 \%7, \%16
+      \%22 = and i32 \%3, \%17
+      \%23 = and i32 \%5, \%18
+      \%24 = xor i32 \%20, \%5
+      \%25 = xor i32 \%21, \%10
+      \%26 = xor i32 \%13, \%22
+      \%27 = xor i32 \%23, \%7
+      \%28 = xor i32 \%19, \%8
+      store i32 \%28, ptr \%2, align 4, !tbaa !7
+      \%29 = xor i32 \%25, \%24
+      store i32 \%29, ptr \%9, align 4, !tbaa !7
+      \%30 = xor i32 \%24, \%28
+      store i32 \%30, ptr \%0, align 4, !tbaa !7
+      \%31 = xor i32 \%26, \%27
+      store i32 \%31, ptr \%6, align 4, !tbaa !7
+      \%32 = xor i32 \%26, -1
+      store i32 \%32, ptr \%11, align 4, !tbaa !7
+      ret void
+    }
+    
+    attributes #0 = { mustprogress nofree norecurse nosync nounwind willreturn memory(argmem: readwrite) uwtable "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="generic-rv32" "target-features"="+32bit,+a,+c,+d,+f,+m,+relax,-e,-experimental-zca,-experimental-zcb,-experimental-zcd,-experimental-zcf,-experimental-zfa,-experimental-zihintntl,-experimental-ztso,-experimental-zvfh,-h,-save-restore,-svinval,-svnapot,-svpbmt,-v,-xtheadba,-xtheadbb,-xtheadbs,-xtheadcmo,-xtheadcondmov,-xtheadfmemidx,-xtheadmac,-xtheadmemidx,-xtheadmempair,-xtheadsync,-xtheadvdot,-xventanacondops,-zawrs,-zba,-zbb,-zbc,-zbkb,-zbkc,-zbkx,-zbs,-zdinx,-zfh,-zfhmin,-zfinx,-zhinx,-zhinxmin,-zicbom,-zicbop,-zicboz,-zicsr,-zifencei,-zihintpause,-zk,-zkn,-zknd,-zkne,-zknh,-zkr,-zks,-zksed,-zksh,-zkt,-zmmul,-zve32f,-zve32x,-zve64d,-zve64f,-zve64x,-zvl1024b,-zvl128b,-zvl16384b,-zvl2048b,-zvl256b,-zvl32768b,-zvl32b,-zvl4096b,-zvl512b,-zvl64b,-zvl65536b,-zvl8192b" }
+    
+    !llvm.module.flags = !{!0, !1, !2, !3, !4, !5}
+    !llvm.ident = !{!6}
+    
+    !0 = !{i32 1, !"wchar_size", i32 4}
+    !1 = !{i32 1, !"target-abi", !"ilp32d"}
+    !2 = !{i32 8, !"PIC Level", i32 2}
+    !3 = !{i32 7, !"PIE Level", i32 2}
+    !4 = !{i32 7, !"uwtable", i32 2}
+    !5 = !{i32 8, !"SmallDataLimit", i32 8}
+    !6 = !{!"clang version 17.0.0 (https://github.com/llvm/llvm-project.git e3dd9f7e66fec22986605da2dcd8120a7864455d)"}
+    !7 = !{!8, !8, i64 0}
+    !8 = !{!"int", !9, i64 0}
+    !9 = !{!"omnipotent char", !10, i64 0}
+    !10 = !{!"Simple C/C++ TBAA"}
+\end{lstlisting}
+
+Intermediate Representation code input for s-box algorithm.
+\\\\
+\begin{lstlisting}
+    .text
+	.attribute	4, 16
+	.attribute	5, "rv32i2p0"
+	.file	"s-box.c"
+	.globl	sbox                            # -- Begin function sbox
+	.p2align	1
+	.type	sbox,@function
+sbox:                                   # @sbox
+	.cfi_startproc
+# \%bb.0:
+	lw	a1, 16(a0)
+	lw	a2, 0(a0)
+	lw	a3, 12(a0)
+	lw	a4, 4(a0)
+	lw	a5, 8(a0)
+	xor	a2, a2, a1
+	xor	a6, a3, a1
+	xor	a7, a5, a4
+	not	t0, a2
+	not	t1, a4
+	not	t2, a7
+	not	t3, a3
+	not	t4, a6
+	and	t0, a4, t0
+	and	a5, a5, t1
+	and	t1, a3, t2
+	and	a1, a1, t3
+	and	t2, a2, t4
+	xor	a2, a2, a5
+	xor	a4, t1, a4
+	xor	a1, a7, a1
+	xor	a3, t2, a3
+	xor	a5, t0, a6
+	sw	a5, 16(a0)
+	xor	a4, a4, a2
+	sw	a4, 4(a0)
+	xor	a2, a2, a5
+	sw	a2, 0(a0)
+	xor	a3, a3, a1
+	sw	a3, 12(a0)
+	not	a1, a1
+	sw	a1, 8(a0)
+	ret
+.Lfunc_end0:
+	.size	sbox, .Lfunc_end0-sbox
+	.cfi_endproc
+                                        # -- End function
+	.ident	"clang version 17.0.0 (https://github.com/llvm/llvm-project.git e3dd9f7e66fec22986605da2dcd8120a7864455d)"
+	.section	".note.GNU-stack","",@progbits
+
+\end{lstlisting}
+
+Assembly output without naxor instruction.
+\\\\
+
+\begin{lstlisting}
+    .text
+	.attribute	4, 16
+	.attribute	5, "rv32i2p0"
+	.file	"s-box.c"
+	.globl	sbox                            # -- Begin function sbox
+	.p2align	1
+	.type	sbox,@function
+sbox:                                   # @sbox
+	.cfi_startproc
+# \%bb.0:
+	lw	a1, 16(a0)
+	lw	a2, 0(a0)
+	lw	a3, 12(a0)
+	lw	a4, 4(a0)
+	lw	a5, 8(a0)
+	xor	a2, a2, a1
+	xor	a6, a3, a1
+	xor	a7, a5, a4
+	naxor	a5, a4, a5 ,a2
+	naxor	t0, a7, a3 ,a4
+	naxor	a1, a3, a1 ,a7
+	naxor	a3, a6, a2 ,a3
+	naxor	a2, a2, a4 ,a6
+	sw	a2, 16(a0)
+	xor	a4, t0, a5
+	sw	a4, 4(a0)
+	xor	a2, a2, a5
+	sw	a2, 0(a0)
+	xor	a3, a3, a1
+	sw	a3, 12(a0)
+	not	a1, a1
+	sw	a1, 8(a0)
+	ret
+.Lfunc_end0:
+	.size	sbox, .Lfunc_end0-sbox
+	.cfi_endproc
+                                        # -- End function
+	.ident	"clang version 17.0.0 (https://github.com/llvm/llvm-project.git e3dd9f7e66fec22986605da2dcd8120a7864455d)"
+	.section	".note.GNU-stack","",@progbits
+
+\end{lstlisting}
+
+Assembly output with naxor instruction. 15 lines of not, and, xor operations are reduced to 5 naxor instructions.
+\\\\
+
+
+
+
+
+
+\section{LXR Instruction}
+
+S-box algorithm uses multiple inputs and outputs and they are supposed to be loaded and stored to the registers during implementation. An example pattern is matched using TableGen. Lxr instruction covers an xor operation of two loaded numbers. ALU\_rrr class is used to match the pattern since three registers are used in the instruction.
+
+\begin{lstlisting}
+let mayLoad = 1 in{
+def LXR : ALU_rr<0b0011011, 0b101, "lxr">,
+Sched<[WriteIALU, ReadIALU, ReadIALU]>;
+}
+\end{lstlisting}
+
+ALU\_rr class is used and 0011011, 101 numbers are used for opcodes. mayLoad flag is 1 to enable the load instruction in pattern.
+\\
+\begin{lstlisting}
+def : Pat< (xor (load GPR:$rs1),(load GPR:$rs2)),
+(LXR GPR:$rs1,GPR:$rs2)>;
+\end{lstlisting}
+
+LXR instruction covers the xor operation of two loaded numbers.
+\\
+
+%\begin{figure}
+%    \centering
+%    \includegraphics{adding_new_instr/lxr_dag_diagram.png}
+%    \caption{dag diagram output for the example lxr algorithm}
+%    \label{fig:lxr_dag_diagram}
+%\end{figure}
+
+\begin{lstlisting}
+    define i32 @foo(ptr \%p1, ptr \%p2) {
+        \%a = load i32, ptr \%p1
+        \%b = load i32, ptr \%p2
+        \%res = xor i32 \%a, \%b
+        ret i32 \%res
+      }
+\end{lstlisting}
+
+Intermediate Representation code input for lxr algorithm.
+\\\\
+
+\begin{lstlisting}
+      
+          .text
+          .attribute	4, 16
+          .attribute	5, "rv32i2p0"
+          .file	"lxr.ll"
+          .globl	foo                             # -- Begin function foo
+          .p2align	2
+          .type	foo,@function
+      foo:                                    # @foo
+          .cfi_startproc
+      # \%bb.0:
+          lw	a0, 0(a0)
+          lw	a1, 0(a1)
+          xor	a0, a0, a1
+          ret
+      .Lfunc_end0:
+          .size	foo, .Lfunc_end0-foo
+          .cfi_endproc
+                                              # -- End function
+          .section	".note.GNU-stack","",@progbits
+      
+      
+\end{lstlisting}
+
+Assembly output without lxr instruction.
+\\\\
+
+
+\begin{lstlisting}
+    .text
+	.attribute	4, 16
+	.attribute	5, "rv32i2p0"
+	.file	"lxr.ll"
+	.globl	foo                             # -- Begin function foo
+	.p2align	2
+	.type	foo,@function
+foo:                                    # @foo
+	.cfi_startproc
+# \%bb.0:
+	lxr	a0, a0, a1
+	ret
+.Lfunc_end0:
+	.size	foo, .Lfunc_end0-foo
+	.cfi_endproc
+                                        # -- End function
+	.section	".note.GNU-stack","",@progbits
+\end{lstlisting}
+
+Assembly output with lxr instruction. Two loads and one xor instructions are reduced to lxr instruction.
+\\\\
