@@ -7,7 +7,11 @@
 #include "constants.h"
 #include "printstate.h"
 #include "round.h"
-
+static inline void P3(ascon_state_t* s) {
+  ROUND(s, 0xf0);
+  ROUND(s, 0xe1);
+  ROUND(s, 0xd2);
+}
 static inline void P12(ascon_state_t* s) {
   ROUND(s, 0xf0);
   ROUND(s, 0xe1);

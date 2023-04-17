@@ -1,20 +1,14 @@
-#ifndef ROUND_H_
-#define ROUND_H_
-
-#include "ascon.h"
-#include "constants.h"
-#include "printstate.h"
+#include <stdint.h>
+typedef struct {
+  uint64_t x[5];
+} ascon_state_t;
 
 static inline uint64_t ROR(uint64_t x, int n) {
   return x >> n | x << (-n & 63);
 }
 
-static inline void ROUND(ascon_state_t* s, uint8_t C) {
-  ascon_state_t t;
-  /* addition of round constant */
-  s->x[2] ^= C;
-  /* printstate(" round constant", s); */
-  /* substitution layer */
+void keccakSbox(ascon_state_t* s){
+    ascon_state_t t;
   s->x[0] ^= s->x[4];
   s->x[4] ^= s->x[3];
   s->x[2] ^= s->x[1];
@@ -36,7 +30,5 @@ static inline void ROUND(ascon_state_t* s, uint8_t C) {
   s->x[2] = t.x[2] ^ ROR(t.x[2], 1) ^ ROR(t.x[2], 6);
   s->x[3] = t.x[3] ^ ROR(t.x[3], 10) ^ ROR(t.x[3], 17);
   s->x[4] = t.x[4] ^ ROR(t.x[4], 7) ^ ROR(t.x[4], 41);
-  //printstate(" round output", s);
+  return;
 }
-
-#endif /* ROUND_H_ */
