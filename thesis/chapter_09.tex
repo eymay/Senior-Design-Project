@@ -162,9 +162,9 @@ target triple = "riscv32-unknown-linux-gnu"
 ; Function Attrs: noinline nounwind optnone
 define dso_local void @ROT() #0 !dbg !15 {
   store i32 15, i32* @a, align 4, !dbg !19
-  %1 = load i32, i32* @a, align 4, !dbg !20
-  %2 = call i32 @llvm.fshr.i32(i32 %1, i32 %1, i32 2), !dbg !21
-  store i32 %2, i32* @a, align 4, !dbg !22
+  \%1 = load i32, i32* @a, align 4, !dbg !20
+  \%2 = call i32 @llvm.fshr.i32(i32 \%1, i32 \%1, i32 2), !dbg !21
+  store i32 \%2, i32* @a, align 4, !dbg !22
   ret void, !dbg !23
 }
 \end{lstlisting}
@@ -184,7 +184,7 @@ ROT:                                    # @ROT
 	.loc	0 3 0                           # roti.c:3:0
 	.cfi_sections .debug_frame
 	.cfi_startproc
-# %bb.0:
+# \%bb.0:
 	addi	sp, sp, -16
 	.cfi_def_cfa_offset 16
 .Ltmp0:
@@ -195,15 +195,15 @@ ROT:                                    # @ROT
 	.cfi_offset s0, -8
 	addi	s0, sp, 16
 	.cfi_def_cfa s0, 0
-	lui	a0, %hi(a)
+	lui	a0, \%hi(a)
 	li	a1, 15
-	sw	a1, %lo(a)(a0)
+	sw	a1, \%lo(a)(a0)
 	.loc	0 11 30                         # roti.c:11:30
-	lw	a1, %lo(a)(a0)
+	lw	a1, \%lo(a)(a0)
 	.loc	0 11 6 is_stmt 0                # roti.c:11:6
 	roti	a1, a1, 2
 	.loc	0 11 4                          # roti.c:11:4
-	sw	a1, %lo(a)(a0)
+	sw	a1, \%lo(a)(a0)
 	.loc	0 14 1 is_stmt 1                # roti.c:14:1
 	lw	ra, 12(sp)                      # 4-byte Folded Reload
 	lw	s0, 8(sp)                       # 4-byte Folded Reload
@@ -273,22 +273,22 @@ def : Pat< (xor (and (not GPR:$src1), GPR:$src2), GPR:$src3),
 (NAXOR GPR:$src1, GPR:$src2, GPR:$src3)>;
 \end{lstlisting}
 
-This pattern is used 5 times in the rectangular shape of the figure x.x. NAXOR instruction reduces 15 instructions into 5 instructions.
+This pattern is used 5 times in the rectangular shape of the \ref{fig:bit_manipulation_extension_groupings}. NAXOR instruction reduces 15 instructions into 5 instructions.
 \\\\
-%\begin{figure}
-%    \centering
-%    \includegraphics{adding_new_instr/sbox_naxor_pattern.png}
-%    \caption{naxor patterns in sbox algorithm}
-%    \label{fig:c_code_with_builtin_function_for_roti}
-%\end{figure}
-%
-%
-%\begin{figure}
-%    \centering
-%    \includegraphics{adding_new_instr/naxor_dag_diagram.png}
-%    \caption{dag diagram output for the s-box algorithm}
-%    \label{fig:rotill_output_for_rotic}
-%\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.3]{adding_new_instr/sbox_naxor_pattern.png}
+    \caption{naxor patterns in sbox algorithm}
+    \label{fig:sbox_naxor_pattern}
+\end{figure}
+
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.35]{adding_new_instr/naxor_dag_diagram.png}
+    \caption{dag diagram output for the s-box algorithm}
+    \label{fig:naxor_dag_diagram}
+\end{figure}
 
 \begin{lstlisting}
     ; ModuleID = 's-box.c'
@@ -485,12 +485,12 @@ def : Pat< (xor (load GPR:$rs1),(load GPR:$rs2)),
 LXR instruction covers the xor operation of two loaded numbers.
 \\
 
-%\begin{figure}
-%    \centering
-%    \includegraphics{adding_new_instr/lxr_dag_diagram.png}
-%    \caption{dag diagram output for the example lxr algorithm}
-%    \label{fig:lxr_dag_diagram}
-%\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.5]{adding_new_instr/lxr_dag_diagram.png}
+    \caption{dag diagram output for the example lxr algorithm}
+    \label{fig:lxr_dag_diagram}
+\end{figure}
 
 \begin{lstlisting}
     define i32 @foo(ptr \%p1, ptr \%p2) {
