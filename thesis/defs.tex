@@ -11,6 +11,13 @@
 \usepackage{listings}
 \usepackage{xcolor}
 \usepackage{multicol}
+\usepackage{llvm/lang}  % include custom language for LLVM IR.
+\usepackage{nasm/lang}  % include custom language for NASM assembly.
+\usepackage{nasm/style} % include custom style for NASM assembly.
+
+\renewcommand{\lstlistingname}{Code}% Listing -> Algorithm
+\renewcommand{\lstlistlistingname}{List of \lstlistingname s}% List of Listings -> List of Algorithms
+
 
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}

@@ -50,15 +50,16 @@ While running ninja, CPU and ram usage significantly increases. All available co
 \end{lstlisting}
 
 
-%\section*{APPENDIX A.2}
-%\vglue6pt
+\section*{APPENDIX A.2}
+\vglue6pt
 % For Appendix A.2
 % Format the equation environment
-%\renewcommand{\theequation}{A.2.\arabic{equation}}
+\renewcommand{\theequation}{A.2.\arabic{equation}}
 % Reset the counter
-%\setcounter{equation}{0}
+\setcounter{equation}{0}
+The output of the unoptimised S-box function is provided below. The C code used to produce this LLVM IR is in Code \ref{lst:sbox-c}
 
-
+\lstinputlisting[language=llvm,style=nasm]{../s-box/keccakO0.ll}
 
 \newpage
 
