@@ -278,7 +278,7 @@ This pattern is used 5 times in the rectangular shape of the \ref{fig:bit_manipu
 \begin{figure}
     \centering
     \includegraphics[scale=0.3]{adding_new_instr/sbox_naxor_pattern.png}
-    \caption{naxor patterns in sbox algorithm}
+    \caption{NAXOR patterns in sbox algorithm}
     \label{fig:sbox_naxor_pattern}
 \end{figure}
 
@@ -286,7 +286,7 @@ This pattern is used 5 times in the rectangular shape of the \ref{fig:bit_manipu
 \begin{figure}
     \centering
     \includegraphics[scale=0.35]{adding_new_instr/naxor_dag_diagram.png}
-    \caption{dag diagram output for the s-box algorithm}
+    \caption{Dag diagram output for the s-box algorithm}
     \label{fig:naxor_dag_diagram}
 \end{figure}
 
@@ -338,7 +338,7 @@ This pattern is used 5 times in the rectangular shape of the \ref{fig:bit_manipu
 
 
 %\\\\
-\begin{lstlisting}[caption= Assembly output without naxor instruction]
+\begin{lstlisting}[caption= Assembly output without NAXOR instruction]
     .text
 	.attribute	4, 16
 	.attribute	5, "rv32i2p0"
@@ -394,7 +394,7 @@ sbox:                                   # @sbox
 
 %\\\\
 
-\begin{lstlisting}[caption= Assembly output with naxor instruction]
+\begin{lstlisting}[caption= Assembly output with NAXOR instruction]
     .text
 	.attribute	4, 16
 	.attribute	5, "rv32i2p0"
@@ -437,7 +437,7 @@ sbox:                                   # @sbox
 
 \end{lstlisting}
 
-15 lines of not, and, xor operations are reduced to 5 naxor instructions.
+15 lines of not, and, xor operations are reduced to 5 NAXOR instructions.
 \\\\
 
 
@@ -447,7 +447,7 @@ sbox:                                   # @sbox
 
 \section{LXR Instruction}
 
-S-box algorithm uses multiple inputs and outputs and they are supposed to be loaded and stored to the registers during implementation. An example pattern is matched using TableGen. Lxr instruction covers an xor operation of two loaded numbers. ALU\_rrr class is used to match the pattern since three registers are used in the instruction.
+S-box algorithm uses multiple inputs and outputs and they are supposed to be loaded and stored to the registers during implementation. An example pattern is matched using TableGen. LXR instruction covers an xor operation of two loaded numbers. ALU\_rrr class is used to match the pattern since three registers are used in the instruction.
 
 \begin{lstlisting}
 let mayLoad = 1 in{
@@ -469,11 +469,11 @@ LXR instruction covers the xor operation of two loaded numbers.
 \begin{figure}
     \centering
     \includegraphics[scale=0.5]{adding_new_instr/lxr_dag_diagram.png}
-    \caption{dag diagram output for the example lxr algorithm}
+    \caption{dag diagram output for the example LXR algorithm}
     \label{fig:lxr_dag_diagram}
 \end{figure}
 
-\begin{lstlisting}[caption= Intermediate Representation code input for lxr algorithm]
+\begin{lstlisting}[caption= Intermediate Representation code input for LXR algorithm]
     define i32 @foo(ptr \%p1, ptr \%p2) {
         \%a = load i32, ptr \%p1
         \%b = load i32, ptr \%p2
@@ -485,7 +485,7 @@ LXR instruction covers the xor operation of two loaded numbers.
 
 %\\\\
 
-\begin{lstlisting}[caption= Assembly output without lxr instruction]
+\begin{lstlisting}[caption= Assembly output without LXR instruction]
       
           .text
           .attribute	4, 16
@@ -514,7 +514,7 @@ LXR instruction covers the xor operation of two loaded numbers.
 %\\\\
 
 
-\begin{lstlisting}[caption= Assembly output with lxr instruction]
+\begin{lstlisting}[caption= Assembly output with LXR instruction]
     .text
 	.attribute	4, 16
 	.attribute	5, "rv32i2p0"
@@ -534,5 +534,5 @@ foo:                                    # @foo
 	.section	".note.GNU-stack","",@progbits
 \end{lstlisting}
 
-Two loads and one xor instructions are reduced to lxr instruction.
+Two loads and one xor instructions are reduced to LXR instruction.
 \\\\
