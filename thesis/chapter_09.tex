@@ -291,7 +291,7 @@ This pattern is used 5 times in the rectangular shape of the \ref{fig:bit_manipu
 \end{figure}
 
 \begin{minipage}{0.95\linewidth}
-\begin{lstlisting}
+\begin{lstlisting}[caption= Intermediate Representation code input for s-box algorithm]
 
     define void @sbox(ptr  %0)  {
       %2 = getelementptr inbounds [5 x i32], ptr %0, i32 0, i32 4
@@ -336,9 +336,9 @@ This pattern is used 5 times in the rectangular shape of the \ref{fig:bit_manipu
     \end{lstlisting}
 \end{minipage}
 
-Intermediate Representation code input for s-box algorithm.
-\\\\
-\begin{lstlisting}
+
+%\\\\
+\begin{lstlisting}[caption= Assembly output without naxor instruction]
     .text
 	.attribute	4, 16
 	.attribute	5, "rv32i2p0"
@@ -391,10 +391,10 @@ sbox:                                   # @sbox
 
 \end{lstlisting}
 
-Assembly output without naxor instruction.
-\\\\
 
-\begin{lstlisting}
+%\\\\
+
+\begin{lstlisting}[caption= Assembly output with naxor instruction]
     .text
 	.attribute	4, 16
 	.attribute	5, "rv32i2p0"
@@ -437,7 +437,7 @@ sbox:                                   # @sbox
 
 \end{lstlisting}
 
-Assembly output with naxor instruction. 15 lines of not, and, xor operations are reduced to 5 naxor instructions.
+15 lines of not, and, xor operations are reduced to 5 naxor instructions.
 \\\\
 
 
@@ -473,7 +473,7 @@ LXR instruction covers the xor operation of two loaded numbers.
     \label{fig:lxr_dag_diagram}
 \end{figure}
 
-\begin{lstlisting}
+\begin{lstlisting}[caption= Intermediate Representation code input for lxr algorithm]
     define i32 @foo(ptr \%p1, ptr \%p2) {
         \%a = load i32, ptr \%p1
         \%b = load i32, ptr \%p2
@@ -482,10 +482,10 @@ LXR instruction covers the xor operation of two loaded numbers.
       }
 \end{lstlisting}
 
-Intermediate Representation code input for lxr algorithm.
-\\\\
 
-\begin{lstlisting}
+%\\\\
+
+\begin{lstlisting}[caption= Assembly output without lxr instruction]
       
           .text
           .attribute	4, 16
@@ -510,11 +510,11 @@ Intermediate Representation code input for lxr algorithm.
       
 \end{lstlisting}
 
-Assembly output without lxr instruction.
-\\\\
+
+%\\\\
 
 
-\begin{lstlisting}
+\begin{lstlisting}[caption= Assembly output with lxr instruction]
     .text
 	.attribute	4, 16
 	.attribute	5, "rv32i2p0"
@@ -534,5 +534,5 @@ foo:                                    # @foo
 	.section	".note.GNU-stack","",@progbits
 \end{lstlisting}
 
-Assembly output with lxr instruction. Two loads and one xor instructions are reduced to lxr instruction.
+Two loads and one xor instructions are reduced to lxr instruction.
 \\\\
