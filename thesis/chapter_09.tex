@@ -7,7 +7,9 @@
 \section{SHLXOR Instruction}
 We extended the instruction set by adding the SHLXOR instruction. The purpose of this instruction is to shift the first source operand one bit to the left and then XOR it with the second source operand. Then, the obtained result is stored in the destination register. By adding this instruction, we can perform this operation with a single instruction instead of using shift left and XOR instructions separately, making it more efficient.
 Let’s give an example to make it clearer what this instruction does. RS1 and RS2 are source operands and RD is the output.
+\\
 RS1: 0x0101     RS2: 0xFFFF     RD: 0xFDFD
+\\
 0x0101 is shifted left by one and then XOR’ed with 0xFFFF, giving the result 0xFDFD.
 As we mentioned, this new instruction requires two source registers and one destination register. Therefore, unlike the MLA instruction, we don’t need to create a new class to support it. There is already a class named ALU\_rr in the RISCVInstrinfo.td file which has two source and one destination register. Therefore, the new SHLXOR instruction is going to belong to the ALU\_rr class. The ALU\_rr class is given below.
 
@@ -100,6 +102,24 @@ shlxor:                                 # @shlxor
 \end{lstlisting}
 
 In the assembly output, we can see the SHLXOR instruction in line 29. a1 and a2 are the sources and a1 is also the destination as we can see.
+
+In addition to that, we can check the DAG in order to see the effect of our newly added instruction. We can compare the DAGs before the new instruction is added and after. We can observe the DAG before SHLXOR is added in figure \ref{fig:shlxor_before}. In this DAG, shift left (shl) and xor instructions can be seen seperately
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[scale= 0.3]{adding_new_instr/shlxor_before.png}
+    \caption{DAG before SHLXOR is added}
+    \label{fig:shlxor_before}
+\end{figure}
+
+The DAG after we add the SHLXOR instruction can be seen in figure \ref{fig:shlxor_after}. In this DAG, instead of two seperate instructions, a single SHLXOR instruction can be seen.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[scale= 0.3]{adding_new_instr/shlxor_after.png}
+    \caption{DAG after SHLXOR is added}
+    \label{fig:shlxor_after}
+\end{figure}
 
 \section{RORI Instruction}
 One of the Instructions that we worked on is RORI instruction. The purpose of this instruction is to take the operand and rotate it to the right by the amount of the immediate value. This is different from shifting right using an immediate. When shifting a number to the right, the rightmost (least significant) bits are deleted and the leftmost (most significant) bits are filled in with zeros. On the other hand, when a number is rotated right, the least significant bits that are pushed out are not deleted but written into the most significant bits. We want to add add an instruction that performs this operation.
