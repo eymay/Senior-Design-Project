@@ -32,7 +32,7 @@ shlxor s2, s2, s8
 The first RUN command sequence results in the output given in figure \ref{fig:result_of_first_run_command}.
 \begin{figure}
     \centering
-    \includegraphics{testing/result_of_first_run_command.png}
+    \includegraphics[scale=0.7]{testing/result_of_first_run_command.png}
     \caption{Result of first "RUN" command}
     \label{fig:result_of_first_run_command}
 \end{figure}
@@ -43,7 +43,7 @@ Here, FileCheck is checking both the Assembly encoding and the string as it was 
 The second RUN sequence with only the llvm-mc part spits out an ELF object which itself isn’t useful. The console output can be seen in figure \ref{fig:result_of_second_run_command}.
 \begin{figure}
     \centering
-    \includegraphics{testing/result_of_second_run_command.png}
+    \includegraphics[scale=0.9]{testing/result_of_second_run_command.png}
     \caption{Result of second "RUN" command}
     \label{fig:result_of_second_run_command}
 \end{figure}
@@ -51,7 +51,7 @@ The second RUN sequence with only the llvm-mc part spits out an ELF object which
 By using the pipe ‘|’ operator like in Shell, we can tell LLVM-lit to feed another program with the output of a program. An example is given in figure \ref{fig:use_of_pipe_operator}.
 \begin{figure}
     \centering
-    \includegraphics{testing/use_of_pipe_operator.png}
+    \includegraphics[scale=0.9]{testing/use_of_pipe_operator.png}
     \caption{Use of pipe operator}
     \label{fig:use_of_pipe_operator}
 \end{figure}
@@ -62,7 +62,7 @@ In figure \ref{fig:output_for_successfully_passed_test} we can observe that the 
 
 \begin{figure}
     \centering
-    \includegraphics{testing/output_for_successfully_passed_test.png}
+    \includegraphics[scale=0.9]{testing/output_for_successfully_passed_test.png}
     \caption{Output for successfully passed test}
     \label{fig:output_for_successfully_passed_test}
 \end{figure}
@@ -105,7 +105,7 @@ The script is located at llvm/utils/
 The llc test file is populated with FileCheck lines as seen in figure \ref{fig:llc_test_file}.
 \begin{figure}
     \centering
-    \includegraphics{testing/llc_test_file.png}
+    \includegraphics[scale=0.8]{testing/llc_test_file.png}
     \caption{LLC test file}
     \label{fig:llc_test_file}
 \end{figure}
