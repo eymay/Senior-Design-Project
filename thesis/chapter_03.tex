@@ -45,6 +45,119 @@ LLVM Optimizer is a common optimization medium used for every possible source-ta
 
 The output of the optimizer becomes the input for the target back-end which lowers the LLVM IR to the target Assembly. As the generated LLVM IR at the end of the optimizations is the object of pattern matching and assembly support for any custom instruction, it is a critical part of the design process.
 
+\subsection{Analysis Passes}
+There are almost 40 analysis passes. The significant documented analysis passes are listed below:
+
+\begin{multicols}{2}
+\begin{itemize}
+\scriptsize
+     \item Exhaustive Alias Analysis Precision Evaluator
+     \item Basic Alias Analysis (stateless AA impl)
+     \item Basic CallGraph Construction
+     \item Count Alias Analysis Query Responses
+     \item Dependence Analysis
+     \item AA use debugger
+     \item Dominance Frontier Construction
+     \item Dominator Tree Construction
+     \item Simple mod/ref analysis for globals
+     \item Counts the various types of Instructions
+     \item Interval Partition Construction
+     \item Induction Variable Users
+     \item Lazy Value Information Analysis
+     \item LibCall Alias Analysis
+     \item Statically lint-checks LLVM IR
+     \item Natural Loop Information
+     \item Memory Dependence Analysis
+     \item Decodes module-level debug info
+     \item Post-Dominance Frontier Construction
+     \item Post-Dominator Tree Construction
+     \item Alias Set Printer
+     \item Find Used Types
+     \item Detect single entry single exit regions
+     \item Scalar Evolution Analysis
+     \item ScalarEvolution-based Alias Analysis
+     \item Stack Safety Analysis
+     \item Target Data Layout
+
+\end{itemize}
+\end{multicols}
+
+Some of the analysis passes will be discussed to provide background for the following sections.
+
+\subsection{Transformation Passes}
+There are almost 60 transformation passes. The documented transformation passes are listed below:
+
+\begin{multicols}{2}
+\begin{itemize}
+\scriptsize
+     \item Aggressive Dead Code Elimination
+     \item Inliner for always\_inline functions
+     \item Promote ‘by reference’ arguments to scalars
+     \item Basic-Block Vectorization
+     \item Profile Guided Basic Block Placement
+     \item Break critical edges in CFG
+     \item Optimize for code generation
+     \item Merge Duplicate Global Constants
+     \item Dead Code Elimination
+     \item Dead Argument Elimination
+     \item Dead Type Elimination
+     \item Dead Instruction Elimination
+     \item Dead Store Elimination
+     \item Deduce function attributes
+     \item Dead Global Elimination
+     \item Global Variable Optimizer
+     \item Global Value Numbering
+     \item Canonicalize Induction Variables
+     \item Function Integration/Inlining
+     \item Combine redundant instructions
+     \item Combine expression patterns
+     \item Internalize Global Symbols
+     \item Interprocedural Sparse Conditional Constant Propagation
+     \item Jump Threading
+     \item Loop-Closed SSA Form Pass
+     \item Loop Invariant Code Motion
+     \item Delete dead loops
+     \item Extract loops into new functions
+     \item Extract at most one loop into a new function
+     \item Loop Strength Reduction
+     \item Rotate Loops
+     \item Canonicalize natural loops
+     \item Unroll loops
+     \item Unroll and Jam loops
+     \item Unswitch loops
+     \item Lower global destructors
+     \item Lower atomic intrinsics to non-atomic form
+     \item Lower invokes to calls, for unwindless code generators
+     \item Lower SwitchInsts to branches
+     \item Promote Memory to Register
+     \item MemCpy Optimization
+     \item Merge Functions
+     \item Unify function exit nodes
+     \item Partial Inliner
+     \item Remove unused exception handling info
+     \item Reassociate expressions
+     \item Relative lookup table converter
+     \item Demote all values to stack slots
+     \item Scalar Replacement of Aggregates
+     \item Sparse Conditional Constant Propagation
+     \item Simplify the CFG
+     \item Code sinking
+     \item Strip all symbols from a module
+     \item Strip debug info for unused symbols
+     \item Strip Unused Function Prototypes
+     \item Strip all llvm.dbg.declare intrinsics
+     \item Strip all symbols, except dbg symbols, from a module
+     \item Tail Call Elimination
+
+\end{itemize}
+\end{multicols}
+
+\cite{passes}
+
+\subsection{Case Study: Optimizations on S-box }\label{sbox-case}
+
+\subsection{Clang Optimization Levels}
+
 Clang can be invoked with optimization levels deciding which optimization passes are going to be run. The optimisations can target speed or code size. Speed optimising options range from "-O1" to "-O3". "-O2" enables most of the optimizations. "-O3" enables optimisations that can increase the compile time and generate larger code. Main code optimising options are "-Os" and "-Oz". "-Os" is similar to "-O2" but runs extra optimizations to reduce code size. "-Oz" runs more code reducing optimisations compared to "-Os" and is similar to "-O2" again \cite{clangCommands}.
 Caution must be taken as when no arguments are given to Clang, at the time of writing, Clang uses the "-O0" optimization level. Implementing pattern matching on unoptimised LLVM IR is not feasible for several reasons. Firstly, the IR is more sensitive to changes in the frontend. Changing the code style in frontend can cause CodeGen to produce a slightly different IR which makes it less predictable. Secondly, the code size can be too large with redundant code which makes pattern matching large instructions cumbersome. We recommend using "-O2" or "-Os" optimization levels while developing instruction selection patterns. 
 

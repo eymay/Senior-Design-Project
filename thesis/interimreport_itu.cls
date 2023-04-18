@@ -949,7 +949,7 @@ LİSTESİ\fi\normalfont}
 	\addcontentsline{toc}{chapter}{\bf{\protect\ethicalcoverToC}}
 	\singlespacing  				% For single spacing in the top portion of kapak - SBÖ
 	\makeatletter
-	\raggedright
+	\justifying
 	\makeatother	
 	\vspace*{0pt}
 	We are submitting the Senior Design Project Interim Report entitled as “\MakeUppercase{\th@Titlebir \th@Titleiki \th@Titleuc}”.
