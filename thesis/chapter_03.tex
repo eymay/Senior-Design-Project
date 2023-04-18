@@ -155,6 +155,21 @@ There are almost 60 transformation passes. The documented transformation passes 
 \cite{passes}
 
 \subsection{Case Study: Optimizations on S-box }\label{sbox-case}
+%TODO Add ASCON introduction to explain what S-box is
+One of the research topics of this study was to observe the changes to a function performing S-box with bitwise operations. As the pattern is large an enormous Assembly is generated without enabling optimizations. However, when the optimizations are enabled the final LLVM IR file and Assembly is significantly smaller as shown in Code \ref{lst:sbox} and is built upon as such. 
+
+\lstinputlisting[language=C, label={lst:sbox-c}]{../s-box/s-box.c}
+
+\begin{minipage}{0.95\linewidth}
+
+\lstinputlisting[caption={Optimized S-box LLVM IR}, label={lst:sbox},language=llvm]{../s-box/keccakO3.ll}
+
+\end{minipage}
+
+\begin{enumerate}
+    \item 
+\end{enumerate}
+
 
 \subsection{Clang Optimization Levels}
 
