@@ -53,16 +53,18 @@ void shlxor() {
 
 Let’s get an assembly output from this C code by running the following commands:
 
-\begin{lstlisting}
+\begin{lstlisting}[language=Bash]
 clang -S -target riscv32-linux-gnu -emit-llvm -g shlxor.c
-$~/CustomInstrLLVM/build/bin/llc -mtriple=riscv32 shlxor.ll$
+~/CustomInstrLLVM/build/bin/llc -mtriple=riscv32 shlxor.ll
 \end{lstlisting}
 
+%TODO lets set standard bin directory throughout thesis 
 Here, CustomInstrLLVM is the folder that we built llvm in.
 
 This C code basically shifts the variable a by one bit and XOR’s it with b variable. Then the result is stored in a. We can see that, the register that stores the value a is both the first source register and the destination register. The assembly output is given below.
-
-\begin{lstlisting}
+%TODO find RISCV latex syntax 
+%TODO and TableGen
+\begin{lstlisting}%[language={[RISC-V]Assembler}]
 shlxor:                                 # @shlxor
 .Lfunc_begin0:
 	.loc	0 4 0                           # shlx.c:4:0
@@ -165,35 +167,30 @@ void ROT() {
 
 This code rotates 15 to the right by 2 bits. We can obtain the .ll file by running the following command.
 
-\begin{lstlisting}
+\begin{lstlisting}[language=Bash]
 clang -S -target riscv32-linux-gnu -emit-llvm -g roti.c
 \end{lstlisting}
 
-The contents of the .ll file is given below.
+The simplified contents of the .ll file is given below.
 
-\begin{lstlisting}
-; ModuleID = 'roti.c'
-source_filename = "roti.c"
-target datalayout = "e-m:e-p:32:32-i64:64-n32-S128"
-target triple = "riscv32-unknown-linux-gnu"
+\begin{lstlisting}[language=llvm,style=nasm]
 
-@a = dso_local global i32 0, align 4, !dbg !0
+@a = dso_local global i32 0
 
-; Function Attrs: noinline nounwind optnone
-define dso_local void @ROT() #0 !dbg !15 {
-  store i32 15, i32* @a, align 4, !dbg !19
-  \%1 = load i32, i32* @a, align 4, !dbg !20
-  \%2 = call i32 @llvm.fshr.i32(i32 \%1, i32 \%1, i32 2), !dbg !21
-  store i32 \%2, i32* @a, align 4, !dbg !22
-  ret void, !dbg !23
+define void @ROT() {
+  store i32 15, i32* @a
+  %1 = load i32, i32* @a
+  %2 = call i32 @llvm.fshr.i32(i32 %1, i32 %1, i32 2)
+  store i32 %2, i32* @a
+  ret void
 }
 \end{lstlisting}
 
 The fshr intrinsic is visible in the twelfth line. After that, the assembly output can be obtained by running the following command. 
 %The assembly output is given in figure \ref{fig:roti_assembly_output}.
 
-\begin{lstlisting}
-$~/CustomInstrLLVM/build/bin/llc -mtriple=riscv32 roti.ll$
+\begin{lstlisting}[language=Bash]
+~/CustomInstrLLVM/build/bin/llc -mtriple=riscv32 roti.ll$
 \end{lstlisting}
 
 The obtained assembly output is given below.
@@ -250,8 +247,8 @@ return a;
 
 Here, we use 32 as the length because our target is 32 bit and the rotation is implemented in the eighth line. After that, we run the following command with additional flags as mentioned before.
 
-\begin{lstlisting}
-$clang --target=riscv32 -O -S rori.c -march=rv32imaczbb$
+\begin{lstlisting}[language=Bash]
+clang --target=riscv32 -O -S rori.c -march=rv32imaczbb
 \end{lstlisting}
 
 Here, -O defines the level of optimization. -S is used for getting an assembly file as an output. rori.c is the name of our simple C code. -march=rv32imaczbb designates that we want to utilize the zbb subgroup of the bit manipulation extension. The assembly output is given below.%in figure \ref{fig:rori_assembly_output}.
@@ -312,7 +309,7 @@ This pattern is used 5 times in the rectangular shape of the \ref{fig:bit_manipu
 
 \begin{minipage}{0.95\linewidth}
 
-\lstinputlisting[caption={Optimised S-box LLVM IR}, language=llvm]{../s-box/keccakO3.ll}
+\lstinputlisting[caption={Optimised S-box LLVM IR}, language=llvm, style=nasm]{../s-box/keccakO3.ll}
 
 \end{minipage}
 
@@ -452,12 +449,12 @@ LXR instruction covers the xor operation of two loaded numbers.
     \label{fig:lxr_dag_diagram}
 \end{figure}
 
-\begin{lstlisting}[caption= Intermediate Representation code input for LXR algorithm]
-    define i32 @foo(ptr \%p1, ptr \%p2) {
-        \%a = load i32, ptr \%p1
-        \%b = load i32, ptr \%p2
-        \%res = xor i32 \%a, \%b
-        ret i32 \%res
+\begin{lstlisting}[caption={Intermediate Representation code input for LXR algorithm}, language=llvm, style=nasm]
+    define i32 @foo(ptr %p1, ptr %p2) {
+        %a = load i32, ptr %p1
+        %b = load i32, ptr %p2
+        %res = xor i32 %a, %b
+        ret i32 %res
       }
 \end{lstlisting}
 
