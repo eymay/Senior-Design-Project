@@ -156,28 +156,320 @@ There are almost 60 transformation passes. The documented transformation passes 
 
 \subsection{Case Study: Optimizations on S-box }\label{sbox-case}
 %TODO Add ASCON introduction to explain what S-box is
-One of the research topics of this study was to observe the changes to a function performing S-box with bitwise operations. As the pattern is large an enormous Assembly is generated without enabling optimizations. However, when the optimizations are enabled the final LLVM IR file and Assembly is significantly smaller as shown in Code \ref{lst:sbox} and is built upon as such. 
+One of the research topics of this study was to observe the changes to a function shown in Code \ref{lst:sbox-c} performing S-box with bitwise operations. As the pattern is large an enormous Assembly is generated without enabling optimizations. However, when the optimizations are enabled the final LLVM IR file shown in Code \ref{lst:sbox-ir} and Assembly is significantly smaller. 
 
 \lstinputlisting[language=C, label={lst:sbox-c}]{../s-box/s-box.c}
 
+In the end of optimization passes the following IR will be generated:
 \begin{minipage}{0.95\linewidth}
 
-\lstinputlisting[caption={Optimized S-box LLVM IR}, label={lst:sbox},language=llvm]{../s-box/keccakO3.ll}
+    \lstinputlisting[caption={Optimized S-box LLVM IR}, label={lst:sbox-ir},language=llvm]{../s-box/opt/postOrderFuncAttrs.ll}
 
 \end{minipage}
-
+LLVM optimization passes are responsible for the simplification of IR. In this case, the following passes were the passes changing the IR and were run sequntially.
 \begin{enumerate}
-    \item 
+    \item InferFunctionAttrsPass 
+    \item SROAPass 
+    \item EarlyCSEPass 
+    \item GlobalOptPass 
+    \item InstCombinePass 
+    \item EarlyCSEPass 
+    \item InstCombinePass 
+    \item ReassociatePass 
+    \item InstCombinePass 
+    \item DSEPass 
+    \item PostOrderFunctionAttrsPass 
 \end{enumerate}
+ As it can be observed some passes can run several times.
 
+
+ \subsubsection{Infer Function Attributes - InferFunctionAttrsPass}\label{sec:funcAttrs}
+
+ This pass adds metadata to LLVM IR, by analyzing it. Function attributes are used to pass information about functions between LLVM passes.
+
+ \lstinputlisting[caption={LLVM IR Before InferFunctionAttrsPass},linerange={181-189} , label={lst:sbox-preinfFuncAttr},language=llvm]{../s-box/opt/unoptimised.ll}
+ \lstinputlisting[caption={LLVM IR After InferFunctionAttrsPass},linerange={181-189} , label={lst:sbox-infFuncAttr},language=llvm]{../s-box/opt/inferFunctionAttrs.ll}
+
+ Function attribute is inferred as "mustprogress" as the lifetime starting function is interacting with its environment in an observable way making a memory access \cite{llvmref-funcAttrs}. 
+ \par
+Lifetime function decides the accessibility of the pointer to the memory. When memory is allocated the lifetime of pointer to the memory starts and ends when deallocated \cite{llvmref-objectLifetime}.
+
+\subsubsection{Scalar Replacement of Aggregates - SROAPass}
+
+Aggregate IR instructions such as "alloca" are promoted to registers. The promotion to registers also means the lifetime is under control and the explicit lifetime intrinsic calls can be removed.
+
+ \lstinputlisting[caption={Alloca and Lifetime Start Lines Removed From LLVM IR Before SROAPass},linerange={11-22} , label={lst:sbox-infFuncAttr},language=llvm]{../s-box/opt/inferFunctionAttrs.ll}
+ \lstinputlisting[caption={Lifetime End Lines Removed From LLVM IR Before SROAPass},linerange={172-177} , label={lst:sbox-infFuncAttr},language=llvm]{../s-box/opt/inferFunctionAttrs.ll}
+
+An important transformation SROA does is promoting the use of registers instead of using the stack for local variables and using "Load/Store" operations to use them in the unoptimised IR \cite{llvmcode-sroa}. "Store/Load" operations are reduced significantly in this stage especially for intermediate variables where the C code is not referring to the array directly. 
+
+\lstinputlisting[linerange={15-19}, caption={NOT operations between Intermediate Variables} ,language=C, label={lst:sbox-c-nots}]{../s-box/s-box.c}
+
+ \lstinputlisting[caption={Intermediate Load and Stores in LLVM IR Before SROAPass},linerange={66-81} , language=llvm]{../s-box/opt/inferFunctionAttrs.ll}
+
+ \lstinputlisting[caption={Load and Stores Promoted to Registers in LLVM IR After SROAPass},linerange={45-49} ,label={sbox-sroa} , language=llvm]{../s-box/opt/SROAPass.ll}
+
+Similar to the dramatic change in the previous example, operations between the array elements and the intermediate variables are optimised so that the registers are used insted of stack.
+
+According to the statistics obtained from the "opt" tool of LLVM:
+
+\begin{displayquote}
+ 5 mem2reg - Number of alloca's promoted within one block \\
+ 1 mem2reg - Number of alloca's promoted with a single store \\
+ 1 sroa    - Maximum number of partitions per alloca \\
+ 8 sroa    - Maximum number of uses of a partition \\
+41 sroa    - Number of alloca partition uses rewritten \\
+ 6 sroa    - Number of alloca partitions formed \\
+ 6 sroa    - Number of allocas analyzed for replacement \\
+41 sroa    - Number of instructions deleted \\
+ 6 sroa    - Number of allocas promoted to SSA values \\
+\end{displayquote}
+
+\subsubsection{Early Common Subexpression Elimination - EarlyCSEPass}\label{sec:earlyCSE1}
+%TODO: Dominator tree explanation to Analysis part
+Performs a simple dominator tree walk, eliminating trivially redundant instructions.
+
+ \lstinputlisting[caption={Redundant Load Instructions in LLVM IR Before EarlyCSEPass},linerange={4-11} ,label={lst:sbox-cse1}, language=llvm]{../s-box/opt/SROAPass.ll}
+In Code \ref{lst:sbox-cse1} you can see that "\%x1" and "\%arrayidx2" are equal to the function argument "\%state". EarlyCSE pass detects this redundant condition and uses the already present "\%state" pointer in the output.
+
+\lstinputlisting[caption={Optimised Load Instructions in LLVM IR After EarlyCSEPass},linerange={2-6} , label={lst:sbox-cseLoad}, language=llvm]{../s-box/opt/earlyCSE.ll}
+
+Another remark from this example is that the pointer calculation is done in two instructions by "getelementptr" LLVM instruction which accesses the struct's address then the element's address in it. EarlyCSE combines these two instructions outputting the offset calculated pointers.
+
+A natural result of these simple optimizations is that the section which makes use of registers has increased. It can be seen in Code \ref{lst:sbox-cse2} that recalculation of pointers by getelementptr is removed as they are used in the beginning of the function, as shown partly in Code \ref{lst:sbox-cseLoad}.
+\lstinputlisting[caption={Redundant Instructions in LLVM IR Before EarlyCSEPass},linerange={30-69} ,label={lst:sbox-cse2}, language=llvm]{../s-box/opt/SROAPass.ll}
+
+ \lstinputlisting[caption={Optimised LLVM IR After EarlyCSEPass},linerange={20-33} ,label={lst:sbox-cse3}, language=llvm]{../s-box/opt/earlyCSE.ll}
+
+Register based operations increased because redundant load operations from the same pointers are removed. For example, in Code \ref{lst:sbox-cse2} to obtain "\%and", register operation result "\%not" and loaded value "\%11" are used. In the output of EarlyCSE, Code \ref{lst:sbox-cse3}, we can see that instead of reloading to register the loaded register is used, "\%7" in this case.
+
+According to the statistics obtained from the "opt" tool of LLVM:
+\begin{displayquote}
+19 early-cse - Number of instructions Common Subexpression Eliminated \\
+ 7 early-cse - Number of load instructions Common Subexpression Eliminated \\
+35 early-cse - Number of instructions simplified or Dead Code Eliminated \\
+\end{displayquote}
+
+
+\subsubsection{Optimize Gloal Variables - GlobalOpt}
+This pass aims to optimize global variables and transforms them to constants if necessary. This pass did not significantly change the IR. It only added an attribute to the function, "local\_unnamed\_addr" meaning that the address of the function is not significant in the module.
+
+\lstinputlisting[caption={"local\_unnamed\_addr" Attribute Added to LLVM IR After GlobalOpt},linerange={7-7} ,label={lst:sbox-globvar}, language=llvm]{../s-box/opt/globalOptPass.ll}
+
+\subsubsection{Combine Redundant Instructions - InstCombinePass}
+%TODO move transform explanations to Transforms section and only explain the example code here
+Combines redundant instructions and canonicalize them. Canonicalization is the form in which a single way of commutability is preferred. For example if a binary operator has a constant operand it is moved to the right. Canonic instructions can then be used by other passes which they can assume the instructions to be in the canonic form \cite{llvmref-instcombine}.
+\par 
+
+\lstinputlisting[caption={Redundant Load Instruction in LLVM IR Before InstCombine},linerange={10-17} ,label={lst:sbox-instc1_1}, language=llvm]{../s-box/opt/globalOptPass.ll}
+
+\lstinputlisting[caption={Removed Load Instruction in LLVM IR After InstCombine},linerange={4-11} ,label={lst:sbox-instc1_1}, language=llvm]{../s-box/opt/instCombine1.ll}
+
+According to the statistics obtained from the "opt" tool of LLVM:
+\begin{displayquote}
+  5 aa             - Number of NoAlias results \\
+109 assume-queries - Number of Queries into an assume assume bundles \\
+ 10 basicaa        - Number of times a GEP is decomposed \\
+ 11 instcombine    - Number of insts combined \\
+  1 instcombine    - Number of expansions \\
+  2 instcombine    - Number of instruction combining iterations performed \\
+\end{displayquote}
+
+\subsubsection{Early Common Subexpression Elimination - 2nd Run of EarlyCSEPass}
+Similar to the previous EarlyCSE run in Section \ref{sec:earlyCSE1}, load instructions to registers are reused in the subsequent instructions.
+\lstinputlisting[caption={Redundant Load Instructions in LLVM IR Before 2nd EarlyCSEPass},linerange={34-48} ,label={lst:sbox-cse2_1}, language=llvm]{../s-box/opt/instCombine1.ll}
+
+\lstinputlisting[caption={Removed Load Instructions in LLVM IR After 2nd EarlyCSEPass},linerange={31-39} ,label={lst:sbox-cse2_2}, language=llvm]{../s-box/opt/earlyCSE2.ll}
+
+%TODO $LLVMFULLBIN/opt -S instCombine1.ll -passes=early-cse -stats
+%Gives no change in the output, so no stats
+%https://llvm.org/devmtg/2020-09/slides/Schmeiser-Understanding_Changes_made_by_pass_in_the_opt_pipeline.pdf
+
+\subsubsection{Combine Redundant Instructions - 2nd Run of InstCombinePass}
+
+\lstinputlisting[caption={XOR Instruction in LLVM IR Before InstCombine},linerange={4-5,9-11,22-22,27-27} ,label={lst:sbox-instc2-1}, language=llvm]{../s-box/opt/earlyCSE2.ll}
+
+\lstinputlisting[caption={XOR Instruction in LLVM IR After InstCombine},linerange={4-5,9-10,22-22,27-27} ,label={lst:sbox-instc2_2}, language=llvm]{../s-box/opt/instCombine2.ll}
+
+The first algebraic optimisation in the process can be observed in this example. In Code \ref{lst:sbox-instc2-1}, to obtain "\%and37" the boolean operations of the following must be performed:
+
+$$ (\%0 \oplus \%2)  \land ( \%2 \oplus -1)  $$
+It can be shown that a simpler boolean form can be obtained by transitioning equivalent boolean equations:
+$$ (\%0 \oplus \%2)  \land  \lnot \%2   $$
+$$ ((\%0 \land \lnot \%2) \lor (\lnot \%0 \land \%2))  \land  \lnot \%2   $$
+$$ (\%0 \land \lnot \%2\land  \lnot \%2) \lor (\lnot \%0 \land \%2\land  \lnot \%2)     $$
+$$ (\%0 \land \lnot \%2) \lor (0)     $$
+$$ \%0 \land (\%2 \oplus -1) $$
+
+In Code \ref{lst:sbox-instc2_2}, the redundant operation $\%0 \oplus \%2$ is removed and the result is: 
+
+$$ \%0  \land ( \%2 \oplus -1)  $$
+
+According to the statistics obtained from the "opt" tool of LLVM:
+\begin{displayquote}
+60 assume-queries - Number of Queries into an assume assume bundles \\
+ 5 instcombine    - Number of insts combined \\
+ 1 instcombine    - Number of expansions \\
+ 2 instcombine    - Number of instruction combining iterations performed \\ 
+12 instsimplify   - Number of reassociations \\
+\end{displayquote}
+
+\subsubsection{Reassociate Expressions - ReassociatePass}
+Reassociates associative expressions, to promote better constant propagation and simplify expression graph to reduce instruction count. It implements an algorithm where the constants have least rank and the rank increases with the expression reverse post order traversal. 
+
+\lstinputlisting[caption={Instructions in LLVM IR Before ReassociatePass},linerange={26-29} ,label={lst:sbox-reass}, language=llvm]{../s-box/opt/instCombine2.ll}
+
+\lstinputlisting[caption={Instructions with Reassociated Arguments in LLVM IR After ReassociatePass},linerange={26-29} ,label={lst:sbox-reass2}, language=llvm]{../s-box/opt/reassociatePass.ll}
+
+A basic glance in the debug output of the pass gives more idea about how the reassociation works.
+
+\begin{lstlisting}[language=Bash]
+Calculated Rank[state] = 3
+Combine negations for:   %xor = xor i32 %0, %1
+LINEARIZE:   %xor = xor i32 %0, %1
+OPERAND:   %0 = load i32, ptr %arrayidx, align 4, !tbaa !7 (1)
+ADD USES LEAF:   %0 = load i32, ptr %arrayidx, align 4, !tbaa !7 (1)
+OPERAND:   %1 = load i32, ptr %state, align 4, !tbaa !7 (1)
+ADD LEAF:   %1 = load i32, ptr %state, align 4, !tbaa !7 (1)
+RAIn:	xor i32	[ %0, #262145] [ %1, #262146]
+RAOut:	xor i32	[ %1, #262146] [ %0, #262145]
+RA:   %xor = xor i32 %0, %1
+TO:   %xor = xor i32 %1, %0
+Combine negations for:   %xor7 = xor i32 %0, %2
+LINEARIZE:   %xor7 = xor i32 %0, %2
+OPERAND:   %0 = load i32, ptr %arrayidx, align 4, !tbaa !7 (1)
+ADD USES LEAF:   %0 = load i32, ptr %arrayidx, align 4, !tbaa !7 (1)
+OPERAND:   %2 = load i32, ptr %arrayidx4, align 4, !tbaa !7 (1)
+ADD USES LEAF:   %2 = load i32, ptr %arrayidx4, align 4, !tbaa !7 (1)
+RAIn:	xor i32	[ %0, #262145] [ %2, #262148]
+RAOut:	xor i32	[ %2, #262148] [ %0, #262145]
+RA:   %xor7 = xor i32 %0, %2
+TO:   %xor7 = xor i32 %2, %0
+\end{lstlisting}
+
+The debug output deals with the beginning of the function which is given below.
+
+
+\lstinputlisting[caption={Instructions in LLVM IR Before ReassociatePass},linerange={5-11} ,label={lst:sbox-reass}, language=llvm]{../s-box/opt/instCombine2.ll}
+The pass computed that the reassociation would result in the instruction "\%xor = xor i32 \%1, \%0" which is already how the IR is so it is not changed. However, as it can be seen in Code \ref{lst:sbox-reass2}, "\%xor7 = xor i32 \%2, \%0" replaced its alternative representation as the rank of "\%0" is less than "\%2". 
+
+
+According to the statistics obtained from the "opt" tool of LLVM:
+\begin{displayquote}
+    16 reassociate - Number of insts reassociated
+\end{displayquote}
+
+
+\subsubsection{Combine Redundant Instructions - 2nd Run of InstCombinePass}
+In this last run of InstCombinePass instruction count is not changed. Some reassociations by the previous pass are reversed.
+
+\lstinputlisting[caption={Instructions in LLVM IR Before the 3rd InstCombinePass},linerange={26-29} ,label={lst:sbox-instc3_1}, language=llvm]{../s-box/opt/reassociatePass.ll}
+
+\lstinputlisting[caption={Instructions with Reassociated Arguments in LLVM IR After InstCombinePass},linerange={26-29} ,label={lst:sbox-instc3_2}, language=llvm]{../s-box/opt/instCombine3.ll}
+
+Though it may seem wasteful, it is a common theme in LLVM that some transformations may be done and be completely reversed by another pass. 
+
+
+According to the statistics obtained from the "opt" tool of LLVM:
+\begin{displayquote}
+60 assume-queries - Number of Queries into an assume assume bundles \\
+ 7 instcombine    - Number of insts combined \\
+ 2 instcombine    - Number of instruction combining iterations performed \\
+12 instsimplify   - Number of reassociations \\
+\end{displayquote}
+
+
+\subsubsection{Dead Store Elimination - DSEPass}
+%TODO what is dead
+Trivial dead stores are eliminated. As the load operations are optimised, most of the store instructions become dead meaning that they do not affect the flow in any way.
+
+
+\lstinputlisting[caption={Redundant Store Instructions in LLVM IR Before DSEPass},linerange={30-36} ,label={lst:sbox-dse1}, language=llvm]{../s-box/opt/instCombine3.ll}
+
+\lstinputlisting[caption={Removed Store Instructions in LLVM IR After DSEPass},linerange={27-29} ,label={lst:sbox-dse2}, language=llvm]{../s-box/opt/DSE.ll}
+
+To see how the DSE works we can observe two dead Store's and a killer Store, unnecessary code is stripped away.
+
+\lstinputlisting[caption={Store Instructions to the Same Address in LLVM IR Before DSEPass},linerange={2-2, 8-8, 30-30, 42-42} ,label={lst:sbox-dse3}, language=llvm]{../s-box/opt/instCombine3.ll}
+
+Here is the debug output of the DSE pass.
+
+\begin{lstlisting}[language=Bash]
+Trying to eliminate MemoryDefs killed by 4 = MemoryDef(3) (  store i32 %xor43, ptr %state, align 4, !tbaa !7)
+  trying to get dominating access
+   visiting 3 = MemoryDef(2)->liveOnEntry (  store i32 %xor12, ptr %arrayidx11, align 4, !tbaa !7)
+   visiting 2 = MemoryDef(1)->liveOnEntry (  store i32 %xor7, ptr %arrayidx, align 4, !tbaa !7)
+   visiting 1 = MemoryDef(liveOnEntry) (  store i32 %xor, ptr %state, align 4, !tbaa !7)
+  Checking for reads of 1 = MemoryDef(liveOnEntry) (  store i32 %xor, ptr %state, align 4, !tbaa !7)
+   4 = MemoryDef(3)->1 (  store i32 %xor43, ptr %state, align 4, !tbaa !7)
+    ... skipping killing def/dom access
+   2 = MemoryDef(1)->liveOnEntry (  store i32 %xor7, ptr %arrayidx, align 4, !tbaa !7)
+   3 = MemoryDef(2)->liveOnEntry (  store i32 %xor12, ptr %arrayidx11, align 4, !tbaa !7)
+ Checking if we can kill 1 = MemoryDef(liveOnEntry) (  store i32 %xor, ptr %state, align 4, !tbaa !7)
+DSE: Remove Dead Store:
+  DEAD:   store i32 %xor, ptr %state, align 4, !tbaa !7
+  KILLER:   store i32 %xor43, ptr %state, align 4, !tbaa !7
+  trying to get dominating access
+   visiting 0 = MemoryDef(liveOnEntry)
+   ...  found LiveOnEntryDef
+  finished walk
+  .
+  .
+  .
+  Trying to eliminate MemoryDefs killed by 10 = MemoryDef(9) (  store i32 %xor65, ptr %state, align 4, !tbaa !7)
+  trying to get dominating access
+   visiting 9 = MemoryDef(8) (  store i32 %xor60, ptr %arrayidx9, align 4, !tbaa !7)
+   visiting 8 = MemoryDef(7) (  store i32 %xor55, ptr %arrayidx, align 4, !tbaa !7)
+   visiting 7 = MemoryDef(6)->liveOnEntry (  store i32 %xor52, ptr %arrayidx4, align 4, !tbaa !7)
+   visiting 6 = MemoryDef(4) (  store i32 %xor49, ptr %arrayidx11, align 4, !tbaa !7)
+   visiting 4 = MemoryDef(liveOnEntry) (  store i32 %xor43, ptr %state, align 4, !tbaa !7)
+  Checking for reads of 4 = MemoryDef(liveOnEntry) (  store i32 %xor43, ptr %state, align 4, !tbaa !7)
+   10 = MemoryDef(9)->4 (  store i32 %xor65, ptr %state, align 4, !tbaa !7)
+    ... skipping killing def/dom access
+   6 = MemoryDef(4) (  store i32 %xor49, ptr %arrayidx11, align 4, !tbaa !7)
+   9 = MemoryDef(8) (  store i32 %xor60, ptr %arrayidx9, align 4, !tbaa !7)
+   7 = MemoryDef(6)->liveOnEntry (  store i32 %xor52, ptr %arrayidx4, align 4, !tbaa !7)
+   8 = MemoryDef(7) (  store i32 %xor55, ptr %arrayidx, align 4, !tbaa !7)
+ Checking if we can kill 4 = MemoryDef(liveOnEntry) (  store i32 %xor43, ptr %state, align 4, !tbaa !7)
+DSE: Remove Dead Store:
+  DEAD:   store i32 %xor43, ptr %state, align 4, !tbaa !7
+  KILLER:   store i32 %xor65, ptr %state, align 4, !tbaa !7
+  trying to get dominating access
+   visiting 0 = MemoryDef(liveOnEntry)
+   ...  found LiveOnEntryDef
+  finished walk
+\end{lstlisting}
+
+It can be observed that when the DSE encounters a Store instruction to the same address as a previous instruction, kills the previous instruction. The last Store instruction survives DSE.
+
+According to the statistics obtained from the "opt" tool of LLVM:
+\begin{displayquote}
+14 aa              - Number of MustAlias results \\
+62 aa              - Number of NoAlias results \\
+30 basicaa         - Number of times a GEP is decomposed \\
+29 dse             - Number iterations check for reads in getDomMemoryDef \\
+ 0 dse             - Number of other instrs removed \\
+ 7 dse             - Number of stores deleted \\
+ 7 dse             - Number of times a valid candidate is returned from getDomMemoryDef \\
+ 5 dse             - Number of stores remaining after DSE \\
+ 1 ir              - Number of renumberings across all blocks \\
+71 memory-builtins - Number of arguments with unsolved size and offset \\
+\end{displayquote}
+
+\subsubsection{Post Order Function Attributes Pass - PostOrderFunctionAttrsPass}
+This pass is similar to the InferFunctionAttrsPass in Section \ref{sec:funcAttrs}. It does not change the IR, adds metadata to it for the other passes.
+
+\lstinputlisting[caption={Function Attributes After PostOrderFunctionAttrsPass},linerange={1-2} ,label={lst:sbox-post2}, language=llvm]{../s-box/opt/DSE.ll}
+\lstinputlisting[caption={Function Attributes Before PostOrderFunctionAttrsPass},linerange={1-2} ,label={lst:sbox-post1}, language=llvm]{../s-box/opt/postOrderFuncAttrs.ll}
+
+The added attributes signal that the function does not deallocate memory, does not recurse by calling itself, never raises an exception, will continue execution at the end according to the call stack, may read or write any memory. 
+
+In the end of optimization passes the IR at Code \ref{sbox-ir} will be generated.
 
 \subsection{Clang Optimization Levels}
 
 Clang can be invoked with optimization levels deciding which optimization passes are going to be run. The optimisations can target speed or code size. Speed optimising options range from "-O1" to "-O3". "-O2" enables most of the optimizations. "-O3" enables optimisations that can increase the compile time and generate larger code. Main code optimising options are "-Os" and "-Oz". "-Os" is similar to "-O2" but runs extra optimizations to reduce code size. "-Oz" runs more code reducing optimisations compared to "-Os" and is similar to "-O2" again \cite{clangCommands}.
 Caution must be taken as when no arguments are given to Clang, at the time of writing, Clang uses the "-O0" optimization level. Implementing pattern matching on unoptimised LLVM IR is not feasible for several reasons. Firstly, the IR is more sensitive to changes in the frontend. Changing the code style in frontend can cause CodeGen to produce a slightly different IR which makes it less predictable. Secondly, the code size can be too large with redundant code which makes pattern matching large instructions cumbersome. We recommend using "-O2" or "-Os" optimization levels while developing instruction selection patterns. 
-
-
-
 
 LLVM optimizer can be performed with opt [options] [filename] command\cite{optimizer}.
 
