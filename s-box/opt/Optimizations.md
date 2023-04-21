@@ -4,18 +4,19 @@
 Used analysis passes:
 - TargetLibraryInfo
 
-FuncAttrsPass
-Used analysis passes:
-- AssumptionCache
-- BasicAliasAnalysis
-- CFG
-- CGSCCPassManager
-- CallGraph
-- CallGraphSCCPass
-- CaptureTracking
-- LazyCallGraph
-- MemoryLocation
-- ValueTracking
+>FuncAttrsPass
+>Used analysis passes:
+>- AssumptionCache
+>- BasicAliasAnalysis
+>- CFG
+>- CGSCCPassManager
+>- CallGraph
+>- CallGraphSCCPass
+>- CaptureTracking
+>- LazyCallGraph
+>- MemoryLocation
+>- ValueTracking
+
 2. SROAPass
 Used analysis passes:
 - AssumptionCache
@@ -97,3 +98,10 @@ Used analysis passes:
 |BasicAliasAnalysis    | yes |
 |CFG                   | yes |
 |CGSCCPassManager      | no |
+
+1. BasicAliasAnalysis
+2. DomTree
+3. GlobalsModRef
+4. MemorySSA
+5. TLI, TTI
+6. ConstantFolding

@@ -7,7 +7,9 @@
 \section{SHLXOR Instruction}
 We extended the instruction set by adding the SHLXOR instruction. The purpose of this instruction is to shift the first source operand one bit to the left and then XOR it with the second source operand. Then, the obtained result is stored in the destination register. By adding this instruction, we can perform this operation with a single instruction instead of using shift left and XOR instructions separately, making it more efficient.
 Let’s give an example to make it clearer what this instruction does. RS1 and RS2 are source operands and RD is the output.
+\\
 RS1: 0x0101     RS2: 0xFFFF     RD: 0xFDFD
+\\
 0x0101 is shifted left by one and then XOR’ed with 0xFFFF, giving the result 0xFDFD.
 As we mentioned, this new instruction requires two source registers and one destination register. Therefore, unlike the MLA instruction, we don’t need to create a new class to support it. There is already a class named ALU\_rr in the RISCVInstrinfo.td file which has two source and one destination register. Therefore, the new SHLXOR instruction is going to belong to the ALU\_rr class. The ALU\_rr class is given below.
 
@@ -51,16 +53,18 @@ void shlxor() {
 
 Let’s get an assembly output from this C code by running the following commands:
 
-\begin{lstlisting}
+\begin{lstlisting}[language=Bash]
 clang -S -target riscv32-linux-gnu -emit-llvm -g shlxor.c
-$~/CustomInstrLLVM/build/bin/llc -mtriple=riscv32 shlxor.ll$
+~/CustomInstrLLVM/build/bin/llc -mtriple=riscv32 shlxor.ll
 \end{lstlisting}
 
+%TODO lets set standard bin directory throughout thesis 
 Here, CustomInstrLLVM is the folder that we built llvm in.
 
 This C code basically shifts the variable a by one bit and XOR’s it with b variable. Then the result is stored in a. We can see that, the register that stores the value a is both the first source register and the destination register. The assembly output is given below.
-
-\begin{lstlisting}
+%TODO find RISCV latex syntax 
+%TODO and TableGen
+\begin{lstlisting}%[language={[RISC-V]Assembler}]
 shlxor:                                 # @shlxor
 .Lfunc_begin0:
 	.loc	0 4 0                           # shlx.c:4:0
@@ -100,6 +104,24 @@ shlxor:                                 # @shlxor
 \end{lstlisting}
 
 In the assembly output, we can see the SHLXOR instruction in line 29. a1 and a2 are the sources and a1 is also the destination as we can see.
+
+In addition to that, we can check the DAG in order to see the effect of our newly added instruction. We can compare the DAGs before the new instruction is added and after. We can observe the DAG before SHLXOR is added in figure \ref{fig:shlxor_before}. In this DAG, shift left (shl) and xor instructions can be seen seperately
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[scale= 0.3]{adding_new_instr/shlxor_before.png}
+    \caption{DAG before SHLXOR is added}
+    \label{fig:shlxor_before}
+\end{figure}
+
+The DAG after we add the SHLXOR instruction can be seen in figure \ref{fig:shlxor_after}. In this DAG, instead of two seperate instructions, a single SHLXOR instruction can be seen.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[scale= 0.3]{adding_new_instr/shlxor_after.png}
+    \caption{DAG after SHLXOR is added}
+    \label{fig:shlxor_after}
+\end{figure}
 
 \section{RORI Instruction}
 One of the Instructions that we worked on is RORI instruction. The purpose of this instruction is to take the operand and rotate it to the right by the amount of the immediate value. This is different from shifting right using an immediate. When shifting a number to the right, the rightmost (least significant) bits are deleted and the leftmost (most significant) bits are filled in with zeros. On the other hand, when a number is rotated right, the least significant bits that are pushed out are not deleted but written into the most significant bits. We want to add add an instruction that performs this operation.
@@ -145,35 +167,30 @@ void ROT() {
 
 This code rotates 15 to the right by 2 bits. We can obtain the .ll file by running the following command.
 
-\begin{lstlisting}
+\begin{lstlisting}[language=Bash]
 clang -S -target riscv32-linux-gnu -emit-llvm -g roti.c
 \end{lstlisting}
 
-The contents of the .ll file is given below.
+The simplified contents of the .ll file is given below.
 
-\begin{lstlisting}
-; ModuleID = 'roti.c'
-source_filename = "roti.c"
-target datalayout = "e-m:e-p:32:32-i64:64-n32-S128"
-target triple = "riscv32-unknown-linux-gnu"
+\begin{lstlisting}[language=llvm,style=nasm]
 
-@a = dso_local global i32 0, align 4, !dbg !0
+@a = dso_local global i32 0
 
-; Function Attrs: noinline nounwind optnone
-define dso_local void @ROT() #0 !dbg !15 {
-  store i32 15, i32* @a, align 4, !dbg !19
-  \%1 = load i32, i32* @a, align 4, !dbg !20
-  \%2 = call i32 @llvm.fshr.i32(i32 \%1, i32 \%1, i32 2), !dbg !21
-  store i32 \%2, i32* @a, align 4, !dbg !22
-  ret void, !dbg !23
+define void @ROT() {
+  store i32 15, i32* @a
+  %1 = load i32, i32* @a
+  %2 = call i32 @llvm.fshr.i32(i32 %1, i32 %1, i32 2)
+  store i32 %2, i32* @a
+  ret void
 }
 \end{lstlisting}
 
 The fshr intrinsic is visible in the twelfth line. After that, the assembly output can be obtained by running the following command. 
 %The assembly output is given in figure \ref{fig:roti_assembly_output}.
 
-\begin{lstlisting}
-$~/CustomInstrLLVM/build/bin/llc -mtriple=riscv32 roti.ll$
+\begin{lstlisting}[language=Bash]
+~/CustomInstrLLVM/build/bin/llc -mtriple=riscv32 roti.ll$
 \end{lstlisting}
 
 The obtained assembly output is given below.
@@ -230,8 +247,8 @@ return a;
 
 Here, we use 32 as the length because our target is 32 bit and the rotation is implemented in the eighth line. After that, we run the following command with additional flags as mentioned before.
 
-\begin{lstlisting}
-$clang --target=riscv32 -O -S rori.c -march=rv32imaczbb$
+\begin{lstlisting}[language=Bash]
+clang --target=riscv32 -O -S rori.c -march=rv32imaczbb
 \end{lstlisting}
 
 Here, -O defines the level of optimization. -S is used for getting an assembly file as an output. rori.c is the name of our simple C code. -march=rv32imaczbb designates that we want to utilize the zbb subgroup of the bit manipulation extension. The assembly output is given below.%in figure \ref{fig:rori_assembly_output}.
@@ -278,7 +295,7 @@ This pattern is used 5 times in the rectangular shape of the \ref{fig:bit_manipu
 \begin{figure}
     \centering
     \includegraphics[scale=0.3]{adding_new_instr/sbox_naxor_pattern.png}
-    \caption{naxor patterns in sbox algorithm}
+    \caption{NAXOR patterns in sbox algorithm}
     \label{fig:sbox_naxor_pattern}
 \end{figure}
 
@@ -286,59 +303,18 @@ This pattern is used 5 times in the rectangular shape of the \ref{fig:bit_manipu
 \begin{figure}
     \centering
     \includegraphics[scale=0.35]{adding_new_instr/naxor_dag_diagram.png}
-    \caption{dag diagram output for the s-box algorithm}
+    \caption{Dag diagram output for the s-box algorithm}
     \label{fig:naxor_dag_diagram}
 \end{figure}
 
 \begin{minipage}{0.95\linewidth}
-\begin{lstlisting}
 
-    define void @sbox(ptr  %0)  {
-      %2 = getelementptr inbounds [5 x i32], ptr %0, i32 0, i32 4
-      %3 = load i32, ptr %2
-      %4 = load i32, ptr %0
-      %5 = xor i32 %4, %3
-      %6 = getelementptr inbounds [5 x i32], ptr %0, i32 0, i32 3
-      %7 = load i32, ptr %6
-      %8 = xor i32 %7, %3
-      %9 = getelementptr inbounds [5 x i32], ptr %0, i32 0, i32 1
-      %10 = load i32, ptr %9
-      %11 = getelementptr inbounds [5 x i32], ptr %0, i32 0, i32 2
-      %12 = load i32, ptr %11
-      %13 = xor i32 %12, %10
-      %14 = xor i32 %5, -1
-      %15 = xor i32 %10, -1
-      %16 = xor i32 %13, -1
-      %17 = xor i32 %7, -1
-      %18 = xor i32 %8, -1
-      %19 = and i32 %10, %14
-      %20 = and i32 %12, %15
-      %21 = and i32 %7, %16
-      %22 = and i32 %3, %17
-      %23 = and i32 %5, %18
-      %24 = xor i32 %20, %5
-      %25 = xor i32 %21, %10
-      %26 = xor i32 %13, %22
-      %27 = xor i32 %23, %7
-      %28 = xor i32 %19, %8
-      store i32 %28, ptr %2
-      %29 = xor i32 %25, %24
-      store i32 %29, ptr %9
-      %30 = xor i32 %24, %28
-      store i32 %30, ptr %0
-      %31 = xor i32 %26, %27
-      store i32 %31, ptr %6
-      %32 = xor i32 %26, -1
-      store i32 %32, ptr %11
-      ret void
-    }
-    
-    \end{lstlisting}
+\lstinputlisting[caption={Optimised S-box LLVM IR}, language=llvm, style=nasm]{../s-box/keccakO3.ll}
+
 \end{minipage}
 
-Intermediate Representation code input for s-box algorithm.
-\\\\
-\begin{lstlisting}
+%\\\\
+\begin{lstlisting}[caption= Assembly output without NAXOR instruction]
     .text
 	.attribute	4, 16
 	.attribute	5, "rv32i2p0"
@@ -391,10 +367,10 @@ sbox:                                   # @sbox
 
 \end{lstlisting}
 
-Assembly output without naxor instruction.
-\\\\
 
-\begin{lstlisting}
+%\\\\
+
+\begin{lstlisting}[caption= Assembly output with NAXOR instruction]
     .text
 	.attribute	4, 16
 	.attribute	5, "rv32i2p0"
@@ -437,7 +413,7 @@ sbox:                                   # @sbox
 
 \end{lstlisting}
 
-Assembly output with naxor instruction. 15 lines of not, and, xor operations are reduced to 5 naxor instructions.
+15 lines of not, and, xor operations are reduced to 5 NAXOR instructions.
 \\\\
 
 
@@ -447,7 +423,7 @@ Assembly output with naxor instruction. 15 lines of not, and, xor operations are
 
 \section{LXR Instruction}
 
-S-box algorithm uses multiple inputs and outputs and they are supposed to be loaded and stored to the registers during implementation. An example pattern is matched using TableGen. Lxr instruction covers an xor operation of two loaded numbers. ALU\_rrr class is used to match the pattern since three registers are used in the instruction.
+S-box algorithm uses multiple inputs and outputs and they are supposed to be loaded and stored to the registers during implementation. An example pattern is matched using TableGen. LXR instruction covers an xor operation of two loaded numbers. ALU\_rrr class is used to match the pattern since three registers are used in the instruction.
 
 \begin{lstlisting}
 let mayLoad = 1 in{
@@ -469,23 +445,23 @@ LXR instruction covers the xor operation of two loaded numbers.
 \begin{figure}
     \centering
     \includegraphics[scale=0.5]{adding_new_instr/lxr_dag_diagram.png}
-    \caption{dag diagram output for the example lxr algorithm}
+    \caption{dag diagram output for the example LXR algorithm}
     \label{fig:lxr_dag_diagram}
 \end{figure}
 
-\begin{lstlisting}
-    define i32 @foo(ptr \%p1, ptr \%p2) {
-        \%a = load i32, ptr \%p1
-        \%b = load i32, ptr \%p2
-        \%res = xor i32 \%a, \%b
-        ret i32 \%res
+\begin{lstlisting}[caption={Intermediate Representation code input for LXR algorithm}, language=llvm, style=nasm]
+    define i32 @foo(ptr %p1, ptr %p2) {
+        %a = load i32, ptr %p1
+        %b = load i32, ptr %p2
+        %res = xor i32 %a, %b
+        ret i32 %res
       }
 \end{lstlisting}
 
-Intermediate Representation code input for lxr algorithm.
-\\\\
 
-\begin{lstlisting}
+%\\\\
+
+\begin{lstlisting}[caption= Assembly output without LXR instruction]
       
           .text
           .attribute	4, 16
@@ -510,11 +486,11 @@ Intermediate Representation code input for lxr algorithm.
       
 \end{lstlisting}
 
-Assembly output without lxr instruction.
-\\\\
+
+%\\\\
 
 
-\begin{lstlisting}
+\begin{lstlisting}[caption= Assembly output with LXR instruction]
     .text
 	.attribute	4, 16
 	.attribute	5, "rv32i2p0"
@@ -534,5 +510,5 @@ foo:                                    # @foo
 	.section	".note.GNU-stack","",@progbits
 \end{lstlisting}
 
-Assembly output with lxr instruction. Two loads and one xor instructions are reduced to lxr instruction.
+Two loads and one xor instructions are reduced to LXR instruction.
 \\\\
