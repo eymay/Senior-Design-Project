@@ -172,12 +172,9 @@ LLVM RISC-V Backend is responsible for compiling optimized IR down to RISC-V ass
 \subsection{Instruction Selection}
 SelectionDAG is the instruction selector of LLVM backends which is responsible for selecting the appropriate RISC-V instructions for a given intermediate representation instruction. It takes the target-independent LLVM code as input and generates the target-dependent DAG of instructions. SelectionDAG is the most important part of the compiler for us since we will be dealing with adding new instructions to the RISC-V Backend. 
 
-\subsection{Instruction Selection}
-SelectionDAG is the instruction selector of LLVM backends which is responsible for selecting the appropriate RISC-V instructions for a given intermediate representation instruction. It takes the target-independent LLVM code as input and generates the target-dependent DAG of instructions. SelectionDAG is the most important part of the compiler for us since we will be dealing with adding new instructions to the RISC-V Backend. 
 
 \subsubsection{SelectionDAG construction}
-After IR generating is done, SelectionDAG gets the optimized ir and converts it into target independent SelectionDAG representation. 
-
+After IR generating is done, SelectionDAG gets the optimized ir and converts it into target independent SelectionDAG representation. SelectionDAG consists of SelectionDAG nodes which are created by SelectionDAGBuilder class. SelectionDAGIsel visits all the IR instructions and uses the SelectionDAGBuilder class. The relevant instruction’s method requests an SDNode to the DAG and assigns its opcode. Every SDNode(SelectionDAG node) has an opcode for the operation it represents. SDNodes have multiple values to return as the result. SDValues(SelectionDAG value) holds the information to determine which number to return. SelectionDAGBuilder class reshapes the linear IR input to a SelectionDAG tree form. At the and of the construction SelectionDAG is a target independent and illegal DAG.
 \subsubsection{SelectionDAG legalization}
 SelectionDAG is a target dependent representation after the initial stage of the instruction selection. Before creating a target specific code, SelectionDAG checks if the DAG is legal because the constructed DAG may include incompatible instructions and data types to the target architecture. SelectionDAG legalizes the illegal DAG into a supported form. 
 

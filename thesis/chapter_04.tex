@@ -109,7 +109,7 @@ Figure \ref{fig:dag_sched} shows the DAG before the Instruction Scheduling phase
 \par
 RISCVISD nodes are replaced by their counterparts. The general Load and Store instructions are replaced by their type-aware corresponding LW (Load Word) and SW (Store Word) instructions. Most importantly the MLA instruction is selected replacing the subgraph of 'mul' and 'add' LLVM instructions. 
 \par
-We defined MLA instruction's DAG pattern as in the subgraph. The instruction selection phase took it as a reference, detected the pattern inside the global DAG and used it to place the MLA node. The addition process is explained more thoroughly in Section \ref{MLA_add_section}.
+We defined MLA instruction's DAG pattern as in the subgraph. The instruction selection phase took it as a reference, detected the pattern inside the global DAG and used it to place the MLA node. The addition process is explained more thoroughly in Section \ref{sec:MLA_add_section}.
 
 \begin{figure}
     \centering
