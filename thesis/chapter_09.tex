@@ -54,7 +54,7 @@ void shlxor() {
 Let’s get an assembly output from this C code by running the following commands:
 
 \begin{lstlisting}[language=Bash]
-clang -S -target riscv32-linux-gnu -emit-llvm -g shlxor.c
+clang -S -target riscv32-linux-gnu -emit-llvm shlxor.c
 ~/CustomInstrLLVM/build/bin/llc -mtriple=riscv32 shlxor.ll
 \end{lstlisting}
 
@@ -168,7 +168,7 @@ void ROT() {
 This code rotates 15 to the right by 2 bits. We can obtain the .ll file by running the following command.
 
 \begin{lstlisting}[language=Bash]
-clang -S -target riscv32-linux-gnu -emit-llvm -g roti.c
+clang -S -target riscv32-linux-gnu -emit-llvm roti.c
 \end{lstlisting}
 
 The simplified contents of the .ll file is given below.
@@ -283,7 +283,7 @@ def NAXOR : ALU_rrr<0b11, 0b100, "naxor">,
 Sched<[WriteIMul, ReadIMul, ReadIMul]>;
 \end{lstlisting}
 
-Since there are three variables in this instruction, custom ALU\_rrr class is used which is explained in section 5.3. 11 and 100 numbers are used for funct2 and funct3.
+Since there are three variables in this instruction, custom ALU\_rrr class is used which is explained in code \ref{lst:ALU_rrr}. 11 and 100 numbers are used for funct2 and funct3.
 \\\\
 \begin{lstlisting}
 def : Pat< (xor (and (not GPR:$src1), GPR:$src2), GPR:$src3),
@@ -299,6 +299,12 @@ This pattern is used 5 times in the rectangular shape of the \ref{fig:bit_manipu
     \label{fig:sbox_naxor_pattern}
 \end{figure}
 
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.2]{adding_new_instr/naxor_sched.png}
+    \caption{Dag diagram output for the s-box algorithm before scheduling}
+    \label{fig:naxor_sched_diagram}
+\end{figure}
 
 \begin{figure}
     \centering
@@ -306,6 +312,47 @@ This pattern is used 5 times in the rectangular shape of the \ref{fig:bit_manipu
     \caption{Dag diagram output for the s-box algorithm}
     \label{fig:naxor_dag_diagram}
 \end{figure}
+
+\begin{lstlisting}[caption= C code input for the S-box algorithm]
+
+	typedef struct {
+  int x[5];
+} ascon_state_t;
+
+void sbox(ascon_state_t state) {
+int t0, t1, t2, t3, t4;
+state.x[0] ^= state.x[4];
+state.x[4] ^= state.x[3];
+state.x[2] ^= state.x[1];
+t0  = state.x[0];
+t1  = state.x[1];
+t2  = state.x[2];
+t3  = state.x[3];
+t4  = state.x[4];
+t0 =~ t0;    
+t1 =~ t1;    
+t2 =~ t2;    
+t3 =~ t3;    
+t4 =~ t4;
+t0 &= state.x[1];
+t1 &= state.x[2];
+t2 &= state.x[3];
+t3 &= state.x[4];
+t4 &= state.x[0];
+state.x[0] ^= t1;
+state.x[1] ^= t2;
+state.x[2] ^= t3;
+state.x[3] ^= t4;
+state.x[4] ^= t0;
+state.x[1] ^= state.x[0];
+state.x[0] ^= state.x[4];
+state.x[3] ^= state.x[2];
+state.x[2] =~ state.x[2];
+
+return;
+}
+
+\end{lstlisting}
 
 \begin{minipage}{0.95\linewidth}
 
@@ -368,7 +415,13 @@ sbox:                                   # @sbox
 \end{lstlisting}
 
 
-%\\\\
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.19]{adding_new_instr/naxor_match.png}
+    \caption{Dag diagram output for the s-box algorithm after NAXOR instruction is matched}
+    \label{fig:naxor_match_diagram}
+\end{figure}
+
 
 \begin{lstlisting}[caption= Assembly output with NAXOR instruction]
     .text
@@ -423,7 +476,7 @@ sbox:                                   # @sbox
 
 \section{LXR Instruction}
 
-S-box algorithm uses multiple inputs and outputs and they are supposed to be loaded and stored to the registers during implementation. An example pattern is matched using TableGen. LXR instruction covers an xor operation of two loaded numbers. ALU\_rrr class is used to match the pattern since three registers are used in the instruction.
+S-box algorithm uses multiple inputs and outputs and they are supposed to be loaded and stored to the registers during implementation. An example pattern is matched using TableGen. LXR instruction covers an xor operation of two loaded numbers. ALU\_rrr class (\ref{lst:ALU_rrr}) is used to match the pattern since three registers are used in the instruction.
 
 \begin{lstlisting}
 let mayLoad = 1 in{
@@ -444,8 +497,16 @@ LXR instruction covers the xor operation of two loaded numbers.
 
 \begin{figure}
     \centering
+    \includegraphics[scale=0.3]{adding_new_instr/lxr_sched.png}
+    \caption{Dag diagram for the example LXR algorithm before scheduling}
+    \label{fig:lxr_sched_diagram}
+\end{figure}
+
+
+\begin{figure}
+    \centering
     \includegraphics[scale=0.5]{adding_new_instr/lxr_dag_diagram.png}
-    \caption{dag diagram output for the example LXR algorithm}
+    \caption{Dag diagram output for the example LXR algorithm}
     \label{fig:lxr_dag_diagram}
 \end{figure}
 
@@ -487,7 +548,12 @@ LXR instruction covers the xor operation of two loaded numbers.
 \end{lstlisting}
 
 
-%\\\\
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.3]{adding_new_instr/lxr_match.png}
+    \caption{Dag diagram output for the example LXR algorithm after LXR instruction is matched}
+    \label{fig:lxr_match}
+\end{figure}
 
 
 \begin{lstlisting}[caption= Assembly output with LXR instruction]

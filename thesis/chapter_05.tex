@@ -31,9 +31,9 @@ include "RISCVInstrInfoCrypt.td"
 
 Add the specifications of the instruction to the RISCVInstrInfoCrypt.td file. Here we created a new class of instruction is defined named ALU\_rrr. For the MLA instruction, the specifications are:
 
-\begin{lstlisting}
+\begin{lstlisting}[caption= ALU\_rrr,label={lst:ALU_rrr}]
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
-class ALU\_rrr<bits<2> funct2, bits<3> funct3, string opcodestr,
+class ALU_rrr<bits<2> funct2, bits<3> funct3, string opcodestr,
             bit Commutable = 0>
    : RVInstR4<funct2, funct3, OPC_OP, 
    (outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2, GPR:$rs3),
@@ -117,29 +117,4 @@ SelectionDAG consists of numerous files but the most relevant ones to the develo
 
 
 
-%TODO Move to Appendix
-\section{Creating Assembly File From C File}
 
-LLVM consists of many flexible libraries which allows user to use different libraries with preffered  options. To create RISC-V assembly from c code, Clang and LLC are used with the following commands. \\
-
-Clang is the C compiler front-end which is mainly used with LLVM backend. Clang is used in this project to produce LLVM intermediate representation code. Following command produces a .ll file in the current directory. 
-
-\begin{lstlisting}[language=Bash]
--clang -S -target riscv32-linux-gnu -emit-llvm -g foo.c
-\end{lstlisting}
-
--S option provides to run only preprocess and compilation steps. \\
--target option specifies the 32 bit RISC-V target architecture. \\
--emit-llvm is for targeting the LLVM backend. \\
--g option generates the source level debug information.\\
-
-LLC is the LLVM compiler back-end which converts LLVM intermediate representation (IR) into native machine code for a specific target architecture. Following command produces a .s file for RISC-V architecture in the current directory. 
-
-\begin{lstlisting}[language=Bash]
-llvm-project/build/bin/llc -debug-only=isel -view-isel-dags -mtriple=riscv32 lxr.ll
-\end{lstlisting}
-%TODO lets set standard bin in this thesis, similar todo exists 
-
--debug-only=isel option gives the debug informations during the DAG lowering process.\\
--view-isel-dags option prints the directed acylic graph (DAG) image of the IR code.\\
--mtriple=riscv32 defines the 32 bits RISC-V target architecture.\\

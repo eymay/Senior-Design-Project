@@ -468,7 +468,7 @@ This pass is similar to the InferFunctionAttrsPass in Section \ref{sec:funcAttrs
 
 The added attributes signal that the function does not deallocate memory, does not recurse by calling itself, never raises an exception, will continue execution at the end according to the call stack, may read or write any memory. 
 
-In the end of optimization passes the IR at Code \ref{sbox-ir} will be generated.
+In the end of optimization passes the IR at Code \ref{lst:sbox-ir} will be generated.
 
 \subsection{Clang Optimization Levels}
 
@@ -485,14 +485,34 @@ SelectionDAG is the instruction selector of LLVM backends which is responsible f
 
 
 \subsubsection{SelectionDAG construction}
-<<<<<<< HEAD
 After IR generating is done, SelectionDAG gets the optimized ir and converts it into target independent SelectionDAG representation. SelectionDAG consists of SelectionDAG nodes which are created by SelectionDAGBuilder class. SelectionDAGIsel visits all the IR instructions and uses the SelectionDAGBuilder class. The relevant instruction’s method requests an SDNode to the DAG and assigns its opcode. Every SDNode(SelectionDAG node) has an opcode for the operation it represents. SDNodes have multiple values to return as the result. SDValues(SelectionDAG value) holds the information to determine which number to return. SelectionDAGBuilder class reshapes the linear IR input to a SelectionDAG tree form. At the and of the construction SelectionDAG is a target independent and illegal DAG.
-=======
-After IR generating is done, SelectionDAG gets the optimized IR and converts it into target independent SelectionDAG representation. 
 
->>>>>>> 2dde0c04a74ff0928e0aea3029db4a97056a8361
 \subsubsection{SelectionDAG legalization}
-SelectionDAG is a target dependent representation after the initial stage of the instruction selection. Before creating a target specific code, SelectionDAG checks if the DAG is legal because the constructed DAG may include incompatible instructions and data types to the target architecture. SelectionDAG legalizes the illegal DAG into a supported form. 
+SelectionDAG is a target dependent representation after the construction stage of the instruction selection. Before creating a target specific code, SelectionDAG checks if the DAG is legal because the constructed DAG may include incompatible instructions and data types to the target architecture \cite{legalizer}. Selectiondag legalization refers to the process of transforming the SelectionDAG to the constraints and requirements of the target architecture. Legalization may involve adding, removing, splitting or merging the nodes which provides to match the register file and instruction set of the target architecture \cite{llvmcookbook}. SelectionDAG legalization also ensures that the data type of the target architecture is compatible with the target architecture by truncating or promoting the data types. For example if SelectionDAG includes i32 data type nodes targeted to an i64 architecture, SDlegalizer promotes the i32 nodes into i64 data type. For every target architecture type, IselLowering.cpp files are responsible for legalizing the SelectionDAG. SDlegalizer legalizes the illegal DAG into a supported form and ensures that the generated code is efficent and compatible to target architecture.\\\\
+An example of legalizing the SelectionDAG by truncating the i64 data type DAG into i32 data type target architecture is shown in code \ref{lst:ir_legalization}. IR code includes i64 data type variables, however target architecture supports only i32 data type. Before the legalization(figure \ref{fig:dag_before_legalization}) DAG is not converted to target data type yet and it is needed to become i64 compatible. It can be seen that after legalization(figure \ref{fig:dag_after_legalization}), i32 nodes are truncated and there is not i64 nodes in the DAG.
+
+\begin{lstlisting}[caption={Intermediate Representation code input for legalization example}, label={lst:ir_legalization}, language=llvm, style=nasm]
+  define i64 @test(i64 %a, i64 %b, i64 %c) {
+    %mul = mul nsw i64 %a, %b
+    %add = add i64 %mul, %c
+    ret i64 %add
+    }
+  \end{lstlisting}
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.5]{the_llvm_compiler/dag_before_legalization.png}
+  \caption{DAG diagram before the legalization stage}
+  \label{fig:dag_before_legalization}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.4]{the_llvm_compiler/dag_after_legalization.png}
+  \caption{DAG diagram after the legalization stage}
+  \label{fig:dag_after_legalization}
+\end{figure}
+
 
 \subsubsection{SelectionDAG optimization}
 SelectionDAG is in an optimizable form after legalization because legalization phase may create unnecessary DAG nodes and the reducable nodes are not combined yet. SelectionDAG optimizer minimzes the DAG nodes before creating the target spesific instructions.
