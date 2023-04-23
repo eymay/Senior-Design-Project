@@ -951,12 +951,12 @@ LİSTESİ\fi\normalfont}
 	\raggedright
 	\makeatother	
 	\vspace*{0pt}
-	We are submitting the Senior Design Project Interim Report entitled as “\MakeUppercase{\th@Titlebir \th@Titleiki \th@Titleuc}”.
-   The  Senior Design Project Interim Report has been prepared as to fulfill the relevant 
+	We are submitting the Senior Design Project Interim Report entitled “\MakeUppercase{\th@Titlebir \th@Titleiki \th@Titleuc}”.
+   The  Senior Design Project Interim Report has been prepared to fulfill the relevant 
    regulations of the Electronics and Communication Engineering Department of Istanbul Technical
     University. We hereby confirm that we have realized all stages of the Senior Design Project 
     Interim Report by ourselves, and we have abided by the ethical rules with respect to academic 
-    and professional integrity . 
+    and professional integrity. 
 	
   \vskip 30\p@ 
 	\hspace{70\p@} \th@titleFtSz \th@isimsoyisimbir  \\

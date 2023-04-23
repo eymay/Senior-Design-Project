@@ -11,7 +11,7 @@ Let’s give an example to make it clearer what this instruction does. RS1 and R
 RS1: 0x0101     RS2: 0xFFFF     RD: 0xFDFD
 \\
 0x0101 is shifted left by one and then XOR’ed with 0xFFFF, giving the result 0xFDFD.
-As we mentioned, this new instruction requires two source registers and one destination register. Therefore, unlike the MLA instruction, we don’t need to create a new class to support it. There is already a class named ALU\_rr in the RISCVInstrinfo.td file which has two source and one destination register. Therefore, the new SHLXOR instruction is going to belong to the ALU\_rr class. The ALU\_rr class is given below.
+As we mentioned, this new instruction requires two source registers and one destination register. Therefore, unlike the MLA instruction, we don’t need to create a new class to support it. There is already a class named ALU\_rr in the RISCVInstrinfo.td file that has two source and one destination register. Therefore, the new SHLXOR instruction is going to belong to the ALU\_rr class. The ALU\_rr class is given below.
 
 \begin{lstlisting}
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
@@ -245,7 +245,7 @@ return a;
 }
 \end{lstlisting}
 
-Here, we use 32 as the length because our target is 32 bit and the rotation is implemented in the eighth line. After that, we run the following command with additional flags as mentioned before.
+Here, we use 32 as the length because our target is 32-bit and the rotation is implemented in the eighth line. After that, we run the following command with additional flags as mentioned before.
 
 \begin{lstlisting}[language=Bash]
 clang --target=riscv32 -O -S rori.c -march=rv32imaczbb
@@ -295,7 +295,7 @@ This pattern is used 5 times in the rectangular shape of the \ref{fig:bit_manipu
 \begin{figure}
     \centering
     \includegraphics[scale=0.3]{adding_new_instr/sbox_naxor_pattern.png}
-    \caption{NAXOR patterns in sbox algorithm}
+    \caption{NAXOR patterns in s-box algorithm}
     \label{fig:sbox_naxor_pattern}
 \end{figure}
 
@@ -356,7 +356,7 @@ return;
 
 \begin{minipage}{0.95\linewidth}
 
-\lstinputlisting[caption={Optimised S-box LLVM IR}, language=llvm, style=nasm]{../s-box/keccakO3.ll}
+\lstinputlisting[caption={Optimized S-box LLVM IR}, language=llvm, style=nasm]{../s-box/keccakO3.ll}
 
 \end{minipage}
 

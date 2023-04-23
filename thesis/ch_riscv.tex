@@ -3,7 +3,7 @@
 \clearpage
 \chapter{RISC-V}\label{Ch8}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-In this project, our target is a 32 bit RISC-V core. RISC stands for reduced instruction set computer and RISC-V is an open standard Instruction Set Architecture. \cite{riscvorgabout} It is structured as a small base instruction set architecture and it has different additional extensions. The base instruction set architecture (ISA) is straightforward, rendering RISC-V appropriate for academic and learning purposes, yet extensive enough to function as a cost-effective and energy-efficient ISA for embedded systems. \cite{watermanriscv} Being open source and royalty free is another significant advantage and is an important reason why RISC-V is being commonly used. 
+In this project, our target is a 32-bit RISC-V core. RISC stands for reduced instruction set computer and RISC-V is an open standard Instruction Set Architecture. \cite{riscvorgabout} It is structured as a small base instruction set architecture and it has different additional extensions. The base instruction set architecture (ISA) is straightforward, rendering RISC-V appropriate for academic and learning purposes, yet extensive enough to function as a cost-effective and energy-efficient ISA for embedded systems. \cite{watermanriscv} Being open-source and royalty-free is another significant advantage and is an important reason why RISC-V is being commonly used. 
 RISC-V was developed by Prof. Krste Asanović and his students Andrew Waterman and Yunsup Lee. They started working on this project in 2010 as a part of as part of the Parallel Computing Laboratory which was in UC Berkeley. Par Lab was sponsored by several companies and worked on advancing parallel computing.
 
 \section{RISC-V ISA}
@@ -16,7 +16,7 @@ The Instruction Set Architecture (ISA) constitutes a part of a computer’s abst
     \label{fig:level_of_abstraction_diagram}
 \end{figure}
 
-There are different base integer variants of RISC-V such as RV32I, RV64I, and RV128I. These have address spaces of 32, 64, and 128 bits respectively. \cite{Altinayozlem} In our project, we are interested in 32 bits. RISC-V has 32 general purpose registers. Their application binary interface names and purposes can be seen in figure \ref{fig:riscv_registers}. Also in the figure, we can see a different set of registers. These registers are used for floating point operations. Their ABI and purposes are also given.
+There are different base integer variants of RISC-V such as RV32I, RV64I, and RV128I. These have address spaces of 32, 64, and 128 bits respectively. \cite{Altinayozlem} In our project, we are interested in 32-bits. RISC-V has 32 general-purpose registers. Their application binary interface names and purposes can be seen in figure \ref{fig:riscv_registers}. Also in the figure, we can see a different set of registers. These registers are used for floating point operations. Their ABI and purposes are also given.
 
 \begin{figure}[h!]
     \centering
@@ -26,7 +26,7 @@ There are different base integer variants of RISC-V such as RV32I, RV64I, and RV
 \end{figure}
 
 \section{RISC-V Base Instructions}
-There are four basic instruction formats in the base RV32I ISA. These are named R, I, S, U and all of these are 32 bits in length. There are two more additional variants named B and J as well.\cite{rvmanual} These formats are given in figure \ref{fig:risc-v_base_instruction_formats}.
+There are four basic instruction formats in the base RV32I ISA. These are named R, I, S, U and all of these are 32-bits in length. There are two more additional variants named B and J as well.\cite{rvmanual} These formats are given in figure \ref{fig:risc-v_base_instruction_formats}.
 \begin{figure}
     \centering
     \includegraphics{riscv/riscv_base_instruction_formats.png}
@@ -62,30 +62,30 @@ Among these, the bit manipulation (B) standard extension is quite important for 
     \label{fig:bit_manipulation_extension_groupings}
 \end{figure}
 
-Grouping these instructions according to how commonly they are used and similarity of the operations that they perform makes them more organized and easier to work on. 
+Grouping these instructions according to how commonly they are used and the similarity of the operations that they perform makes them more organized and easier to work on. 
 Some of these extensions are compatible with RV64 only. The compatibilities and the groups the instructions belong to are given in figure \ref{fig:rv32_rv64_compatibilities_and_groups}.
 \begin{figure}[h!]
     \centering
     \includegraphics{riscv/rv32_rv64_compatibilities_and_groups.png}
-    \caption{Bit RV32/RV64 compatibilites and groups \cite{bitmanipdraft}}
+    \caption{Bit RV32/RV64 compatibilities and groups \cite{bitmanipdraft}}
     \label{fig:rv32_rv64_compatibilities_and_groups}
 \end{figure}
 
 \clearpage
 
-To give a clearer image of what bit manipulation (B) instructions do, let’s explain few of them. For example, “CLZ” is an instruction for counting the leading zeros. Its purpose is to find out how many zeros there are before encountering a 1, starting from the most significant bit. Another example is “ORN” instruction. It negates the second operand and performs bitwise or with the first one. 
+To give a clearer image of what bit manipulation (B) instructions do, let’s explain a few of them. For example, “CLZ” is an instruction for counting the leading zeros. Its purpose is to find out how many zeros there are before encountering a 1, starting from the most significant bit. Another example is “ORN” instruction. It negates the second operand and performs bitwise or with the first one. 
 There is also a scalar cryptography instruction set extension for RISC-V. The RISC-V Scalar Cryptography extensions allow cryptographic tasks to be completed more quickly. Furthermore, these extensions significantly reduce the difficulty of implementing fast and secure cryptography in embedded devices and IoT. \cite{cryptogroups} This instruction set extension is also divided into subgroups according to the purpose and similarity of the instructions. The groups are given in figure \ref{fig:cryptography_extension_subgroups}. These groups and their purposes can be explained briefly.
 
 Zbkb contains bit manipulation instructions for cryptography. These are a selection of the bit manipulation extension Zbb that have specific applications in cryptography. \\
 Zbkc contains carry-less multiply instructions.\\
-Zbkx instructions can be useful for implementing sboxes in constant time.\\
-Zknd contains instructions which help speed up the decryption and key schedule functions of the AES block cypher and Zkne does the same for encryption.\\
+Zbkx instructions can be useful for implementing s-boxes in constant time.\\
+Zknd contains instructions that help speed up the decryption and key schedule functions of the AES block cipher and Zkne does the same for encryption.\\
 Zknh has some instructions that can help speed up the SHA2 family of cryptographic hash functions.\\
 Zksed contains instructions that speed up the SM4 block cipher.\\
 Zksh instructions help accelerate the SM3 hash function.\\
 Zkr can be useful to seed cryptographic random bit generators.\cite{cryptoextensiondoc}
 
-These extensions are supported by the compiler but pattern matching support for Zbkb and Zbkx is incomplete. Also for Zknd, Zkne, Zknh, Zksed and Zksh no pattern matching exists. Therefore, these instructions can be only used via instrinsic calls or from assembler.\cite{llvmextensionspage}
+These extensions are supported by the compiler but pattern matching support for Zbkb and Zbkx is incomplete. Also for Zknd, Zkne, Zknh, Zksed and Zksh, no pattern matching exists. Therefore, these instructions can be only used via intrinsic calls or from the assembler.\cite{llvmextensionspage}
 
 \begin{figure}
     \centering
@@ -94,4 +94,4 @@ These extensions are supported by the compiler but pattern matching support for 
     \label{fig:cryptography_extension_subgroups}
 \end{figure}
 
-These instructions are not a part of the base instruction set. Therefore, one cannot perform these operations with a single instruction if they use the base instructions only. Instruction extensions prove quite useful in these situations. One important thing we need to be careful about is that we should check these standard instruction extensions before we try to implement non-standard extensions by ourselves. These are comprehensive extensions and may already contain the extensions that we want to implement. After making sure that the extension we want is not present, we may try to implement non-standard extensions.
+These instructions are not a part of the base instruction set. Therefore, one cannot perform these operations with a single instruction if one use the base instructions only. Instruction extensions prove quite useful in these situations. One important thing we need to be careful about is that we should check these standard instruction extensions before we try to implement non-standard extensions by ourselves. These are comprehensive extensions and may already contain the extensions that we want to implement. After making sure that the extension we want is not present, we may try to implement non-standard extensions.

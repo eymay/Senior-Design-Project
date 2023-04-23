@@ -4,7 +4,7 @@
 \clearpage
 \chapter{PATH OF AN INSTRUCTION}\label{Ch4}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-In this chapter, the path of an instruction will be demonstrated and the corresponding DAG input of the most critical phases of SelectionDAG will be shown. We selected the input program as a function that performs multiplication and addition. This was our litmus test code used while adding MLA (Multiply and Add) instruction to the LLVM backend with TableGen. We explained our addition of MLA instruction thoroughly in Section \ref{sec:MLA_add_section}. 
+In this chapter, the path of an instruction will be demonstrated and the corresponding DAG input of the most critical phases of SelectionDAG will be shown. We selected the input program as a function that performs multiplication and addition. This was our litmus test code used while adding MLA (Multiply and Add) instruction to the LLVM back-end with TableGen. We explained our addition of MLA instruction thoroughly in Section \ref{sec:MLA_add_section}. 
 
 \begin{lstlisting}[language=C, caption=madd.c program]
 int a,b,c;
@@ -18,7 +18,7 @@ void maddFunc() {
 \end{lstlisting}
 
 \section{Clang AST}
-You can see the Abstract Syntax Tree (AST) produced by Clang in Figure \ref{fig:clang_ast}. The AST consists of an expression tree with three levels. At the highest level there is an expression tree of multiplication between variables 'a' and 'b'. This expression tree's result becomes an argument for another expression tree with the addition operator. The second argument at this addition subtree is the variable 'c'. The expression tree at the root has assignment as an operator. The first argument to this tree is 'a' and the second argument is the result of multiplication and addition. Figure \ref{fig:ast_mla} shows the entire expression tree with the operations multiply and add. 
+You can see the Abstract Syntax Tree (AST) produced by Clang in Figure \ref{fig:clang_ast}. The AST consists of an expression tree with three levels. At the highest level, there is an expression tree of multiplication between variables 'a' and 'b'. This expression tree's result becomes an argument for another expression tree with the addition operator. The second argument at this addition subtree is the variable 'c'. The expression tree at the root has an assignment as an operator. The first argument to this tree is 'a' and the second argument is the result of multiplication and addition. Figure \ref{fig:ast_mla} shows the entire expression tree with the operations multiply and add. 
 
 \begin{figure}
     \centering
@@ -92,7 +92,7 @@ According to the interface file, RISCVISD::ADD\_LO is meant to add Lo 12 bits fr
     \label{fig:combine2}
 \end{figure}
 
-Figure \ref{fig:isel} shows the DAG before the Instruction Selection phase. Comparison of Figure \ref{fig:combine2} and \ref{fig:isel} indicates that the second optimization did not change the DAG. This may be due to the reason that the subgraphs including the legalized nodes are not complex enough as the input C code is minimal.
+Figure \ref{fig:isel} shows the DAG before the Instruction Selection phase. A comparison of Figure \ref{fig:combine2} and \ref{fig:isel} indicates that the second optimization did not change the DAG. This may be due to the reason that the subgraphs including the legalized nodes are not complex enough as the input C code is minimal.
 \par
 The DAG nodes up until Instruction Selection are instances of SDNode class which are target-independent nodes.
 \begin{figure}
@@ -107,7 +107,7 @@ Figure \ref{fig:dag_sched} shows the DAG before the Instruction Scheduling phase
 \par
 RISCVISD nodes are replaced by their counterparts. The general Load and Store instructions are replaced by their type-aware corresponding LW (Load Word) and SW (Store Word) instructions. Most importantly the MLA instruction is selected replacing the subgraph of 'mul' and 'add' LLVM instructions. 
 \par
-We defined MLA instruction's DAG pattern as in the subgraph. The instruction selection phase took it as a reference, detected the pattern inside the global DAG and used it to place the MLA node. The addition process is explained more thoroughly in Section \ref{sec:MLA_add_section}.
+We defined MLA instruction's DAG pattern as in the subgraph. The instruction selection phase took it as a reference, detected the pattern inside the global DAG, and used it to place the MLA node. The addition process is explained more thoroughly in Section \ref{sec:MLA_add_section}.
 
 \begin{figure}
     \centering
@@ -139,7 +139,7 @@ The generated Machine Instruction as a result of scheduling is shown in Figure \
 
 \clearpage
 \section{Machine Code Instruction}
-After register allocation, Machine Code Instruction (MCInst) representation of the code is created. MCInst can be thought of as an intermediate representation of the lower-level code. It can be used to produce both an object file and an Assembly file. The generated Assembly is presented below:
+After register allocation, a Machine Code Instruction (MCInst) representation of the code is created. MCInst can be thought of as an intermediate representation of the lower-level code. It can be used to produce both an object file and an Assembly file. The generated Assembly is presented below:
 \begin{lstlisting}[ caption=madd.s Assembly Output]
     maddFunc:                               # @maddFunc
 # %bb.0:
