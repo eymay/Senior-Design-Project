@@ -91,7 +91,7 @@ def : Pat< (add (mul GPR:$src1, GPR:$src2), GPR:$src3),
 
 MLA instruction is called from RISCVInstrInfoCrypt.td file and inputs and outputs are determined.
 
-\section{Adding Pattern Matching Support for New Instruction Using C++}
+\section{Adding Pattern Matching Support for New Instruction Using C++ in SelectionDAG}
 TableGen aims to provide a declarative way to introduce new patterns for new instruction developers. However, not all instructions can be described in this scheme.  Although it is called "dag" as a keyword in TableGen, it expects a tree of instructions. Custom C++ can be the only way to match until the TableGen based system improves. It is also possible to use C++ in complex patterns in TableGen, which can make the most of the pattern declarative and only the necessary part in imperative style.
 \par
 A domain that TableGen fails is matching a graph of instructions with dependant operands. As an example we can think of an instruction having two operands of Load Instructions. If the Load instructions are from an array, they must be related to each other by an offset and it might need to be detected for certain patterns.
@@ -114,7 +114,428 @@ SelectionDAG consists of numerous files but the most relevant ones to the develo
 
 %TODO C++ code for matching will be added
 
+\lstinputlisting[caption={The corresponding Optimized and Legalized DAG of Code \ref{lst:sbox-xor}},linerange={3-3,4-4,8-9,13-13,16-16} ,label={lst:sbox-xor-dag},language=llvm,style=nasm]{../s-box/opt-lowered-dag.td}
 
+In an attempt to match the three instructions in Code \ref{lst:sbox-xor}, the DAG in Code \ref{lst:sbox-xor-dag} is analyzed. First remark is that "getelementptr"is converted to an add instruction which calculates the offset. Another remark is that the load instructions have the same base address in first operand as expected pointing to the same node. If the pattern is large, we can introduce a new function which will contain the logic. The function's prototype should be added to the corresponding header file.
+
+
+\lstinputlisting[caption={Introduction of New Function for Pattern Matching in C++},label={lst:sbox-iseldagtodag},language=C++]{../s-box/custom_c++/iseldagtodagPlace.cpp}
+
+
+The C++ logic for matching this pattern is provided below.
+
+\lstinputlisting[caption={C++ logic for Pattern Matching the DAG in Code \ref{lst:sbox-xor-dag}},label={lst:sbox-cpp},language=C++]{../s-box/custom_c++/xor_loads.cpp}
+
+The logic starts from the root of the DAG which in this case is XOR instruction or the ISD::XOR SelectionDAG node. Then we iterate through its leaves and check the distinctive features of the pattern. In this pattern we are interested in the distance of offset addresses of Load instructions so we progressively approach them by assuming the pattern holds and quitting if not. Progressive checking is a common theme in LLVM and as Instruction Selection is one of the stages affecting the compilation times significantly, patterns should not be checked in a single if statement by logical combinations. 
+
+The checks if statements are doing can be summarised in steps. As the function only runs in XOR case the root can be assumed to be XOR safely.
+\begin{enumerate}
+    \item Check if the operands are both Load instructions.
+    \item Check if the Second Load instruction has an Add instruction in its second operand
+    \item Check if the base offset of the first load and the first addendum of the second load are the same, as they should point to the beginning of the struct.
+    \item Check if the second addendum is a constant.
+    \item Check if the unsigned value of constant second addendum is equal to 16.
+\end{enumerate}
+
+At this point, it can be safely assumed that the only XOR that conforms to the pattern can be in this line of program. SelectionDAG provides more API to simply replace the nodes in that pattern with the custom instruction.
+
+
+To interact with the DAG, SelectionDAG's API is used. We encourage the developers to read the source code and learn to use the public functions exposed by SelectionDAG in order to interact with the DAG most effectively. RISCVISelDAGToDAG.cpp file already has many instruction selection mechanisms in place which can be read through. 
+
+\section{Discussion of Pattern Matching in Other Stages of the Compiler}
+Pattern Matching can be assumed to mainly be an Instruction Selection problem where the pattern will be simply identified and replaced. However, when we take a look at the baseline problem any Compiler technology solves, it is to convert more familiar patterns in some language to a more unfamiliar pattern in machine language. Also this conversion occurs in a large number of steps through optimisation in IR form as discussed in Section \ref{sec:opt}, to DAG formation in SelectionDAG to MCInstr form down the pipeline. Their data structures can differ in representing the instructions which can make some pattern matching schemes to be more fragile than others. Also, as the lowering gets performed high level information about the program is lost but the formation gets closer to the final output of Assembly. 
+
+For simple cases where for example a combination of R-type instructions will be matched and replaced, Instruction Selection might be the most convenient stage to extend. Howeveer if the pattern requires the instruction selection to be performed already, pattern match can be done in MCInst level. In contrary, if higher level information of the pattern is required, a pattern can be matched to an intrinsic function in IR level. 
+
+Another reason to consider different stages is that there can be multiple patterns mapped to the same instruction. Further optimization opportunities can rise in further stages. 
+
+\subsection{Case Study: SH1ADD in SelectionDAG and MCInst Level}
+%TODO make sure MIR is explained previously
+%TODO make sure Zba is explained for SH1ADD instr, https://wiki.riscv.org/display/HOME/Recently+Ratified+Extensions, https://github.com/riscv/riscv-crypto/releases/tag/v1.0.1-scalar
+It was discussed that dealing with the lowered DAG to MIR can provide more optimization opportunities. In this section the case of "SH1ADD" instruction which is ratified in RISC-V Zba extension will be analyzed. The instruction shifts rs1 left by one, adds rs2 and writes to rd. Its encoding and pattern in the standard implementation of LLVM in TableGen is as follows:
+
+\begin{lstlisting}[%language=TableGen,
+caption={Instruction Encoding of the Instructions} ]
+let Predicates = [HasStdExtZba] in {
+def SH1ADD : ALU_rr<0b0010000, 0b010, "sh1add">,
+             Sched<[WriteSHXADD, ReadSHXADD, ReadSHXADD]>;
+def SH2ADD : ALU_rr<0b0010000, 0b100, "sh2add">,
+             Sched<[WriteSHXADD, ReadSHXADD, ReadSHXADD]>;
+def SH3ADD : ALU_rr<0b0010000, 0b110, "sh3add">,
+             Sched<[WriteSHXADD, ReadSHXADD, ReadSHXADD]>;
+} // Predicates = [HasStdExtZba]
+\end{lstlisting}
+
+As the SH2ADD and SH3ADD have similar implementations to SH1ADD their patterns will be stripped.
+
+\begin{lstlisting}[%language=TableGen
+, caption={Instruction Pattern of the Instructions}]
+let Predicates = [HasStdExtZba] in {
+def : Pat<(add (shl GPR:$rs1, (XLenVT 1)), non_imm12:$rs2),
+          (SH1ADD GPR:$rs1, GPR:$rs2
+
+// More complex cases use a ComplexPattern.
+def : Pat<(add sh1add_op:$rs1, non_imm12:$rs2),
+          (SH1ADD sh1add_op:$rs1, GPR:$rs2)>;)>;
+
+def : Pat<(add (mul_oneuse GPR:$rs1, (XLenVT 6)), GPR:$rs2),
+          (SH1ADD (SH1ADD GPR:$rs1, GPR:$rs1), GPR:$rs2)>;
+def : Pat<(add (mul_oneuse GPR:$rs1, (XLenVT 10)), GPR:$rs2),
+          (SH1ADD (SH2ADD GPR:$rs1, GPR:$rs1), GPR:$rs2)>;
+def : Pat<(add (mul_oneuse GPR:$rs1, (XLenVT 18)), GPR:$rs2),
+          (SH1ADD (SH3ADD GPR:$rs1, GPR:$rs1), GPR:$rs2)>;
+\end{lstlisting}
+
+We can observe that ComplexPattern's  are used to enable using C++ together with TableGen. The Complex Pattern's TableGen declarations are provided below:
+
+\begin{lstlisting}[language=C++, caption={TableGen Declaration of ComplexPatterns}]
+
+def sh1add_op : ComplexPattern<XLenVT, 1, "selectSHXADDOp<1>", [], [], 6>;
+
+class binop_oneuse<SDPatternOperator operator>
+    : PatFrag<(ops node:$A, node:$B),
+              (operator node:$A, node:$B), [{
+  return N->hasOneUse();
+}]>;
+
+def mul_oneuse : binop_oneuse<mul>;
+\end{lstlisting}
+
+"selectSHXADDOp" is a template function which provides the shift amount argument.
+
+\begin{lstlisting}[language=C++, caption={Template Function of the ComplexPattern for "sh1add\_op"}]
+
+bool selectSHXADDOp(SDValue N, unsigned ShAmt, SDValue &Val);
+template <unsigned ShAmt> bool selectSHXADDOp(SDValue N, SDValue &Val) {
+return selectSHXADDOp(N, ShAmt, Val);
+}
+\end{lstlisting}
+
+The C++ logic can be found in RISCVISelDAGToDAG.cpp file, the implementation will be reduced to the patterns described in comments:
+
+\begin{lstlisting}[language=C++, caption={Implementation of the ComplexPattern for "sh1add\_op"}]
+/// Look for various patterns that can be done with a SHL that can be folded
+/// into a SHXADD. \p ShAmt contains 1, 2, or 3 and is set based on which
+/// SHXADD we are trying to match.
+bool RISCVDAGToDAGISel::selectSHXADDOp(SDValue N, unsigned ShAmt,
+                                       SDValue &Val) {
+  if (N.getOpcode() == ISD::AND && isa<ConstantSDNode>(N.getOperand(1))) {
+    SDValue N0 = N.getOperand(0);
+
+    bool LeftShift = N0.getOpcode() == ISD::SHL;
+    if ((LeftShift || N0.getOpcode() == ISD::SRL) &&
+        isa<ConstantSDNode>(N0.getOperand(1))) {
+      uint64_t Mask = N.getConstantOperandVal(1);
+      unsigned C2 = N0.getConstantOperandVal(1);
+
+      unsigned XLen = Subtarget->getXLen();
+      if (LeftShift)
+        Mask &= maskTrailingZeros<uint64_t>(C2);
+      else
+        Mask &= maskTrailingOnes<uint64_t>(XLen - C2);
+
+      // Look for (and (shl y, c2), c1) where c1 is a shifted mask with no
+      // leading zeros and c3 trailing zeros. We can use an SRLI by c2+c3
+      // followed by a SHXADD with c3 for the X amount.
+       ...
+        // Look for (and (shr y, c2), c1) where c1 is a shifted mask with c2
+        // leading zeros and c3 trailing zeros. We can use an SRLI by C3
+        // followed by a SHXADD using c3 for the X amount.
+        ...
+      }
+    }
+  }
+
+  bool LeftShift = N.getOpcode() == ISD::SHL;
+  if ((LeftShift || N.getOpcode() == ISD::SRL) &&
+      isa<ConstantSDNode>(N.getOperand(1))) {
+    SDValue N0 = N.getOperand(0);
+    if (N0.getOpcode() == ISD::AND && N0.hasOneUse() &&
+        isa<ConstantSDNode>(N0.getOperand(1))) {
+      uint64_t Mask = N0.getConstantOperandVal(1);
+      if (isShiftedMask_64(Mask)) {
+        unsigned C1 = N.getConstantOperandVal(1);
+        unsigned XLen = Subtarget->getXLen();
+        unsigned Leading = XLen - llvm::bit_width(Mask);
+        unsigned Trailing = llvm::countr_zero(Mask);
+        // Look for (shl (and X, Mask), C1) where Mask has 32 leading zeros and
+        // C3 trailing zeros. If C1+C3==ShAmt we can use SRLIW+SHXADD.
+        ...
+        // Look for (srl (and X, Mask), C1) where Mask has 32 leading zeros and
+        // C3 trailing zeros. If C3-C1==ShAmt we can use SRLIW+SHXADD.
+        ...
+      }
+    }
+  }
+  return false;
+}
+\end{lstlisting}
+
+%TODO what is materialization
+Despite using TableGen and SelectionDAG, there is an optimization opportunity for "SH1ADD" in MIR form. It is done in immediate materialisation where a constant node in the DAG representation is not converted to instructions until needed. In the MCTargetDesc/RISCVMatInt.cpp file, an optimisation for representing immediates is provided as follows:
+
+\begin{lstlisting}[language=C++, caption={Immediate Materialisation for "SH1ADD"}]
+namespace llvm::RISCVMatInt {
+InstSeq generateInstSeq(int64_t Val, const FeatureBitset &ActiveFeatures) {
+  RISCVMatInt::InstSeq Res;
+  generateInstSeqImpl(Val, ActiveFeatures, Res);
+  ...
+
+// Perform optimization with SH*ADD in the Zba extension.
+  if (Res.size() > 2 && ActiveFeatures[RISCV::FeatureStdExtZba]) {
+    int64_t Div = 0;
+    unsigned Opc = 0;
+    RISCVMatInt::InstSeq TmpSeq;
+    // Select the opcode and divisor.
+    if ((Val % 3) == 0 && isInt<32>(Val / 3)) {
+      Div = 3;
+      Opc = RISCV::SH1ADD;
+    } else if ((Val % 5) == 0 && isInt<32>(Val / 5)) {
+      Div = 5;
+      Opc = RISCV::SH2ADD;
+    } else if ((Val % 9) == 0 && isInt<32>(Val / 9)) {
+      Div = 9;
+      Opc = RISCV::SH3ADD;
+    }
+    // Build the new instruction sequence.
+    if (Div > 0) {
+      generateInstSeqImpl(Val / Div, ActiveFeatures, TmpSeq);
+      TmpSeq.emplace_back(Opc, 0);
+      if (TmpSeq.size() < Res.size())
+        Res = TmpSeq;
+    } else {
+      // Try to use LUI+SH*ADD+ADDI.
+      int64_t Hi52 = ((uint64_t)Val + 0x800ull) & ~0xfffull;
+      int64_t Lo12 = SignExtend64<12>(Val);
+      Div = 0;
+      if (isInt<32>(Hi52 / 3) && (Hi52 % 3) == 0) {
+        Div = 3;
+        Opc = RISCV::SH1ADD;
+      } else if (isInt<32>(Hi52 / 5) && (Hi52 % 5) == 0) {
+        Div = 5;
+        Opc = RISCV::SH2ADD;
+      } else if (isInt<32>(Hi52 / 9) && (Hi52 % 9) == 0) {
+        Div = 9;
+        Opc = RISCV::SH3ADD;
+      }
+      // Build the new instruction sequence.
+      if (Div > 0) {
+        // For Val that has zero Lo12 (implies Val equals to Hi52) should has
+        // already been processed to LUI+SH*ADD by previous optimization.
+        generateInstSeqImpl(Hi52 / Div, ActiveFeatures, TmpSeq);
+        TmpSeq.emplace_back(Opc, 0);
+        TmpSeq.emplace_back(RISCV::ADDI, Lo12);
+        if (TmpSeq.size() < Res.size())
+          Res = TmpSeq;
+      }
+    }
+  }
+
+\end{lstlisting}
+
+By using "SH1ADD" in immediate materialization, a single instruction can be used instead of two. It can be checked that in the standard testing suite there is the following function which returns a 64 bit integer:
+
+\begin{lstlisting}[language=llvm,style=nasm, caption={Function for Immediate Materialisation}]
+define i64 @PR54812() {
+; RV64I-LABEL: PR54812:
+; RV64I:       # %bb.0:
+; RV64I-NEXT:    lui a0, 1048447
+; RV64I-NEXT:    addiw a0, a0, 1407
+; RV64I-NEXT:    slli a0, a0, 12
+; RV64I-NEXT:    ret
+;
+; RV64IZBA-LABEL: PR54812:
+; RV64IZBA:       # %bb.0:
+; RV64IZBA-NEXT:    lui a0, 872917
+; RV64IZBA-NEXT:    sh1add a0, a0, a0
+; RV64IZBA-NEXT:    ret
+;
+  ret i64 -2158497792;
+}
+\end{lstlisting}
+%TODO can be compared in more detail
+In the FileCheck lines which is explained in Section \ref{sec:llc_test}, we can see the Assembly lines that should be emmitted. It can be observed that the desired immediate can be obtained with "sh1add" in less instructions.
+
+\subsection{Case Study: ROR in SelectionDAG and IR Level}
+%TODO intrinsic vs builtin
+In LLVM, rotation instruction which is shifting and feeding the carry back to the shift point, is captured in IR level. To match in IR level, a new intrinsic function is defined in TableGen. TableGen is not only used in instruction selection, it is used wherever a declarative form is better suited such as in IR or MLIR levels.
+
+\begin{lstlisting}[language=C++, caption={Funnel Shift Intrinsic Definition}]
+//===-------------------- Bit Manipulation Intrinsics ---------------------===//
+//
+
+// None of these intrinsics accesses memory at all.
+let IntrProperties = [IntrNoMem, IntrSpeculatable, IntrWillReturn] in {
+  def int_bswap: DefaultAttrsIntrinsic<[llvm_anyint_ty], [LLVMMatchType<0>]>;
+  def int_ctpop: DefaultAttrsIntrinsic<[llvm_anyint_ty], [LLVMMatchType<0>]>;
+  def int_bitreverse: DefaultAttrsIntrinsic<[llvm_anyint_ty], [LLVMMatchType<0>]>;
+  def int_fshl : DefaultAttrsIntrinsic<[llvm_anyint_ty],
+      [LLVMMatchType<0>, LLVMMatchType<0>, LLVMMatchType<0>]>;
+  def int_fshr : DefaultAttrsIntrinsic<[llvm_anyint_ty],
+      [LLVMMatchType<0>, LLVMMatchType<0>, LLVMMatchType<0>]>;
+}
+\end{lstlisting}
+
+'fshr' is defined as funnel shift right intrinsic function \cite{llvmref-fshl}. It is matched in IR optimizations by InstCombine pass.
+
+\begin{lstlisting}[language=C++, caption={Funnel Shift Right Pattern Matching}]
+/// Match UB-safe variants of the funnel shift intrinsic.
+static Instruction *matchFunnelShift(Instruction &Or, InstCombinerImpl &IC){
+  unsigned Width = Or.getType()->getScalarSizeInBits();
+
+  // First, find an or'd pair of opposite shifts:
+  // or (lshr ShVal0, ShAmt0), (shl ShVal1, ShAmt1)
+  BinaryOperator *Or0, *Or1;
+  if (!match(Or.getOperand(0), m_BinOp(Or0)) ||
+      !match(Or.getOperand(1), m_BinOp(Or1)))
+    return nullptr;
+
+  Value *ShVal0, *ShVal1, *ShAmt0, *ShAmt1;
+  if (!match(Or0, m_OneUse(m_LogicalShift(m_Value(ShVal0),
+       m_Value(ShAmt0)))) ||
+      !match(Or1, m_OneUse(m_LogicalShift(m_Value(ShVal1), 
+       m_Value(ShAmt1)))) ||
+      Or0->getOpcode() == Or1->getOpcode())
+    return nullptr;
+
+  // Canonicalize to or(shl(ShVal0, ShAmt0), lshr(ShVal1, ShAmt1)).
+  if (Or0->getOpcode() == BinaryOperator::LShr) {
+    std::swap(Or0, Or1);
+    std::swap(ShVal0, ShVal1);
+    std::swap(ShAmt0, ShAmt1);
+  }
+
+  // Match the shift amount operands for a funnel shift pattern. This always
+  // matches a subtraction on the R operand.
+  auto matchShiftAmount = [&](Value *L, Value *R, unsigned Width) -> Value * {
+    // Check for constant shift amounts that sum to the bitwidth.
+    ...
+
+    return nullptr;
+  };
+
+  Value *ShAmt = matchShiftAmount(ShAmt0, ShAmt1, Width);
+  bool IsFshl = true; // Sub on LSHR.
+  if (!ShAmt) {
+    ShAmt = matchShiftAmount(ShAmt1, ShAmt0, Width);
+    IsFshl = false; // Sub on SHL.
+  }
+  if (!ShAmt)
+    return nullptr;
+
+  Intrinsic::ID IID = IsFshl ? Intrinsic::fshl : Intrinsic::fshr;
+  Function *F = Intrinsic::getDeclaration(Or.getModule(), IID, Or.getType());
+  return CallInst::Create(F, {ShVal0, ShVal1, ShAmt});
+}
+\end{lstlisting}
+
+The pattern matching API is provided by IR/PatternMatch.h file. After the pattern for rotation and the shift amount are matched the corresponding intrinsic function is called. 
+
+The function is called in OR visiting function, so the root of the pattern is OR:
+
+\begin{lstlisting}[language=C++, caption={Funnel Shift Right Pattern Function Called}]
+Instruction *InstCombinerImpl::visitOr(BinaryOperator &I) {
+  ...
+  if (Instruction *Funnel = matchFunnelShift(I, *this))
+    return Funnel;
+  ...
+  return nullptr;
+}
+
+
+\end{lstlisting}
+
+The intrinsic function is converted to ROTR SelectionDAG node in the general SelectionDAGBuilder.cpp file.
+\begin{lstlisting}[language=C++, caption={Funnel Shift Intrinsic converted to ROTL}]
+/// Lower the call to the specified intrinsic function.
+void SelectionDAGBuilder::visitIntrinsicCall(const CallInst &I,
+                                             unsigned Intrinsic) {
+  const TargetLowering &TLI = DAG.getTargetLoweringInfo();
+  SDLoc sdl = getCurSDLoc();
+  DebugLoc dl = getCurDebugLoc();
+  SDValue Res;
+
+  SDNodeFlags Flags;
+  if (auto *FPOp = dyn_cast<FPMathOperator>(&I))
+    Flags.copyFMF(*FPOp);
+
+  switch (Intrinsic) {
+  default:
+    // By default, turn this into a target intrinsic node.
+    visitTargetIntrinsic(I, Intrinsic);
+    return;
+  ...
+
+  case Intrinsic::fshl:
+  case Intrinsic::fshr: {
+    bool IsFSHL = Intrinsic == Intrinsic::fshl;
+    SDValue X = getValue(I.getArgOperand(0));
+    SDValue Y = getValue(I.getArgOperand(1));
+    SDValue Z = getValue(I.getArgOperand(2));
+    EVT VT = X.getValueType();
+
+    if (X == Y) {
+      auto RotateOpcode = IsFSHL ? ISD::ROTL : ISD::ROTR;
+      setValue(&I, DAG.getNode(RotateOpcode, sdl, VT, X, Z));
+    } else {
+      auto FunnelOpcode = IsFSHL ? ISD::FSHL : ISD::FSHR;
+      setValue(&I, DAG.getNode(FunnelOpcode, sdl, VT, X, Y, Z));
+    }
+    return;
+  }
+  ...
+}
+
+\end{lstlisting}
+
+
+The intrinsic functions can be defined as target-specific or target independent. "fshl" is a general intrinsic function and targets can either expand it by replacing it with its equivalent instructions or lower it directly to an instruction by legalizing it. RISC-V Zbb extension supports bitwise rotation so LLVM has the extension's implementation in the source. In RISCVISelLowering.cpp file the legalization of "ROTR" is managed regarding whether the extension is enabled or disabled.
+
+\begin{lstlisting}[language=C++, caption={ROTR Legalization Conditional}]
+RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
+                                         const RISCVSubtarget &STI)
+    : TargetLowering(TM), Subtarget(STI) {
+    ...
+  if (Subtarget.hasStdExtZbb() || Subtarget.hasStdExtZbkb() ||
+      Subtarget.hasVendorXTHeadBb()) {
+    if (Subtarget.is64Bit())
+      setOperationAction({ISD::ROTL, ISD::ROTR}, MVT::i32, Custom);
+  } else {
+    setOperationAction({ISD::ROTL, ISD::ROTR}, XLenVT, Expand);
+  }
+  ...
+}
+\end{lstlisting}
+
+The "Custom" action is defined in TableGen in RISCVInstrInfoZb.td file as well as instruction encodings.
+
+\begin{lstlisting}[language=C++, caption={ROR Encodings and Pattern}]
+def riscv_rolw   : SDNode<"RISCVISD::ROLW",   SDT_RISCVIntBinOpW>;
+def riscv_rorw   : SDNode<"RISCVISD::RORW",   SDT_RISCVIntBinOpW>;
+...
+let Predicates = [HasStdExtZbbOrZbkb] in {
+def ROL   : ALU_rr<0b0110000, 0b001, "rol">,
+            Sched<[WriteRotateReg, ReadRotateReg, ReadRotateReg]>;
+def ROR   : ALU_rr<0b0110000, 0b101, "ror">,
+            Sched<[WriteRotateReg, ReadRotateReg, ReadRotateReg]>;
+
+def RORI  : RVBShift_ri<0b01100, 0b101, OPC_OP_IMM, "rori">,
+            Sched<[WriteRotateImm, ReadRotateImm]>;
+} // Predicates = [HasStdExtZbbOrZbkb]
+...
+let Predicates = [HasStdExtZbbOrZbkb] in {
+def : PatGprGpr<shiftop<rotl>, ROL>;
+def : PatGprGpr<shiftop<rotr>, ROR>;
+
+def : PatGprImm<rotr, RORI, uimmlog2xlen>;
+// There's no encoding for roli in the the 'B' extension as it can be
+// implemented with rori by negating the immediate.
+def : Pat<(rotl GPR:$rs1, uimmlog2xlen:$shamt),
+          (RORI GPR:$rs1, (ImmSubFromXLen uimmlog2xlen:$shamt))>;
+} // Predicates = [HasStdExtZbbOrZbkb]
+\end{lstlisting}
+
+As you can see when the pattern match logic is lifted up to the IR level the modifications in Instruction Selection are straightforward to implement. 
 
 
 
