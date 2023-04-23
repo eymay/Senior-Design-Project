@@ -74,7 +74,7 @@ LLVM-MC can be run before writing the test to see the encoding or hand-coding is
 
 The header of the MC test can be used, if prefixes other than the present one are needed, add them to the –check-prefixes= side and make sure to use them in the file.
 
-\section{LLC/CodeGen Test}
+\section{LLC/CodeGen Test}\label{sec:llc_test}
 llc tests are more familiar since they check how an .ll produces Assembly-like (MCInst) strings. Instead of the manual checking, this tool can be used and batch-testing can be done.
 
 Here is an example of the LLVM-IR code implemented for the SHLXOR instruction that we want. As it can be seen from its signature, it is a function taking two 32-bit integers and returning one. It takes one input, shifts it left by one and assigns it to a variable \%1. \%1 is then XOR’ed with the second input and the result is returned.
