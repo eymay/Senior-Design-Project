@@ -55,8 +55,9 @@ Let’s get an assembly output from this C code by running the following command
 
 \begin{lstlisting}[language=Bash]
 clang -S -target riscv32-linux-gnu -emit-llvm shlxor.c
-~/CustomInstrLLVM/build/bin/llc -mtriple=riscv32 shlxor.ll
+<llvm-build-path>/build/bin/llc -mtriple=riscv32 shlxor.ll
 \end{lstlisting}
+
 
 %TODO lets set standard bin directory throughout thesis 
 Here, CustomInstrLLVM is the folder that we built llvm in.
