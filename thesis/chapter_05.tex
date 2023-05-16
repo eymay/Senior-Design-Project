@@ -357,7 +357,7 @@ define i64 @PR54812() {
 In the FileCheck lines which is explained in Section \ref{sec:llc_test}, we can see the Assembly lines that should be emmitted. It can be observed that the desired immediate can be obtained with "sh1add" in less instructions.
 
 \subsection{Case Study: ROR in SelectionDAG and IR Level}
-%TODO intrinsic vs builtin
+
 In LLVM, rotation instruction which is shifting and feeding the carry back to the shift point, is captured in IR level. To match in IR level, a new intrinsic function is defined in TableGen. TableGen is not only used in instruction selection, it is used wherever a declarative form is better suited such as in IR or MLIR levels.
 
 \begin{lstlisting}[language=C++, caption={Funnel Shift Intrinsic Definition}]

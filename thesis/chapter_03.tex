@@ -16,6 +16,12 @@ LLVM is a collection of modular and flexible libraries and a toolchain software 
 
 LLVM IR is the common representation of languages. Various LLVM front-ends translate related languages into IR. Related back-end compiles IR into assembly according to the target hardware. This structure helps to increase flexibility between front-ends and back-ends. With this structure, we are able to have compilers for every combination of M source codes and N targets with M front-end and N back-end instead of M*N compilers. In our case, we do not have to struggle with the front-end also our back-end will be working for every source code of LLVM because of this benefit. The front-end we use in the developing process will be clang which is the LLVM C/C++ front-end\cite{clang}.
 
+The concept of instrinsic function is supported by LLVM. They are internal functions and they have their semantics directly defined by LLVM itself. LLVM provides both target-independent and target-specific intrinsics. \cite{llvmdevmeeting} These intrinsics have well known semantics and names and they must adhere to certain restrictions. In general, these intrinsics serve as an expansion mechanism for the LLVM language that does not necessitate modifying all of the transformations in LLVM when introducing changes to the language. Intrinsic function names start with “llvm.” \cite{googlesiteintrinsic}
+
+There are also builtin functions that are supported by Clang. Some of these have the same syntax as GCC. In addition to these, Clang supports other builtin functions that GCC doesn’t. Some of these are \_\_builtin\_shufflevector, \_\_builtin\_unreachable etc. As we can see, these builtin functions start with double underscores.
+
+Intrinsic functions and builtin functions are two seperate things and should not be confused. Builtins are at C level (source code) while intrinsics are LLVM IR level and a builtin may or may not be expanded into intrinsic calls.
+
 \section{Parts of the Clang Front-end}
 
 \subsection{Clang Lex Library}
