@@ -968,7 +968,10 @@ LİSTESİ\fi\normalfont}
 	\vskip 10\p@ 
 	\hspace{70\p@}\th@titleFtSz \th@isimsoyisimuc  \\
 	\hspace{70\p@}\th@titleFtSz (\th@ogrencinouc) \\
-
+    \vskip 250\p@ 
+    \th@titleFtSz Project Advisor:\th@tezyoneticisi\\
+    \vspace*{\fill}
+    \null\vfill %To prevent the page from breaking
 	\newpage
 %\vspace*{\fill}
 }
