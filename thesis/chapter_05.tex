@@ -109,10 +109,8 @@ The process for adding an instruction via C++ is as follows:
     \item Implement pattern matching and replacement with SelectionDAG node.
 \end{enumerate}
 
-%TODO what is a basic block, maybe in IR section 
-SelectionDAG consists of numerous files but the most relevant ones to the developer can be few if the complexity of the pattern is small. The order of files will be from IR to Assembly. RISCVCodeGenPrepare.cpp file provides mechanisms for matching in IR form. This file exists mainly due to the limitation of SelectionDAG which is running per basic-block. RISCVISelLowering.cpp contains the lowering of IR to SelectionDAG nodes. It can decide on whether a type or expression should be legalized or expanded. RISCVISelDAGToDAG.cpp is the instruction selector in C++. Its implementation traverses the DAG from the root and runs the selection functions depending on the SelectionDAG node type which is parallel to Opcodes. 
+SelectionDAG consists of numerous files but the most relevant ones to the developer can be few if the complexity of the pattern is small. The order of files will be from IR to Assembly. RISCVCodeGenPrepare.cpp file provides mechanisms for matching in IR form. This file exists mainly due to the limitation of SelectionDAG which is running per basic-block. RISCVISelLowering.cpp contains the lowering of IR to SelectionDAG nodes. It can decide on whether a type or expression should be legalized or expanded. RISCVISelDAGToDAG.cpp is the instruction selector in C++. Its implementation traverses the DAG from the root and runs the selection functions depending on the SelectionDAG node type which is parallel to instructions. 
 
-%TODO C++ code for matching will be added
 
 \lstinputlisting[caption={The corresponding Optimized and Legalized DAG of Code \ref{lst:sbox-xor}},linerange={3-3,4-4,8-9,13-13,16-16} ,label={lst:sbox-xor-dag},language=llvm,style=nasm]{../s-box/opt-lowered-dag.td}
 
