@@ -151,7 +151,7 @@ Another reason to consider different stages is that there can be multiple patter
 
 \subsection{Case Study: SH1ADD in SelectionDAG and MCInst Level}
 %TODO make sure MIR is explained previously
-%TODO make sure Zba is explained for SH1ADD instr, https://wiki.riscv.org/display/HOME/Recently+Ratified+Extensions, https://github.com/riscv/riscv-crypto/releases/tag/v1.0.1-scalar
+
 It was discussed that dealing with the lowered DAG to MIR can provide more optimization opportunities. In this section the case of "SH1ADD" instruction which is ratified in RISC-V Zba extension will be analyzed. The instruction shifts rs1 left by one, adds rs2 and writes to rd. Its encoding and pattern in the standard implementation of LLVM in TableGen is as follows:
 
 \begin{lstlisting}[%language=TableGen,
