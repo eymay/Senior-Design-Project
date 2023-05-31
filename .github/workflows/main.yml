@@ -9,10 +9,10 @@ jobs:
       - name: Compile LaTeX document
         uses: xu-cheng/latex-action@v2
         with:
-          root_file: interimreport.tex
+          root_file: thesis.tex
           working_directory: thesis
       - name: Upload PDF file
         uses: actions/upload-artifact@v3
         with:
           name: PDF
-          path: thesis/interimreport.pdf
+          path: thesis/thesis.pdf
