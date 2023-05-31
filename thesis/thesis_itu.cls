@@ -1,5 +1,10 @@
+%!TEX root=thesis.tex
 \NeedsTeXFormat{LaTeX2e}[1996/12/01]
-\ProvidesClass{interimreport_itu}[19/04/2020 SBO]
+\ProvidesClass{thesis_itu}[08/02/2019 BE]
+
+\newcommand{\headlinecolor}{\normalcolor}
+\RequirePackage{xcolor}
+\definecolor{slcolor}{HTML}{882B21}
 
 \DeclareOption{openbib}{\PassOptionsToClass{openbib}{report}}
 \DeclareOption{draft}{\PassOptionsToClass{draft}{report}}
@@ -22,15 +27,41 @@
 \DeclareOption{oneside}{\ClassWarning{itutez}{Option 'oneside' superfluous. Ignored.}}
 
 %====================================== TEZ DERLEME SEÇENEKLERİ ======================================
-\newif\if@Onluarkali
+% LANGUAGE:
 \newif\if@Ingilizce
 \@Ingilizcefalse
-\newif\if@ElektrikElektronik 								% Elektrik-Elektronik Fakültesi - SBÖ
-\DeclareOption{onluarkali}{\PassOptionsToClass{twoside}{report}\@Onluarkalitrue}
 \DeclareOption{ingilizce}{\@Ingilizcetrue}
 \DeclareOption{turkce}{\@Ingilizcefalse}
-\DeclareOption{elektrikelektronik}{\@ElektrikElektroniktrue} % Elektrik-Elektronik Fakültesi - SBÖ
-
+% DEGREE:
+\newif\if@Doktora
+\newif\if@YuksekLisans
+\newif\if@Lisans
+\DeclareOption{doktora}{\@Doktoratrue}
+\DeclareOption{yukseklisans}{\@YuksekLisanstrue}
+\DeclareOption{lisans}{\@Lisanstrue}
+% PRINT TYPE:
+\newif\if@Onluarkali
+\newif\if@Bez
+\@Bezfalse
+\DeclareOption{onluarkali}{\PassOptionsToClass{twoside}{report}\@Onluarkalitrue}
+\DeclareOption{karton}{\@Bezfalse}
+\DeclareOption{bez}{\@Beztrue}
+% INSTITUTE- FOR GRADUATE DEGREES:
+\newif\if@Bilisim
+\newif\if@Avrasya
+\newif\if@FenBilimleri
+\newif\if@SosyalBilimler
+\newif\if@Enerji
+\DeclareOption{bilisim}{\@Bilisimtrue}
+\DeclareOption{avrasya}{\@Avrasyatrue}
+\DeclareOption{fenbilimleri}{\@FenBilimleritrue}
+\DeclareOption{sosyalbilimler}{\@SosyalBilimlertrue}
+\DeclareOption{enerji}{\@Enerjitrue}
+% FACULTY - FOR UNDERGRADUATE DEGREES:
+\newif\if@UcakUzay
+\newif\if@ElektrikElektronik 								% Elektrik-Elektronik Fakültesi - SBÖ
+\DeclareOption{ucakuzay}{\@UcakUzaytrue}
+\DeclareOption{elektrikelektronik}{\@ElektrikElektroniktrue} 			% Elektrik-Elektronik Fakültesi - SBÖ
 \ProcessOptions
 %=================================== LOADING CLASS AND PACKAGES =====================================
 \LoadClass[a4paper,onecolumn,12pt]{report}[1996/10/31]
@@ -42,13 +73,13 @@
 \RequirePackage{calc}
 \RequirePackage{appendix}
 \usepackage[absolute]{textpos}
-\usepackage{lscape} 				% Landscape package
+\usepackage{lscape} 										% Landscape package
 \usepackage{url}
 
 %========================================= CAPTION SETTINGS =========================================
 \captionsetup [table]{position=top, aboveskip=0.3truecm, belowskip=6pt}
 \captionsetup [figure]{position=bottom, labelsep=colon, aboveskip=0.0truecm, belowskip=0.0truecm}
-\DeclareCaptionLabelSeparator{colon}{ \bfseries: } % Proper colomn separation in the figure labels - SBÖ
+\DeclareCaptionLabelSeparator{colon}{ \bfseries: } 				% Proper colomn separation in the figure labels - SBÖ
 
 %========================================== PAGE SETTINGS ===========================================
 % Setting of even pages that do not have page numbers and odd page setting that does have a page number - SBÖ
@@ -56,11 +87,11 @@
   \clearpage
   \if@twoside
     \ifodd
-      \c@page 						% Count the page - SBÖ
+      \c@page 											% Count the page - SBÖ
     \else
       \hbox{}
-      \thispagestyle{empty} 		% Empty even pages and do not include numbering in even pages - SBÖ
-      \newpage
+      \thispagestyle{empty} 									% Empty even pages and do not include numbering in even pages - SBÖ
+      %\newpage
       \if@twocolumn
 	\hbox{}
 	\newpage
@@ -76,8 +107,8 @@
       \c@page
     \else
       \hbox{}
-      %\thispagestyle{empty} 		% Full even pages and include numbering in even pages - SBÖ
-      \newpage
+      %\thispagestyle{empty} 								% Full even pages and include numbering in even pages - SBÖ
+      %\newpage
       \if@twocolumn
 	\hbox{}
 	\newpage
@@ -90,8 +121,8 @@
 \lhead{} % Left header empty
 \chead{} % Center header empty
 \rhead{} % Right header empty
-%\lfoot{\thepage} % Left foot empty
-%\cfoot{} % Center foot page number included
+\lfoot{} % Left foot empty
+\cfoot{\thepage} % Center foot page number included
 \rfoot{} % Right foot empty 
 \renewcommand{\headrulewidth}{0pt} 
 
@@ -103,18 +134,11 @@
 \widowpenalty=10000
 \clubpenalty=10000
 
-% Protect the text going over the right side of the page - SBÖ
-\tolerance=1
-\emergencystretch=\maxdimen
-%\hyphenpenalty=10000
-\hbadness=10000
-
-%============================ SETTINGS OF TITLE SPACINGS 25 mm FROM TOP ============================
-% No need if space at the top of the first chapter title page - SBÖ
-%\newlength{\ChapterUstenBosluk}
-%\setlength{\ChapterUstenBosluk}{21.5mm} 
-%\newlength{\UstenBosluk}
-%\setlength{\UstenBosluk}{17mm} 
+%============================ SETTINGS OF TITLE SPACINGS ONE INCH FROM TOP ============================
+\newlength{\ChapterUstenBosluk}
+\setlength{\ChapterUstenBosluk}{21.5mm} 
+\newlength{\UstenBosluk}
+\setlength{\UstenBosluk}{17mm} 
 
 %============================= TOC, LOT AND LOF RELATED PARAGPRAPH SKIPS ============================
 \newlength{\LoFparskip}     %% List of Figure parskip 08-05-2006
@@ -127,6 +151,12 @@
 \setlength{\ToCparskip}{0em}
 
 %============================== SETTINGS BETWEEN onaypage AND CHAPTERS ==============================
+\newif\if@SembolListesiVar  %% Sembol Listesi Olsun mu?
+\@SembolListesiVarfalse
+
+\newif\if@KisaltmaListesiVar%% Kisaltma Listesi Olsun mu?
+\@KisaltmaListesiVarfalse
+
 \newif\if@TabloListesiVar   %% Tablo Listesi Olsun mu?
 \@TabloListesiVartrue       %% Default = Var
 
@@ -144,14 +174,16 @@
 
 \newcommand*{\TabloListesiYok}{\@TabloListesiVarfalse}
 \newcommand*{\SekilListesiYok}{\@SekilListesiVarfalse}
+\newcommand*{\KisaltmaListesiYok}{\@KisaltmaListesiVarfalse}
 
-%========================================= KAPAK SETTINGS  ==========================================
+%=================================== KAPAK AND onaypage SETTINGS  ====================================
 \newcommand{\th@StoreIn}[2]{\gdef#1{#2}}  %% Stores the second arg in the command specified by the first arg.
 
 \newcommand*{\yazarbir}[2]{
   \th@StoreIn{\th@isimsoyisimbir}{#1 #2}
   \th@StoreIn{\th@soyisimisimbir}{#2, #1}
 }
+
 \newcommand*{\yazariki}[2]{
   \th@StoreIn{\th@isimsoyisimiki}{#1 #2}
   \th@StoreIn{\th@soyisimisimiki}{#2, #1}
@@ -161,7 +193,35 @@
   \th@StoreIn{\th@soyisimisimuc}{#2, #1}
 }
 
+\newcommand*{\juriBir}[2]{
+  \th@StoreIn{\th@juribir}{#1}
+  \th@StoreIn{\th@juribiruniv}{#2}
+}
 
+\newcommand*{\juriIki}[2]{
+  \th@StoreIn{\th@juriiki}{#1}
+  \th@StoreIn{\th@juriikiuniv}{#2}
+}
+
+\newcommand*{\juriUc}[2]{
+  \th@StoreIn{\th@juriuc}{#1}
+  \th@StoreIn{\th@juriucuniv}{#2}
+}
+
+\newcommand*{\juriDort}[2]{
+  \th@StoreIn{\th@juridort}{#1}
+  \th@StoreIn{\th@juridortuniv}{#2}
+}
+
+\newcommand*{\juriBes}[2]{
+  \th@StoreIn{\th@juribes}{#1}
+  \th@StoreIn{\th@juribesuniv}{#2}
+}
+
+\newcommand{\tezyoneticisi}[2]{
+  \th@StoreIn{\th@TezYoneticisi}{#1}
+  \th@StoreIn{\th@TezYoneticisiUniv}{#2}
+}
 
 \newcommand*{\anabilimdali}[2]{
   \th@StoreIn{\th@AnaBilimDali}{#1}
@@ -173,17 +233,61 @@
   \th@StoreIn{\th@Programme}{#2}
 }
 
-%================================= FACULTY SETTINGS =================================== 
-    \if@ElektrikElektronik 										% Added recently - SBÖ
-    \def\th@Enstitu{ELEKTRİK-ELEKTRONİK FAKÜLTESİ}
-    \def\th@Institute{ELECTRICAL-ELECTRONICS FACULTY}
-    \def\th@Instituteiki{}
+\newcommand*{\ithaf}[1]{\th@StoreIn{\th@Ithaf}{#1}}
+
+\newcommand*{\unvan}[1]{\th@StoreIn{\th@Unvan}{#1}}
+
+%====================================== INSTITUTES SETTINGS =========================================
+     \if@Bilisim
+      \def\th@Enstitu{B\.il\.i\c s\.im Enst\. it\"us\"u}
+      \def\th@EnstituIki{}	
+      \def\th@Institute{Informatics Institute}
+      \def\th@Instituteiki{} 									% Added for onay page simplicity - SBÖ
     \fi
-
-%=================================== ALL PAGES FROM KAPAK TO TOC =====================================  
+    \if@FenBilimleri
+      \def\th@Enstitu{L\.isansüstü Eğ\.it\.im Enst\.itüsü}
+      \def\th@EnstituIki{}		
+      \def\th@Institute{Graduate School}
+      \def\th@Instituteiki{} 									% FBE ingilizce yeni baslik icin
+    \fi
+    \if@SosyalBilimler
+      \def\th@Enstitu{Sosyal B\. il\. imler Enst\. it\"us\"u}
+      \def\th@EnstituIki{}		      
+      \def\th@Institute{The Graduate School of Arts}            			% To fill the text properly to the first line - SBÖ
+      \def\th@Instituteiki{and Social Sciences} 					% Added for onay page simplicity - SBÖ
+    \fi
+    \if@Enerji
+      \def\th@Enstitu{Enerj\. i Enst\. it\"us\"u}
+      \def\th@EnstituIki{}		
+      \def\th@Institute{Institute of Energy}
+      \def\th@Instituteiki{} 									% Added for onay page simplicity - SBÖ
+    \fi
+    \if@Avrasya
+      \def\th@Enstitu{Avrasya Yer B\. il\. imler\. i Enst\. it\"us\"u}
+      \def\th@EnstituIki{}		
+      \def\th@Institute{Eurasia Institute of}                   				% To fill the text properly to the first line - SBÖ
+      \def\th@Instituteiki{Earth Sciences} 						% Added for onay page simplicity - SBÖ
+    \fi
+%======================================= FACULTIES SETTINGS =========================================
+    \if@UcakUzay
+	\def\th@Enstitu{U\c cak ve Uzay B\.imler\.i Fak\"ultes\.i}
+	\def\th@EnstituIki{}		
+	\def\th@Institute{FACULTY OF AERONAUTICS AND}
+	\def\th@Instituteiki{ASTRONAUTICS}
+    \fi
+    \if@ElektrikElektronik 									% Added recently - SBÖ
+    	\def\th@Enstitu{Elektr\.ik-Elektron\.ik Fak\"ultes\.i}
+	\def\th@EnstituIki{}		
+    	\def\th@Institute{ELECTRICAL-ELECTRONICS FACULTY}
+    	\def\th@Instituteiki{}
+    \fi
+%================================== ALL PAGES FROM KAPAK TO FORWARD ==================================  
 \newcommand{\kapak}[1]{\th@StoreIn{\th@Kapak}{#1}}
-
-\kapak{\th@DisKapak}%\th@IcKapak
+\if@Bez
+  \kapak{\th@DisKapak\th@IcKapak\if@Ingilizce \th@IcKapakTurkce\fi}
+\else
+  \kapak{\th@DisKapak\th@IcKapak\if@Ingilizce \th@IcKapakTurkce\fi}
+\fi
 
 %====================================== SETTINGS OF FONT SIZES ======================================= 
 \newcommand*{\th@titleFtSz}{\fontseries{b}\fontsize{12}{12}\selectfont}             %% Title Font Boyutu
@@ -216,16 +320,37 @@
 \newcommand*{\ogrencinoiki}[1]{\th@StoreIn{\th@ogrencinoiki}{#1}}
 \newcommand*{\ogrencinouc}[1]{\th@StoreIn{\th@ogrencinouc}{#1}}
 
-\newcommand*{\tezyoneticisi}[1]{\th@StoreIn{\th@tezyoneticisi}{#1}}
-
+\newcommand*{\tezvermetarih}[2]{
+  \th@StoreIn{\th@tezvermetarih}{#1}
+  \th@StoreIn{\th@submissiondate}{#2}
+}
+\newcommand*{\tezsavunmatarih}[2]{
+  \th@StoreIn{\th@tezsavunmatarih}{#1}
+  \th@StoreIn{\th@defencedate}{#2}
+}
+\newcommand*{\esdanismani}[2]{
+  \th@StoreIn{\th@esdanisman}{#1}
+  \th@StoreIn{\th@esdanismanuniv}{#2}
+}
 
 %========================= KAPAK AND EKLERIN INGILIZCE TURKCE TANIMLAMALARI ==========================
 \if@Ingilizce
-  % Modified the size and placement of the bigstar - SBÖ
-  %\def\th@EnstituUpper{ISTANBUL TECHNICAL UNIVERSITY \raisebox{1.6pt}{\footnotesize$\bigstar$} \MakeUppercase{\th@Institute}}
-  %\def\th@EnstituUpperTR{İSTANBUL TEKNİK ÜNİVERSİTESİ \raisebox{1.6pt}{\footnotesize$\bigstar$} \MakeUppercase{\th@Enstitu}}
+  \if@Doktora
+    \def\TezSeviyesi{Ph.D. THESIS}
+    \def\TezSeviyesiTR{DOKTORA TEZ{\.I}}
+  \fi
+  \if@YuksekLisans
+    \def\TezSeviyesi{M.Sc. THESIS}
+    \def\TezSeviyesiTR{YüKSEK L{\.I}SANS TEZ{\.I}}
+  \fi
+  \if@Lisans
+    \def\TezSeviyesi{SENIOR DESIGN PROJECT}
+    \def\TezSeviyesiTR{ L{\.I}SANS B{\.I}T{\.I}RME TASARIM PROJES{\.I}}
+  \fi
+  % Modification of the size and the placement of bigstar - SBÖ
+  \def\th@EnstituUpper{\MakeUppercase{\th@Institute}}
+  \def\th@EnstituUpperTR{\MakeUppercase{\th@Enstitu}}
   %\def\th@EnstituUpper{İSTANBUL TECHNICAL UNIVERSITY $\bigstar$ INSTITUTE OF SCIENCE AND TECHNOLOGY}
-  \def\th@UniversityUpper{ISTANBUL TECHNICAL UNIVERSITY} % Front cover part of the top portion - SBÖ
   \def\Baslikbir{\th@Titlebir}
   \def\Baslikiki{\th@Titleiki}
   \def\Baslikuc{\th@Titleuc}
@@ -236,25 +361,43 @@
   \def\TarihBuyuk{\th@date}
   \def\TarihBuyukTR{\th@tarih} 									% Turkish date at kapak added - SBÖ
   \def\TarihKucuk{\th@dateKucuk}
+  \def\VermeTarihi{\th@submissiondate}
+  \def\VermeTarihiBaslik{Date of Submission}
+  \def\SavunmaTarihi{\th@defencedate}
+  \def\SavunmaTarihiBaslik{Date of Defense Examination}
   \def\YoneticiBaslik{Supervisor (Chairman)}
   \def\DanismanBaslik{Thesis Advisor}
+  \def\JuriBaslik{Members of the Examining Committee}
   \def\EklerinBasligi{APPENDICES}
 \else
-
-  % Modified the size and placement of the bigstar - SBÖ
-  %\def\th@EnstituUpper{İSTANBUL TEKNİK ÜNİVERSİTESİ \raisebox{1pt}{\footnotesize$\bigstar$} \MakeUppercase{\th@Enstitu}}
+  \if@Doktora
+    \def\TezSeviyesi{DOKTORA TEZİ}
+  \fi
+  \if@YuksekLisans
+    \def\TezSeviyesi{YÜKSEK LİSANS TEZİ}
+  \fi
+  \if@Lisans
+    \def\TezSeviyesi{BİTİRME ÇALIŞMASI}
+  \fi
+  % Modification of the size and the placement of bigstar - SBÖ
+  \def\th@EnstituUpper{İSTANBUL TEKNİK ÜNİVERSİTESİ \raisebox{1pt}{\footnotesize$\bigstar$} \MakeUppercase{\th@Enstitu}}
   %\def\th@EnstituUpper{İSTANBUL TEKNİK ÜNİVERSİTESİ $\bigstar$ FEN BİLİMLERİ ENSTİTÜSÜ}
   \def\Baslikbir{\th@baslikbir}
   \def\Baslikiki{\th@baslikiki}
   \def\Baslikuc{\th@baslikuc}
   \def\Anabilim{\th@AnaBilimDali}
-  \def\AnabilimBaslik{Anabilim Dalı}
+  \def\AnabilimBaslik{Anabilim Dalı}\th@Ethical
   \def\Program{\th@Programi}
   \def\ProgramBaslik{Programı}
   \def\TarihBuyuk{\th@tarih}
   \def\TarihKucuk{\th@tarihKucuk}
+  \def\VermeTarihi{\th@tezvermetarih}
+  \def\VermeTarihiBaslik{Tezin Enstitüye Verildiği Tarih}
+  \def\SavunmaTarihi{\th@tezsavunmatarih}
+  \def\SavunmaTarihiBaslik{Tezin Savunulduğu Tarih}
   \def\YoneticiBaslik{Tez Danışmanı}
   \def\DanismanBaslik{Tez Danışmanı}
+  \def\JuriBaslik{Diğer Jüri Üyeleri}
   \def\EklerinBasligi{EKLER}
 \fi
 %====================================== BIBTEX ICIN TANIMLAMALAR =====================================
@@ -290,6 +433,8 @@
   \def\bolum{bölüm}
   \def\teknikrapor{Teknik Rapor}
   \def\lisanstezi{Lisans Tezi}
+  \def\yuksektezi{{\it {Yüksek Lisans Tezi}}}
+  \def\doktoratezi{{\it {Doktora Tezi}}}
 \fi
 
 %=============================== SATIR ARASI BOŞLUKLARININ TANIMLARI =================================
@@ -307,18 +452,18 @@
 
 %================================ SAYFA YAPISI İLE İLGİLİ TANIMLAMALAR ================================
 \AtBeginDocument{
-	    \setlength{\paperheight}{297mm}         
+	\setlength{\paperheight}{297mm}         
         \setlength{\voffset}{-0.4mm}            %% 25.4 mm - 0.4 mm = 25 mm from the top - SBÖ 
         %\setlength{\voffset}{0mm}              
- %       \setlength{\hoffset}{14.6mm} 
-        \setlength{\oddsidemargin}{-0.4mm}      %% Sayfa Solu = 1 in (25.4 mm) - 0.4 mm = 25 mm %% [A4 297mm X 210mm] - SBÖ
-        \setlength{\evensidemargin}{-0.4mm}     %% Sayfa Solu = 1 in (25.4 mm) - 0.4 mm = 25 mm - SBÖ
+        %\setlength{\hoffset}{14.6mm} 
+        \setlength{\oddsidemargin}{14.6mm}      %% Sayfa Solu = 1 in (25.4 mm) + 14.6mm = 40 mm %% [A4 297mm X 210mm] - SBÖ
+        \setlength{\evensidemargin}{-0.4mm}     %% Sayfa Solu = 1 in (25.4 mm) - 0.4mm = 25 mm - SBÖ
         %\setlength{\topmargin}{-3.0mm}   
         \setlength{\topmargin}{0mm}             %% To set the bottom text not to be less than 25mm from the bottom - SBÖ  
         \setlength{\headheight}{0mm}         	%% Sayfa Başlığı (Numarası) = 0 mm
         \setlength{\headsep}{0mm}               %% Sayfa Başlığı ile Sayfa Metni Arası Boşluk
         \setlength{\textheight}{247mm}          %% Sayfa Metni Yüksekliği = 297mm - 25mm - 25mm = 247mm - SBÖ     
-        \setlength{\textwidth}{160mm}           %% Sayfa Metni Genişliği = 210mm - 25mm - 25mm = 160mm
+        \setlength{\textwidth}{145mm}           %% Sayfa Metni Genişliği = 210mm - 25mm - 40mm = 145mm
         \setlength{\marginparsep}{0mm}
         \setlength{\marginparwidth}{0mm}
         \setlength{\leftmargini}{1.25em}
@@ -348,7 +493,8 @@
         }
 %================================== SON SAYFAYA ÖZGEÇMİŞ EKLENİYOR ====================================
 \AtEndDocument{
-    % Nothing defined yet...
+    \th@ozgecmispage
+    \th@edgeStash
 }
 
 %==================== CHAPTER VE SECTION TÜRKÇE/İNGİLİZCE İSİM VE FONT TANIMLARI ======================
@@ -367,23 +513,36 @@
 LİSTESİ\fi\normalfont}
 \newcommand*{\listfigurenameToC}{\fontfamily{ptm}\normalsize\selectfont \if@Ingilizce LIST OF FIGURES\else ŞEKİL
 LİSTESİ\fi\normalfont}
+\newcommand*{\abstractnameToC}{\fontfamily{ptm}\normalsize\selectfont SUMMARY\normalfont}
+\newcommand*{\onaynameToC}{\fontfamily{ptm}\normalsize\selectfont KABUL VE ONAY\normalfont}
+\newcommand*{\ozetnameToC}{\fontfamily{ptm}\normalsize\selectfont ÖZET\normalfont}
+\newcommand*{\onsoznameToC}{\fontfamily{ptm}\normalsize\selectfont \if@Ingilizce FOREWORD\else ÖNSÖZ\fi\normalfont}
+\newcommand*{\ozgecmisnameToC}{\fontfamily{ptm}\normalsize\selectfont \if@Ingilizce CURRICULUM VITAE\else
+ÖZGEÇMİŞ\fi\normalfont}
 \newcommand*{\appendixnameToC}{\fontfamily{ptm}\normalsize\selectfont \if@Ingilizce APPENDICES\else EKLER\fi\normalfont}
+\newcommand*{\symbolnameToC}{\fontfamily{ptm}\normalsize\selectfont \if@Ingilizce SYMBOLS\else SEMBOLLER\fi\normalfont}
 \newcommand*{\bibnameToC}{\fontfamily{ptm}\normalsize\selectfont \if@Ingilizce REFERENCES\else KAYNAKLAR\fi\normalfont}
-\newcommand*{\insidecoverToC}{\fontfamily{ptm}\normalsize\selectfont \if@Ingilizce INSIDE COVER\else İÇ KAPAK\fi\normalfont}
-\newcommand*{\frontcoverToC}{\fontfamily{ptm}\normalsize\selectfont \if@Ingilizce FRONT COVER\else DIŞ KAPAK\fi\normalfont}
-\newcommand*{\ethicalcoverToC}{\fontfamily{ptm}\normalsize\selectfont \if@Ingilizce ETHICAL CONFIRMATION\else DIŞ KAPAK\fi\normalfont}
+\newcommand*{\symbolname}{\th@ChapHead{\if@Ingilizce SYMBOLS\else SEMBOLLER\fi}}
+\newcommand*{\kisaltmanameToC}{\fontfamily{ptm}\normalsize\selectfont \if@Ingilizce ABBREVIATIONS\else
+KISALTMALAR\fi\normalfont}
+\newcommand*{\kisaltmaname}{\th@ChapHead{\if@Ingilizce ABBREVIATIONS\else KISALTMALAR\fi}} 
 
-
+\def\prefacename{\th@ChapHead{\if@Ingilizce FOREWORD\else ÖNSÖZ\fi}}
 \def\refname{\th@ChapHead{\if@Ingilizce REFERENCES\else KAYNAKLAR\fi}}
+\def\abstractname{\th@ChapHead{ÖZET}}
+\def\summaryname{\th@ChapHead{SUMMARY}}
+\def\ozgecmisname{\th@ChapHead{\if@Ingilizce CURRICULUM VITAE\else ÖZGEÇMİŞ\fi}}
 \def\bibname{\th@ChapHead{\if@Ingilizce REFERENCES\else KAYNAKLAR\fi}}
 \def\chaptername{\th@ChapHead{\if@Ingilizce CHAPTER\else BÖLÜM\fi}}
 \def\appendixname{\th@ChapHead{\if@Ingilizce APPENDIX\else EK\fi}}
 \def\contentsname{\th@ChapHead{\if@Ingilizce TABLE OF CONTENTS\else İÇİNDEKİLER\fi}}
 \def\listfigurename{\th@ChapHead{\if@Ingilizce LIST OF FIGURES\else ŞEKİL LİSTESİ\fi}}
 \def\listtablename{\th@ChapHead{\if@Ingilizce LIST OF TABLES\else ÇİZELGE LİSTESİ\fi}}
+\def\indexname{\th@ChapHead{\if@Ingilizce INDEX\else DİZİN\fi}}
 \def\figurename{\bf \if@Ingilizce Figure\else Şekil\fi}
 \def\tablename{\bf \if@Ingilizce Table\else Çizelge\fi}
 \def\partname{\th@ChapHead{\if@Ingilizce PART\else KISIM\fi}}
+\def\glossaryname{\th@ChapHead{\if@Ingilizce DICTIONARY\else TERİMLER SÖZLÜĞÜ\fi}}
 
 %================================ CHAPTER VE SECTION FONT TANIMLARI ===================================
 \newcommand*{\th@DefTheChapter}{\arabic{chapter}}
@@ -427,7 +586,7 @@ LİSTESİ\fi\normalfont}
   \fi
 }
 
-
+% Chapter Settings in TOC (Same as below) - SBÖ 
 %\renewcommand*\l@chapter[2]{
 %	\ifnum \c@tocdepth >\m@ne
 %	\addpenalty{-\@highpenalty}
@@ -522,7 +681,7 @@ LİSTESİ\fi\normalfont}
 		%\nobreak
 		%\nobreak\hb@xt@\@pnumwidth{\dotfill #5} % Removed - SBÖ \hss #5
 		\hfil\nobreak\if@loflotpagebold\bfseries\fi#5 % Added to make the dots come next to the page numbers with bold page numbers - SBÖ
-		\par}%
+		\par}
 	\fi}
 
 % Subfigure LOF Settings - SBÖ
@@ -572,7 +731,14 @@ LİSTESİ\fi\normalfont}
 %\renewcommand*\l@figure\l@table									% Removed - SBÖ
 \renewcommand*\l@figure{\@lofline{1}{0em}{6em}}  					% {1}{0em}{5.5em}} - SBÖ
 
-%========================= WARNINGS IF SOME PARTS ARE MISSING WHEN COMPILED ===========================
+%\newcommand*\l@mistix{\@tocline{1}{0mm}{0mm}}
+%\renewcommand*\l@section{\@tocline{1}{1.1em}{1.5em}}
+%\renewcommand*\l@subsection{\@tocline{2}{1.9em}{2.3em}}
+%\renewcommand*\l@subsubsection{\@toclinealper{3}{3.5em}{3.9em}}
+%\renewcommand*\l@table{\@tocline{1}{0em}{5.5em}}
+%\renewcommand*\l@figure\l@table
+
+%==================== WARNINGS IF SOME IMPORTANT PARTS ARE MISSING WHEN COMPILED ======================
 \newcommand*{\th@baslikbir}{
     \ClassError{itutez}{*** You must specify the TITLE of your thesis! ***}
     {Use the \protect\baslik{} command in the preamble.}}
@@ -585,6 +751,9 @@ LİSTESİ\fi\normalfont}
     \ClassError{itutez}{*** You must specify the DATE of your thesis! ***}
     {Use the \protect\tarih{} command in the preamble.}}
 
+\newcommand*{\th@TeziYoneten}{
+    \ClassError{itutez}{*** You must specify the TEZIYONETEN of your thesis! ***}
+    {Use the \protect\TeziYoneten{} command in the preamble.}}
 
 \newcommand*{\th@isimsoyisimbir}{
     \ClassError{itutez}{*** You must specify the AUTHOR of your thesis! ***}
@@ -592,6 +761,20 @@ LİSTESİ\fi\normalfont}
         preamble. The first arg is your first name and \MessageBreak
         middle initial.  The second arg is your last name.}}
         
+\newcommand{\th@abstractStash}{
+    \ClassError{itutez}{*** You must specify an abstract! ***}
+    {Use the \protect\abstractpage[]{} command in the \MessageBreak
+        preamble. If your abstract runs over a page, \MessageBreak
+        use the optional argument with the word 'long'.}
+}
+
+\newcommand{\th@ozetStash}{
+    \ClassError{itutez}{*** You must specify an ozet! ***}
+    {Use the \protect\ozetpage[]{} command in the \MessageBreak
+        preamble. If your abstract runs over a page, \MessageBreak
+        use the optional argument with the word 'long'.}
+}
+
 \newcommand{\th@AnaBilimDali}{
     \ClassError{itutez}{*** You must specify an AnaBilimDali! ***}
     {Use the \protect\anabilimdali[]{} command in the \MessageBreak
@@ -599,7 +782,26 @@ LİSTESİ\fi\normalfont}
         use the optional argument with the word 'long'.}
 }
 
-%======================== SECTION, SUBSECTION, AND SUBSUBSECTION SETTINGS ============================
+\newcommand{\th@ozgecmisStashbir}{
+    \ClassError{itutez}{*** You must specify an ozgecmis ***}
+    {Use the \protect\ozgecmispage[]{} command in the \MessageBreak
+        preamble. If your abstract runs over a page, \MessageBreak
+        use the optional argument with the word 'long'.}
+}
+
+%==================================== NEW COMMANDS ARE DEFINED ========================================
+% Tesekkur, symbol lists, and abbreviation lists were set to false earlier now they are all true - SBÖ
+\newcommand{\summary}[1]{\th@StoreIn{\th@abstractStash}{#1}}
+\newcommand{\ozet}[1]{\th@StoreIn{\th@ozetStash}{#1}}
+\newcommand{\ozgecmisbir}[1]{\th@StoreIn{\th@ozgecmisStashbir}{#1}}
+\newcommand{\ozgecmisiki}[1]{\th@StoreIn{\th@ozgecmisStashiki}{#1}}
+\newcommand{\ozgecmisuc}[1]{\th@StoreIn{\th@ozgecmisStashuc}{#1}}
+\newcommand{\edge}[1]{\th@StoreIn{\th@edgeStash}{#1}}
+\newcommand{\onsoz}[1]{\@TesekkurVartrue\th@StoreIn{\th@tesekkurStash}{#1}}
+\newcommand{\sembollistesi}[1]{\@SembolListesiVartrue\th@StoreIn{\th@symbollistStash}{#1}}
+\newcommand{\kisaltmalistesi}[1]{\@KisaltmaListesiVartrue\th@StoreIn{\th@kisaltmalistStash}{#1}}
+
+%======================== SECTION, SUBSECTION, AND SUBSUBSECTION SETTINGS =============================
 % Numbered and unnumbered section settings - SBÖ
 \def\section{\@ifstar\unnumberedsection\numberedsection}
 \def\numberedsection{\@ifnextchar[%]
@@ -608,7 +810,7 @@ LİSTESİ\fi\normalfont}
   \unnumberedsectionwithtwoarguments\unnumberedsectionwithoneargument}
 \def\numberedsectionwithoneargument#1{\numberedsectionwithtwoarguments[#1]{#1}}
 \def\unnumberedsectionwithoneargument#1{\unnumberedsectionwithtwoarguments[#1]{#1}}
-\def\numberedsectionwithtwoarguments[#1]#2{%
+\def\numberedsectionwithtwoarguments[#1]#2{
   \ifhmode\par\fi  
   \removelastskip
   \vspace*{12pt}\goodbreak % It was 18pt, but this is before the section spacing, therefore it should be 12pt - SBÖ
@@ -620,9 +822,9 @@ LİSTESİ\fi\normalfont}
   \thesection\;\ 
   #2\quad
   \endgroup\goodbreak 
-  \vskip 6pt\nobreak   	% Added for spacing after the section title - SBÖ
+  \vskip 6pt\nobreak   		% Added for spacing after the section title - SBÖ
   \addcontentsline{toc}{section}{\protect\numberline{\thesection}#1}}
-\def\unnumberedsectionwithtwoarguments[#1]#2{%
+\def\unnumberedsectionwithtwoarguments[#1]#2{
   \ifhmode\par\fi
   \removelastskip
   \vspace*{12pt}\goodbreak
@@ -632,7 +834,7 @@ LİSTESİ\fi\normalfont}
   \bfseries
   #2\quad
   \endgroup\goodbreak
-  \vskip 6pt\nobreak   	% Added for spacing after the section title - SBÖ
+  \vskip 6pt\nobreak   		% Added for spacing after the section title - SBÖ
   \addcontentsline{toc}{section}{#1}}
 
 % Numbered and Unnumbered subsection settings - SBÖ    
@@ -643,10 +845,10 @@ LİSTESİ\fi\normalfont}
   \unnumberedsubsectionwithtwoarguments\unnumberedsubsectionwithoneargument}
 \def\numberedsubsectionwithoneargument#1{\numberedsubsectionwithtwoarguments[#1]{#1}}
 \def\unnumberedsubsectionwithoneargument#1{\unnumberedsubsectionwithtwoarguments[#1]{#1}}
-\def\numberedsubsectionwithtwoarguments[#1]#2{%
+\def\numberedsubsectionwithtwoarguments[#1]#2{
   \ifhmode\par\fi
   \removelastskip
-   \vspace*{6pt}\goodbreak % It was 12pt, but this is before the section spacing, therefore it should be 6pt - SBÖ
+   \vspace*{6pt}\goodbreak 	% It was 12pt, but this is before the section spacing, therefore it should be 6pt - SBÖ
   \refstepcounter{subsection}
   \noindent
   \leavevmode
@@ -654,10 +856,10 @@ LİSTESİ\fi\normalfont}
   \th@HdFnt\th@ScSz
   \thesubsection\;\ 
   #2\quad
-  \endgroup\goodbreak 	% \goodbreak is removed (the below part is added) - SBÖ
-  \vskip 0pt\nobreak   	% Added for spacing after the section title - SBÖ
+  \endgroup\goodbreak 		% \goodbreak is removed (the below part is added) - SBÖ
+  \vskip 0pt\nobreak   		% Added for spacing after the section title - SBÖ
   \addcontentsline{toc}{subsection}{\protect\numberline{\thesubsection}#1}}
-\def\unnumberedsubsectionwithtwoarguments[#1]#2{
+\def\unnumberedsubsectionwithtwoarguments[#1]#2{%
   \ifhmode\par\fi
   \removelastskip
   \vspace*{6pt}\goodbreak
@@ -667,7 +869,7 @@ LİSTESİ\fi\normalfont}
   \bfseries
   #2\quad
   \endgroup\goodbreak
-  \vskip 0pt\nobreak   % Added for spacing after the section title - SBÖ
+  \vskip 0pt\nobreak   		% Added for spacing after the section title - SBÖ
   \addcontentsline{toc}{subsection}{#1}}
 
 % Numbered and Unnumbered subsubsection settings - SBÖ
@@ -714,14 +916,14 @@ LİSTESİ\fi\normalfont}
 \def\unnumberedsubsubsubsectionwithtwoarguments[#1]#2{
   \ifhmode\par\fi
   \removelastskip
-  \vspace*{0pt}\goodbreak % It was 6pt, but this is before the section spacing, therefore it should be 0pt - SBÖ
+  \vspace*{0pt}\goodbreak 	% It was 6pt, but this is before the section spacing, therefore it should be 0pt - SBÖ
   \noindent
   \leavevmode
   \begingroup
   \bfseries
   #2\quad
   \endgroup\goodbreak 
-  \vskip -6pt\nobreak  % Added for spacing after the section title - SBÖ
+  \vskip -6pt\nobreak  		% Added for spacing after the section title - SBÖ
   \addcontentsline{toc}{subsubsubsection}{#1}}
 
 % TOC'de part tanımları - SBÖ 
@@ -759,8 +961,7 @@ LİSTESİ\fi\normalfont}
                       \secdef\@eklerkapak\@schapter}
 
 % TOC'de Chapter tanımları - SBÖ 
-\def\@chapter[#1]#2{%\BolumSagdaKalsinNolu
-	                \newpage % Changed - SBÖ %\BolumSagdaKalsinNolu 
+\def\@chapter[#1]#2{\BolumSagdaKalsinNolu
                     \ifnum \c@secnumdepth >\m@ne
                          \refstepcounter{chapter}
                           \addtocontents{toc}{\protect\addvspace{-10\p@}}
@@ -788,8 +989,7 @@ LİSTESİ\fi\normalfont}
 
 % TOC'de EK tanımları - SBÖ 
 %%EK BÖLÜMÜNDE BÖLÜM NUMARASI OLMASIN DİYE
-\def\@eklerkapak[#1]#2{%\BolumSagdaKalsinNolu
-	                   \newpage % Changed - SBÖ %\BolumSagdaKalsinNolu 
+\def\@eklerkapak[#1]#2{\BolumSagdaKalsinNolu
                     \ifnum \c@secnumdepth >\m@ne
                          \refstepcounter{chapter}
                           \addtocontents{toc}{\protect\addvspace{-10\p@}}
@@ -802,8 +1002,8 @@ LİSTESİ\fi\normalfont}
                     \else
                       \relax 					
                     \fi
-                    \chaptermark{\EklerinBasligi}
-                    % LoT ve LoF da bölümler arası geçişde bir boşluk bırakılacaksa...
+                    \chaptermark{\EklerinBasligi}%
+                    %LoT ve LoF da bölümler arası geçişde bir boşluk bırakılacaksa...
                     %\addtocontents{lof}{\protect\addvspace{10\p@}}
                    \if@twocolumn
                      \@topnewpage[\@makechapterheadEK{\EklerinBasligi}]
@@ -813,9 +1013,9 @@ LİSTESİ\fi\normalfont}
                    \fi
 }
 
-%==================================== CHAPTER TITLE SETTINGS =========================================
+%==================================== CHAPTER TITLE SETTINGS ==========================================
 \def\@makechapterhead#1{
-    %\vspace*{\ChapterUstenBosluk}					% That is strange; there is spacing even if it is empty - SBÖ
+    \vspace*{\ChapterUstenBosluk}					% That is strange; there is spacing even if it is empty - SBÖ
 %		\addcontentsline{toc}{section}{\protect #1}
     {\parindent \z@ \raggedright
     \normalfont
@@ -835,10 +1035,10 @@ LİSTESİ\fi\normalfont}
     %\vskip 20\p@
   }}
 
-%======================================== EK TITLE SETTINGS ==========================================
+%======================================== EK TITLE SETTINGS ===========================================
 %%EK BÖLÜMÜNDE BÖLÜM NUMARASI OLMASIN DİYE
 \def\@makechapterheadEK#1{
-    %\vspace*{\ChapterUstenBosluk}					% That is strange; there is spacing even if it is empty - SBÖ
+    \vspace*{\ChapterUstenBosluk}					% That is strange; there is spacing even if it is empty - SBÖ
     {\parindent \z@ \raggedright
     \normalfont
     \ifnum \c@secnumdepth >\m@ne
@@ -850,103 +1050,250 @@ LİSTESİ\fi\normalfont}
   }}
 
 
-\def\@schapter#1{\newpage % Added - SBÖ %\BolumSagdaKalsinNolu 
+\def\@schapter#1{\BolumSagdaKalsinNolu
     \@makeschapterhead{#1}
     \@afterheading
     }
 
-%======================================= FRONT COVER PAGE SETTINGS ======================================= - SBÖ
-\newcommand*{\th@DisKapak}{
-	\addtocontents{toc}{\protect\addvspace{-10\p@}}
-	\addcontentsline{toc}{chapter}{\bf{\protect\frontcoverToC}}
-	\singlespacing  				% For single spacing in the top portion of kapak - SBÖ
-	\makeatletter
-	\centering
-	\makeatother	
-	\vspace*{0pt}
-	\underline{\bf\th@UniversityUpper} \\
+%======================================== DIŞ KAPAK SETTINGS ========================================== - SBÖ
+\newcommand*{\th@DisKapak}{					% Remodified for better vertical spacing - SBÖ
+	%\BolumSagdaKalsin % This is the trick that allow us to remove first couple of empty pages generated unwantedly - SBÖ
+	\thispagestyle{empty}
+    \if@FenBilimleri
+    \begin{textblock*}{\textwidth}[0,0](37.5mm,30.5mm)
+    \fi
+    \if@Bilisim	
+    \begin{textblock*}{\textwidth}[0,0](40mm,30.5mm)
+    \fi
+    \if@SosyalBilimler
+    \begin{textblock*}{\textwidth}[0,0](36mm,30.5mm)
+    \fi
+    \if@Avrasya
+    \begin{textblock*}{\textwidth}[0,0](40mm,30.5mm)
+    \fi
+    \if@UcakUzay
+    \begin{textblock*}{\textwidth}[0,0](40mm,30.5mm)
+    \fi
+    \if@ElektrikElektronik
+    \begin{textblock*}{\textwidth}[0,0](40mm,30.5mm)
+    \fi
+    	\singlespacing  					% For single spacing in the top portion of kapak - SBÖ
+    	\renewcommand{\ULdepth}{2.75pt} 	% Added using ulem package for \uline command - SBÖ
+    	\renewcommand{\ULthickness}{1.5pt} 	% Added for underline tickness change which was 0.4pt - SBÖ
+    	\centering
+        \uline{\textbf{ISTANBUL TECHNICAL UNIVERSITY}} \\
 	\vskip 6\p@ 
-	\MakeUppercase{\underline{\bf\th@Institute~\th@Instituteiki}} \\
-	\vskip 50\p@ 
-	
-	\vskip 50\p@
-	\begin{textblock*}{\textwidth}[0,0](25mm,90.5mm)
-		\if@Ingilizce 
-		\th@titleFtSz\Baslikspacing \Baslikbir~\Baslikiki~\Baslikuc \\
-		%\vskip 24\p@ 
+    	\uline{{\bf\th@EnstituUpper}}\\ 	% Instead of \underline{text} - SBÖ
 	\end{textblock*}
-	%\vspace*{168pt}
-	\vskip 150\p@ 
-  \MakeUppercase{\underline{\bf SENIOR DESIGN PROJECT }}\\
-  \vskip 1\p@ 
-  \MakeUppercase{\underline{\bf INTERIM REPORT}}\\
-  \vskip 30\p@ 
-	\th@titleFtSz \th@isimsoyisimbir  \\
-	\th@titleFtSz \th@isimsoyisimiki  \\
-	\th@titleFtSz \th@isimsoyisimuc  \\
-	\vskip 12\p@ 
-    \vskip 50\p@ 
-    \th@titleAnaBilimDaliFtSz \MakeUppercase{\Anabilim}\\
-    \th@titleAnaBilimDaliFtSz \MakeUppercase{Department}\\
-    \vskip 12\p@ 
-    %\th@titleAnaBilimDaliFtSz \Program \\
-    \vspace*{\fill}
-    \null\vfill %To prevent the page from breaking
-	\th@titleFtSz \TarihKucuk
-	\newpage
-%\vspace*{\fill}
-}
-\newcommand*{\th@IcKapak}{
-	\addtocontents{toc}{\protect\addvspace{-10\p@}}
-	\addcontentsline{toc}{chapter}{\bf{\protect\insidecoverToC}}
-	\singlespacing  				% For single spacing in the top portion of kapak - SBÖ
-	\makeatletter
-	\centering
-	\makeatother	
-	\vspace*{0pt}
-	\underline{\bf\th@UniversityUpper} \\
-	\vskip 6\p@ 
-	\MakeUppercase{\underline{\bf\th@Institute~\th@Instituteiki}} \\
-	\vskip 50\p@ 
-	
-	\vskip 50\p@
-	\begin{textblock*}{\textwidth}[0,0](25mm,90.5mm)
-		\if@Ingilizce 
-		\th@titleFtSz\Baslikspacing \Baslikbir~\Baslikiki~\Baslikuc \\
-		%\vskip 24\p@ 
-	\end{textblock*}
-	%\vspace*{168pt}
-	\vskip 140\p@ 
-  \MakeUppercase{\underline{SENIOR DESIGN PROJECT }}\\
-  \vskip 1\p@ 
-  \MakeUppercase{\underline{INTERIM REPORT}}\\
-  \vskip 30\p@ 
-	\th@titleFtSz \th@isimsoyisimbir  \\
-	\th@titleFtSz (\th@ogrencinobir) \\
-	\vskip 10\p@ 
-	\th@titleFtSz \th@isimsoyisimiki  \\
-	\th@titleFtSz (\th@ogrencinoiki) \\
-	\vskip 10\p@ 
-	\th@titleFtSz \th@isimsoyisimuc  \\
-	\th@titleFtSz (\th@ogrencinouc) \\
-	\vskip 12\p@ 
-    \vskip 12\p@ 
-    \th@titleAnaBilimDaliFtSz \MakeUppercase{\Anabilim}\\
-    \th@titleAnaBilimDaliFtSz \MakeUppercase{Department}\\
-    \vskip 60\p@ 
-    \th@titleFtSz Project Advisor:\th@tezyoneticisi\\
 
-    %\th@titleAnaBilimDaliFtSz \Program \\
-    \vspace*{\fill}
-    \null\vfill %To prevent the page from breaking
-	\th@titleFtSz \TarihKucuk
-	\newpage
-%\vspace*{\fill}
+    \if@Ingilizce
+    \begin{textblock*}{\textwidth}[0,0](40mm,35.5mm)
+	    \renewcommand{\ULdepth}{2.75pt} 	% Added using ulem package for \uline command - SBÖ
+	    \renewcommand{\ULthickness}{1.5pt} 	% Added for underline tickness change which was 0.4pt - SBÖ
+	    \centering
+	    \uline{\MakeUppercase{\bf\th@Instituteiki}}\\ % FBE ingilizce yeni baslik icin
+    \end{textblock*}
+    \fi
+    
+	\begin{textblock*}{\textwidth}[0,0](40mm,80.5mm)
+		\centering
+		\th@titleFtSz\Baslikspacing \Baslikbir \\
+        \th@titleFtSz\Baslikspacing \Baslikiki \\
+        \th@titleFtSz\Baslikspacing \Baslikuc \\
+	\end{textblock*}
+
+	\begin{textblock*}{\textwidth}[0,0](40mm,150mm)
+	    \centering
+	    \th@titleFtSz \TezSeviyesi  \\
+	\end{textblock*}
+
+	\begin{textblock*}{\textwidth}[0,0](40mm,160mm)
+	    \centering
+        \th@titleFtSz \th@isimsoyisimbir  \\
+        \vskip 10\p@ 
+        \th@titleFtSz \th@isimsoyisimiki  \\
+        \vskip 10\p@ 
+        \th@titleFtSz \th@isimsoyisimuc  \\
+    \end{textblock*}
+
+	\begin{textblock*}{\textwidth}[0,0](40mm,200mm)
+	   \centering
+	   \th@titleAnaBilimDaliFtSz \Anabilim\\
+    \end{textblock*}
+ 
+
+	\begin{textblock*}{\textwidth}[0,0](40mm,260mm)
+	   \centering
+       \th@titleFtSz \TarihBuyuk \\
+    \end{textblock*}
+
+\vspace*{\fill}
 }
 
+%======================================== İÇ KAPAK SETTINGS =========================================== - SBÖ
+\newcommand*{\th@IcKapak}{					% Remodified for better vertical spacing - SBÖ
+	\BolumSagdaKalsin
+	\thispagestyle{empty}
+	\if@FenBilimleri
+		\begin{textblock*}{\textwidth}[0,0](37.5mm,30.5mm)
+	\fi
+	\if@Bilisim	
+		\begin{textblock*}{\textwidth}[0,0](40mm,30.5mm)
+	\fi
+	\if@SosyalBilimler
+		\begin{textblock*}{\textwidth}[0,0](36mm,30.5mm)
+	\fi
+	\if@Avrasya
+		\begin{textblock*}{\textwidth}[0,0](40mm,30.5mm)
+	\fi
+	\if@UcakUzay
+		\begin{textblock*}{\textwidth}[0,0](40mm,30.5mm)
+	\fi
+	\if@ElektrikElektronik
+		\begin{textblock*}{\textwidth}[0,0](40mm,30.5mm)
+	\fi
+		\singlespacing  					% For single spacing in the top portion of kapak - SBÖ
+		\renewcommand{\ULdepth}{2.75pt} 	% Added using ulem package for \uline command - SBÖ
+		\renewcommand{\ULthickness}{1.5pt} 	% Added for underline tickness change which was 0.4pt - SBÖ
+		\centering
+        \uline{\textbf{ISTANBUL TECHNICAL UNIVERSITY}} \\
+	\vskip 6\p@ 
+		\uline{{\bf\th@EnstituUpper}}\\ %Instead of \underline{text} - SBÖ
+	\end{textblock*}
+	
+	\if@Ingilizce
+	\begin{textblock*}{\textwidth}[0,0](40mm,35.5mm)
+		\renewcommand{\ULdepth}{2.75pt} 	% Added using ulem package for \uline command - SBÖ
+		\renewcommand{\ULthickness}{1.5pt} 	% Added for underline tickness change which was 0.4pt - SBÖ
+		\centering
+		\uline{\MakeUppercase{\bf\th@Instituteiki}}\\ % FBE ingilizce yeni baslik icin
+	\end{textblock*}
+	\fi
+      
+	\begin{textblock*}{\textwidth}[0,0](40mm,80.5mm)
+		\centering
+		\th@titleFtSz\Baslikspacing \Baslikbir \\
+		\th@titleFtSz\Baslikspacing \Baslikiki \\
+		\th@titleFtSz\Baslikspacing \Baslikuc \\
+	\end{textblock*}
+	
+	\begin{textblock*}{\textwidth}[0,0](40mm,150mm)
+		\centering
+		\th@titleFtSz \TezSeviyesi  \\
+	\end{textblock*}
+	
+	\begin{textblock*}{\textwidth}[0,0](40mm,160mm)
+		\centering
+        \th@titleFtSz \th@isimsoyisimbir  \\
+        \th@titleFtSz (\th@ogrencinobir) \\
+        \vskip 10\p@ 
+        \th@titleFtSz \th@isimsoyisimiki  \\
+        \th@titleFtSz (\th@ogrencinoiki) \\
+        \vskip 10\p@ 
+        \th@titleFtSz \th@isimsoyisimuc  \\
+        \th@titleFtSz (\th@ogrencinouc) \\
+	\end{textblock*}
+	
+	\begin{textblock*}{\textwidth}[0,0](40mm,200mm)
+		\centering
+		\th@titleAnaBilimDaliFtSz \Anabilim\\
+	\end{textblock*}
+	
+	
+    \begin{textblock*}{\textwidth}[0,0](40mm,230mm)
+	    \centering
+        \th@titleFtSz\DanismanBaslik : \th@titleFtSz \th@TezYoneticisi \\
+        %\ifthenelse{\equal{\th@esdanisman}{}}{}{ \bf{Thesis Co-Advisor:} \bf{\th@esdanisman} \\}
+	\end{textblock*}
+
+    \begin{textblock*}{\textwidth}[0,0](40mm,235mm)
+	    \centering
+	    %\th@titleFtSz\DanismanBaslik : \th@titleFtSz \th@TezYoneticisi \\
+	    \ifthenelse{\equal{\th@esdanisman}{}}{}{ \bf{Thesis Co-Advisor:} \bf{\th@esdanisman} \\}
+    \end{textblock*}
+	
+	\begin{textblock*}{\textwidth}[0,0](40mm,260mm)
+		\centering
+		\th@titleFtSz \TarihBuyuk \\
+	\end{textblock*}
+	
+	\vspace*{\fill}
+}
+
+%===================================== TÜRKÇE İÇ KAPAK SETTINGS ======================================= - SBÖ
+\newcommand*{\th@IcKapakTurkce}{ 			% Remodified for better vertical spacing - SBÖ
+	\BolumSagdaKalsin
+	\thispagestyle{empty}
+	\if@Avrasya
+	\begin{textblock*}{\textwidth}[0,0](35mm,30.5mm)
+	\else
+	\begin{textblock*}{\textwidth}[0,0](40mm,30.5mm)
+	\fi
+		\singlespacing  					% For single spacing in the top portion of kapak - SBÖ
+		\renewcommand{\ULdepth}{2.75pt} 	% Added using ulem package for \uline command - SBÖ
+		\renewcommand{\ULthickness}{1.5pt} 	% Added for underline tickness change which was 0.4pt - SBÖ
+		\centering
+\uline{\textbf{İSTANBUL TEKNİK ÜNİVERSİTESİ}} \\
+	\vskip 6\p@ 
+		\uline{{\bf\th@EnstituUpperTR}}\\ 	% Instead of \underline{text} - SBÖ
+	\end{textblock*}
+	
+	\begin{textblock*}{\textwidth}[0,0](40mm,80.5mm)
+		\centering
+        \th@titleFtSz\Baslikspacing \th@baslikbir \\
+		\th@titleFtSz\Baslikspacing \th@baslikiki \\
+		\th@titleFtSz\Baslikspacing \th@baslikuc \\
+	\end{textblock*}
+	
+	\begin{textblock*}{\textwidth}[0,0](40mm,150mm)
+		\centering
+		\th@titleFtSz \TezSeviyesiTR  \\
+	\end{textblock*}
+	
+	\begin{textblock*}{\textwidth}[0,0](40mm,160mm)
+		\centering
+		\th@titleFtSz \th@isimsoyisimbir  \\
+		\th@titleFtSz (\th@ogrencinobir) \\
+        \vskip 10\p@ 
+        \th@titleFtSz \th@isimsoyisimiki  \\
+        \th@titleFtSz (\th@ogrencinoiki) \\
+        \vskip 10\p@ 
+        \th@titleFtSz \th@isimsoyisimuc  \\
+        \th@titleFtSz (\th@ogrencinouc) \\
+	\end{textblock*}
+	
+	\begin{textblock*}{\textwidth}[0,0](40mm,200mm)
+		\centering
+		\th@titleAnaBilimDaliFtSz \th@AnaBilimDali \\
+	\end{textblock*}
+	
+	
+	\begin{textblock*}{\textwidth}[0,0](40mm,230mm)
+		\centering
+		\th@titleFtSz {Tez Danışmanı}: \th@titleFtSz \th@TezYoneticisi \\
+		%\ifthenelse{\equal{\th@esdanisman}{}}{}{ \bf{(Varsa) Eş Dan\i şman:} \bf{\th@esdanisman} \\}
+	\end{textblock*}
+	
+	\begin{textblock*}{\textwidth}[0,0](40mm,235mm)
+		\centering
+		%\th@titleFtSz {Tez Danışmanı}: \th@titleFtSz \th@TezYoneticisi \\
+		\ifthenelse{\equal{\th@esdanisman}{}}{}{ \bf{(Varsa) Eş Danışman:} \bf{\th@esdanisman} \\}
+	\end{textblock*}
+	
+	\begin{textblock*}{\textwidth}[0,0](40mm,260mm)
+		\centering
+		\th@titleFtSz \TarihBuyukTR \\ 		% Made Uppercase Turkish Month and Year
+	\end{textblock*}
+	
+	\vspace*{\fill}
+}
+
+%========================================= ETHICAL SETTINGS =========================================
 \newcommand*{\th@Ethical}{
-	\addtocontents{toc}{\protect\addvspace{-10\p@}}
-	\addcontentsline{toc}{chapter}{\bf{\protect\ethicalcoverToC}}
+    \BolumSagdaKalsinNolu
+	%\thispagestyle{empty}
+	%\addtocontents{toc}{\protect\addvspace{-10\p@}}
+	%\addcontentsline{toc}{chapter}{\bf{\protect\frontcoverToC}}
 	\singlespacing  				% For single spacing in the top portion of kapak - SBÖ
 	\makeatletter
 	\justifying
@@ -958,36 +1305,268 @@ LİSTESİ\fi\normalfont}
     University. We hereby confirm that we have realized all stages of the Senior Design Project 
     Interim Report by ourselves, and we have abided by the ethical rules with respect to academic 
     and professional integrity . 
-	
+
+
   \vskip 30\p@ 
-	\hspace{70\p@} \th@titleFtSz \th@isimsoyisimbir  \\
+  \raggedright
+	\hspace{70\p@}\th@titleFtSz \th@isimsoyisimbir  \\
 	\hspace{70\p@}\th@titleFtSz (\th@ogrencinobir) \\
 	\vskip 10\p@ 
 	\hspace{70\p@}\th@titleFtSz \th@isimsoyisimiki  \\
 	\hspace{70\p@}\th@titleFtSz (\th@ogrencinoiki) \\
 	\vskip 10\p@ 
 	\hspace{70\p@}\th@titleFtSz \th@isimsoyisimuc  \\
-	\hspace{70\p@}\th@titleFtSz (\th@ogrencinouc) \\
-    \vskip 250\p@ 
-    \th@titleFtSz Project Advisor:\th@tezyoneticisi\\
-    \vspace*{\fill}
-    \null\vfill %To prevent the page from breaking
-	\newpage
-%\vspace*{\fill}
+    \hspace{70\p@}{\th@titleFtSz (\th@ogrencinouc)} \\
+
+	\sloppy 
+	\vspace*{\fill}
 }
 
 
-%======================================== TOC PAGE SETTINGS ========================================= - SBÖ
+%========================================= ONAY PAGE SETTINGS ========================================= - SBÖ
+\newcommand{\th@onaypage}{					% onaypage is modified to match with word template as much as possible - SBÖ	
+	\BolumSagdaKalsin
+	\hyphenpenalty=100
+	\singlespacing
+	\if@Ingilizce 			
+	\begin{textblock*}{\textwidth}[0,0](40mm,50.5mm)
+	{\th@isimsoyisim}, { a} \if@Doktora { Ph.D.}\ \fi  \if@YuksekLisans  { M.Sc.}\ \fi \if@Lisans { B.Sc.}\ \fi student of
+	ITU~\if@Doktora {\th@Institute~\th@Instituteiki}\ \fi \if@YuksekLisans {\th@Institute~\th@Instituteiki}\ \fi \if@Lisans {\th@Institute~\th@Instituteiki}\ \fi student ID \th@ogrencino,\ successfully defended the {\if@Doktora dissertation\ \fi \if@YuksekLisans thesis\ \fi \if@Lisans graduation project\ \fi }entitled {``{\Baslikbir\ifthenelse{\equal{\Baslikiki}{}}{}{
+	\Baslikiki\ifthenelse{\equal{\Baslikuc}{}}{}{\
+	\Baslikuc}}}''}, which he/she prepared after fulfilling the
+	requirements specified in the associated legislations,
+	before the jury whose signatures are below.
+    \end{textblock*}
+ 
+\begin{textblock*}{\textwidth}[0,0](40mm,100.5mm)
+	\begin{tabular}{@{}p{33mm} l l}
+		\bf{Thesis Advisor :}& \bf{\th@TezYoneticisi} & 
+		\hspace*{44pt} \hfill........................  \\		% Matching to the word template - SBÖ
+		& \th@TezYoneticisiUniv  &  \\
+		\ifthenelse{\equal{\th@esdanisman}{}}{}{   &  &  \\
+			&  &  \\
+			\bf{Co-advisor :}& \bf{\th@esdanisman} & 
+			\hspace*{44pt}\hfill........................   \\	% Matching to the word template - SBÖ
+			& \th@esdanismanuniv  &  \\}
+		&  &  \\
+		&  &  \\
+		\bf{Jury Members :}& \bf{\th@juribir} & 
+		\hspace*{44pt}	\hfill........................     \\		% Matching to the word template - SBÖ
+		& \th@juribiruniv  &  \\
+		&  &  \\
+		&  &  \\
+		\ifthenelse{\equal{\th@juriiki}{}}{}{ & 
+			\bf{\th@juriiki} & 
+			\hspace*{44pt}\hfill........................  \\	% Matching to the word template - SBÖ
+	 	& \th@juriikiuniv  &  \\}
+		&  &  \\
+	    	&  &  \\	
+		\ifthenelse{\equal{\th@juriuc}{}}{}{ & 
+			\bf{\th@juriuc} & 
+			\hspace*{44pt}\hfill........................  \\	% Matching to the word template - SBÖ
+		& \th@juriucuniv  &  \\}
+		&  &  \\
+		&  &  \\
+		\ifthenelse{\equal{\th@juridort}{}}{}{ & 
+			\bf{\th@juridort} & 
+			\hspace*{44pt}\hfill........................  \\	% Matching to the word template - SBÖ
+			& \th@juridortuniv  &  \\}
+		&  &  \\
+		&  &  \\
+		\ifthenelse{\equal{\th@juribes}{}}{}{ & \bf{\th@juribes} & 
+			\hspace*{44pt}	\hfill........................\\	% Matching to the word template - SBÖ
+			& \th@juribesuniv  &  \\}
+		&  &  \\
+		&  &  \\
+	\end{tabular}
+\end{textblock*}
+
+\begin{textblock*}{\textwidth}[0,0](40mm,260mm)
+	\begin{tabular}{@{}l l}
+		\bf{Date of Submission~~:} &\hspace*{-10pt}\hfill\bf{\th@submissiondate}  \\
+		\bf{Date of Defense\hspace*{25pt}\hfill:} &\hspace*{-10pt}\hfill\bf{\th@defencedate}  \\
+	\end{tabular}
+\end{textblock*}
+
+	\else
+	
+\begin{textblock*}{\textwidth}[0,0](40mm,50.5mm)
+	İTÜ, \th@Enstitu'nün \th@ogrencino\ numaralı \if@Doktora Doktora\ \fi 
+	\if@YuksekLisans Yüksek Lisans\ \fi \if@Lisans Lisans\ \fi\ öğrencisi 
+	{\th@isimsoyisim}, ilgili 
+	yönetmeliklerin belirlediği gerekli tüm şartları yerine getirdikten
+	sonra hazırladığı 
+	{``\Baslikbir\ifthenelse{\equal{\Baslikiki}{}}{}{   
+	\Baslikiki\ifthenelse{\equal{\Baslikuc}{}}{}{\ 
+	\Baslikuc}}''}
+	başlıklı
+	tezini aşağıdaki imzaları olan jüri önünde
+	başarı ile sunmuştur.
+\end{textblock*}
+
+\begin{textblock*}{\textwidth}[0,0](40mm,100.5mm)
+	\begin{tabular}{@{}p{33mm} l l}
+		\bf{Tez Danışmanı :}& \bf{\th@TezYoneticisi} & 
+		\hspace*{44pt}\hfill........................ \\
+		& \th@TezYoneticisiUniv  &  \\
+		\ifthenelse{\equal{\th@esdanisman}{}}{}{   &  &  \\
+			&  &  \\
+			\bf{Eş Danışman :}& \bf{\th@esdanisman} & 
+			\hspace*{44pt}\hfill........................ \\
+			& \th@esdanismanuniv  &  \\}
+		&  &  \\
+		&  &  \\
+		\bf{Jüri Üyeleri :}& \bf{\th@juribir} & 
+			\hspace*{44pt}\hfill........................ \\
+			& \th@juribiruniv  &  \\
+		&  &  \\
+		&  &  \\
+		& \bf{\th@juriiki} & 
+			\hspace*{44pt}\hfill........................ \\
+			& \th@juriikiuniv  &  \\
+		&  &  \\
+		&  &  \\
+		\ifthenelse{\equal{\th@juriuc}{}}{}{ & 
+			\bf{\th@juriuc} & 
+			\hspace*{44pt}\hfill........................ \\
+			& \th@juriucuniv  &  \\}
+		&  &  \\
+		&  &  \\
+		\ifthenelse{\equal{\th@juridort}{}}{}{ & 
+			\bf{\th@juridort} & 
+			\hspace*{44pt}\hfill........................ \\
+			& \th@juridortuniv  &  \\}
+		&  &  \\
+		&  &  \\
+		\ifthenelse{\equal{\th@juribes}{}}{}{ & \bf{\th@juribes} 
+			& 
+			\hspace*{44pt}\hfill........................ \\
+			& \th@juribesuniv  &  \\}
+		&  &  \\
+		&  &  \\
+	\end{tabular}
+\end{textblock*}	
+
+\begin{textblock*}{\textwidth}[0,0](40mm,260mm)
+	\begin{tabular}{@{}l l}
+		\bf{Teslim Tarihi~~:} & \bf{\th@tezvermetarih}  \\
+		\bf{Savunma Tarihi\hspace*{25pt}\hfill:} & \bf{\th@tezsavunmatarih}  \\
+	\end{tabular}
+\end{textblock*}
+	\fi
+	\sloppy 
+	\vspace*{\fill}
+}
+
+%======================================== İTHAF PAGE SETTINGS ========================================= - SBÖ
+\newcommand*{\th@IthafSayfasi}{
+    \BolumSagdaKalsinNolu 			% Change this to without Nolu shifts the margins down for some reason - SBÖ
+    \setlength{\voffset}{-5mm}      % Strange that it is needed to make it page num. 1.5cm from bottom for the rest - SBÖ
+	\vspace*{0.3\textheight}
+    \begin{flushright}
+	\textbf{\emph{\th@Ithaf}}
+    \end{flushright}
+}
+
+%======================================== ÖNSÖZ PAGE SETTINGS ========================================= - SBÖ
+\newcommand{\th@Onsoz}{
+    \BolumSagdaKalsinNolu
+    \singlespacing
+    \hyphenpenalty=5000
+    \vspace*{\UstenBosluk}
+    \begin{list}{}{\setlength{\leftmargin}{0cm}\setlength{\rightmargin}{0cm}}
+    \item[]
+    \th@ChapterStyle\prefacename\\
+    \end{list}
+    \sloppy
+    \th@tesekkurStash   % the actual tesekkur
+    \vspace{30pt} \\
+    \TarihKucuk \hfill \th@isimsoyisimbir \\
+    \hfill \th@isimsoyisimiki \\
+    \hfill \th@isimsoyisimuc \\
+    
+    \vspace*{-2.54mm} \hfill \th@Unvan\\
+    \addcontentsline{toc}{part}{\bf{\protect\onsoznameToC}}
+}
+
+%======================================== ÖZET PAGE SETTINGS ========================================== - SBÖ
+\newcommand{\th@ozetpage}{
+    \BolumSagdaKalsinNolu
+    \addcontentsline{toc}{part}{\bf{\protect\ozetnameToC}}
+    \vspace*{\UstenBosluk}
+       \begin{center}
+        \begin{tabular}{c}
+         \th@titleFtSz\Baslikspacing \th@baslikbir \\
+         \th@titleFtSz\Baslikspacing \th@baslikiki \\
+         \th@titleFtSz\Baslikspacing \th@baslikuc \\
+             \vspace*{18pt}\\
+         \th@titleFtSz\abstractname\ \\
+             %\\
+        \end{tabular}
+       \end{center}
+%   \begin{list}{}{\setlength{\leftmargin}{0cm}\setlength{\rightmargin}{0cm}}
+%   \item[]
+%   \th@ChapterStyle \th@baslikbir\ \th@baslikiki\ \th@baslikuc  \\
+%   \vspace*{10pt}\\
+%   \th@ChapterStyle \abstractname\ \\
+%   \end{list}
+    \singlespacing
+    \vspace*{18pt}
+    \sloppy
+    \th@ozetStash   % the actual ozet
+}
+
+%======================================= SUMMARY PAGE SETTINGS ======================================== - SBÖ
+\newcommand{\th@Summarypage}{
+    \BolumSagdaKalsinNolu
+    \addcontentsline{toc}{part}{\bf{\protect\abstractnameToC}}
+    \vspace*{\UstenBosluk}
+       \begin{center}
+        \begin{tabular}{c}
+         \th@titleFtSz\Baslikspacing \th@Titlebir \\
+         \th@titleFtSz\Baslikspacing \th@Titleiki \\
+         \th@titleFtSz\Baslikspacing \th@Titleuc \\
+              \vspace*{18pt}\\
+         \th@titleFtSz\summaryname\ \\
+              %\\
+        \end{tabular}
+       \end{center}
+    \singlespacing
+    \vspace*{18pt}
+    \sloppy
+    \th@abstractStash   % the actual abstract
+}
+
+%====================================== ÖZGEÇMİŞ PAGE SETTINGS ======================================== - SBÖ
+\newcommand{\beforeOzgecmis}{
+    \BolumSagdaKalsinNolu
+    \vspace*{\UstenBosluk}
+    \begin{list}{}{\setlength{\leftmargin}{0cm}\setlength{\rightmargin}{0cm}}
+    \item[]
+    \th@ChapterStyle\ozgecmisname\\
+    \addtocontents{toc}{\protect\addvspace{-10\p@}} % For propoer page numbering in TOC, this is placed here - SBÖ
+    \addcontentsline{toc}{chapter}{\bf{\protect\ozgecmisnameToC}}% For propoer page num. in TOC, this is placed here - SBÖ
+    \end{list}
+	\singlespacing
+    \sloppy
+}
+\newcommand{\th@ozgecmispage}{
+    \beforeOzgecmis
+    \th@ozgecmisStashbir   % the actual ozgecmis
+    \beforeOzgecmis
+    \th@ozgecmisStashiki   % the actual ozgecmis
+    \beforeOzgecmis
+    \th@ozgecmisStashuc   % the actual ozgecmis
+}
+
+%======================================== TOC PAGE SETTINGS =========================================== - SBÖ
 \renewcommand\tableofcontents{
-    \makeatletter
-	\raggedright
-	\makeatother
     %\vspace*{\ChapterUstenBosluk} 				% This is not effective - SBÖ
     {\chapter*{\contentsname}\addcontentsline{toc}{part}{\bf{\protect\contentsnameToC}}%
     \vspace*{-18pt}
     \renewcommand{\ULdepth}{4pt} % Added using ulem package for \uline command - SBÖ
     \renewcommand{\ULthickness}{1.5pt} % Added for underline tickness change which was 0.4pt default - SBÖ
-    \if@Ingilizce\hfill\vspace*{0.5truecm}{\bf\uline{Page}}~\else~\hfill\vspace*{0truecm}{\bf\uline{Sayfa}}\fi}\\ %Instead of \underline{text} - SBÖ
+    \if@Ingilizce\hfill\vspace*{0.5truecm}{\bf\uline{Page}}~\else~\hfill\vspace*{0.5truecm}{\bf\uline{Sayfa}}\fi}\\ %Instead of \underline{text} - SBÖ
     %\hfill\vspace*{0.5truecm}{\bf\underline{\if@Ingilizce Page\else Sayfa\fi}}} % Removed by SBÖ
 
     \let\orig@numberline\numberline
@@ -999,52 +1578,68 @@ LİSTESİ\fi\normalfont}
     \setlength{\parskip}{\th@oldparskip}
     }
 
-%======================================== LOT PAGE SETTINGS ========================================= - SBÖ
-\renewcommand\listoftables{
-	\setlength{\voffset}{-5mm}      % Strange that it is needed to make it page num. 1.5cm from bottom for the rest - SBÖ
-    %\vspace*{\ChapterUstenBosluk} 				% This is not effective - SBÖ   
-    {\chapter*{\listtablename}
+%======================================= ABBR. PAGE SETTINGS ========================================== - SBÖ
+\newcommand\kisaltmalist{
+    %\vspace*{\ChapterUstenBosluk} 				% This is not effective - SBÖ
+    \chapter*{\kisaltmaname\@mkboth{\MakeUppercase\kisaltmaname}{\MakeUppercase\kisaltmaname}}
+    \addcontentsline{toc}{part}{\bf{\protect\kisaltmanameToC}}
     \vspace*{-18pt}
-    \renewcommand{\ULdepth}{4pt} % Added using ulem package for \uline command - SBÖ
-    \renewcommand{\ULthickness}{1.5pt} % Added for underline tickness change which was 0.4pt - SBÖ
-    \if@Ingilizce\hfill\vspace*{0.5truecm}{\bf\uline{Page}}~\else~\hfill\vspace*{0truecm}{\bf\uline{Sayfa}}\fi}\\ % Instead of \underline{text} - SBÖ
+    \th@kisaltmalistStash}
+
+%====================================== SYMBOLS PAGE SETTINGS ========================================= - SBÖ     
+\newcommand\symbollist{
+    %\vspace*{\ChapterUstenBosluk} 				% This is not effective - SBÖ
+    \chapter*{\symbolname\@mkboth{\MakeUppercase\symbolname}{\MakeUppercase\symbolname}}
+    \addcontentsline{toc}{part}{\bf{\protect\symbolnameToC}}
+    \vspace*{-18pt}
+    \th@symbollistStash
+    }
+
+%======================================== LOT PAGE SETTINGS =========================================== - SBÖ
+\renewcommand\listoftables{%
+    %\vspace*{\ChapterUstenBosluk} 				% This is not effective - SBÖ   
+    {\chapter*{\listtablename}%
+    \vspace*{-18pt}%
+    \renewcommand{\ULdepth}{4pt}% 				 Added using ulem package for \uline command - SBÖ
+    \renewcommand{\ULthickness}{1.5pt}% 	 Added for underline tickness change which was 0.4pt - SBÖ
+    \if@Ingilizce\hfill\vspace*{0truecm}{\bf\uline{Page}}~\else~\hfill\vspace*{0truecm}{\bf\uline{Sayfa}}\fi}\\ % Instead of \underline{text} - SBÖ
     %\hfill\vspace*{0.5truecm}{\bf\underline{\if@Ingilizce Page\else Sayfa\fi}}} % Removed - SBÖ
 
-    \let\orig@numberline\numberline   
-    \@mkboth{\MakeUppercase\listtablename}{\MakeUppercase\listtablename}
-    \renewcommand*{\numberline}[1]{
-    \orig@numberline{\bf\tablename\ ##1}\hspace{-8pt}{\bf:}\hspace{4pt}} % Better spacing - SBÖ
-    \addcontentsline{toc}{part}{\bf{\protect\listtablenameToC}}
-    \setlength{\th@oldparskip}{\parskip}
-    \setlength{\parskip}{\LoTparskip}
-    \@starttoc{lot}
-    \setlength{\parskip}{\th@oldparskip}
+    \let\orig@numberline\numberline
+    \@mkboth{\MakeUppercase\listtablename}{\MakeUppercase\listtablename}%
+    \renewcommand*{\numberline}[1]{%
+    \orig@numberline{\bf\tablename\ ##1}\hspace{-8pt}{\bf:}\hspace{4pt}}%  Better spacing - SBÖ
+    \addcontentsline{toc}{part}{\bf{\protect\listtablenameToC}}%
+    \setlength{\th@oldparskip}{\parskip}%
+    \setlength{\parskip}{\LoTparskip}%
+    \@starttoc{lot}%
+    \setlength{\parskip}{\th@oldparskip}%
     \let\numberline\orig@numberline
     }
 
-%======================================== LOF PAGE SETTINGS ========================================= - SBÖ  
-\renewcommand\listoffigures{
+%======================================== LOF PAGE SETTINGS =========================================== - SBÖ  
+\renewcommand\listoffigures{%
     %\vspace*{\ChapterUstenBosluk} 				% This is not effective - SBÖ
-    {\chapter*{\listfigurename}
-    \vspace*{-18pt}
-    \renewcommand{\ULdepth}{4pt} % Added using ulem package for \uline command - SBÖ
-    \renewcommand{\ULthickness}{1.5pt} % Added for underline tickness change which was 0.4pt - SBÖ
-    \if@Ingilizce\hfill\vspace*{0.5truecm}{\bf\uline{Page}}~\else~\hfill\vspace*{0truecm}{\bf\uline{Sayfa}}\fi}\\ % Instead of \underline{text} - SBÖ
+    {\chapter*{\listfigurename}%
+    \vspace*{-18pt}%
+    \renewcommand{\ULdepth}{4pt}%				  Added using ulem package for \uline command - SBÖ
+    \renewcommand{\ULthickness}{1.5pt}% 	Added for underline tickness change which was 0.4pt - SBÖ
+    \if@Ingilizce\hfill\vspace*{0truecm}{\bf\uline{Page}}~\else~\hfill\vspace*{0truecm}{\bf\uline{Sayfa}}\fi}\\ % Instead of \underline{text} - SBÖ
     %\hfill\vspace*{0.5truecm}{\bf\underline{\if@Ingilizce Page\else Sayfa\fi}}}
 
     \let\orig@numberline\numberline
-    \@mkboth{\MakeUppercase\listfigurename}{\MakeUppercase\listfigurename}
-    \renewcommand*{\numberline}[1]{
-    \orig@numberline{\bf\figurename\ ##1}\hspace{-8pt}{\bf:}\hspace{4pt}} % Better spacing - SBÖ
-    \addcontentsline{toc}{part}{\bf{\protect\listfigurenameToC}}
-    \setlength{\th@oldparskip}{\parskip}
-    \setlength{\parskip}{\LoFparskip}
-    \@starttoc{lof}
-    \setlength{\parskip}{\th@oldparskip}
+    \@mkboth{\MakeUppercase\listfigurename}{\MakeUppercase\listfigurename}%
+    \renewcommand*{\numberline}[1]{%
+    \orig@numberline{\bf\figurename\ ##1}\hspace{-8pt}{\bf:}\hspace{4pt}}%  Better spacing - SBÖ
+    \addcontentsline{toc}{part}{\bf{\protect\listfigurenameToC}}%
+    \setlength{\th@oldparskip}{\parskip}%
+    \setlength{\parskip}{\LoFparskip}%
+    \@starttoc{lof}%
+    \setlength{\parskip}{\th@oldparskip}%
     \let\numberline\orig@numberline
     }
 
-%===================================== APPENDICES PAGE SETTINGS ====================================== - SBÖ
+%===================================== APPENDICES PAGE SETTINGS ======================================= - SBÖ
 \newcommand{\eklerbolum}[1]{\par
     \newpage
     \singlespacing
@@ -1060,11 +1655,11 @@ LİSTESİ\fi\normalfont}
     %\renewcommand{\thesection}{A.\arabic{section}}
     
     %\addtocontents{toc}{\protect\addvspace{-10\p@}}
-%    \addcontentsline{toc}{chapter}{\bf{\protect\appendixnameToC}}
+    %\addcontentsline{toc}{chapter}{\bf{\protect\appendixnameToC}}
     \global \@appendixtrue
     }
 
-%==================================== BIBLIOGRAPHY PAGE SETTINGS ===================================== - SBÖ
+%==================================== BIBLIOGRAPHY PAGE SETTINGS ====================================== - SBÖ
 \renewcommand{\@biblabel}[1]{#1}
 \renewenvironment{thebibliography}[1]{%\singlespacing
     %\vspace*{\ChapterUstenBosluk} 				% This is not effective - SBÖ
@@ -1086,6 +1681,7 @@ LİSTESİ\fi\normalfont}
           \usecounter{enumiv}
           \let\p@enumiv\@empty
           \renewcommand\theenumiv{\@arabic\c@enumiv}}
+          
     \sloppy
     \clubpenalty4000
     \@clubpenalty \clubpenalty
@@ -1096,50 +1692,66 @@ LİSTESİ\fi\normalfont}
       {\@latex@warning{Empty `thebibliography' environment}}
     \endlist}
 
-%========================================= ALL PAGES CALLED ========================================== - SBÖ
+%========================================= ALL PAGES CALLED =========================================== - SBÖ
 \newcommand{\th@MakeThesisPrologue}{
     \thispagestyle{empty}
     \fontfamily{ptm}
     \selectfont
-    \lfoot{} % Left foot empty
-    \cfoot{\thepage} % Center foot page number included
-    \pagenumbering{roman}								
-    \renewcommand*{\thepage}{\small{\roman{page}}}  	% Page number font size set to 11 pt for roman pages - SBÖ
     \th@Kapak
-    \th@IcKapak
-    \th@Ethical
     \fontfamily{cmr}
     \selectfont
-    \setcounter{page}{\if@Ingilizce \if@Onluarkali 2 \else 3 \fi \else 
+    \pagenumbering{roman}								
+    \renewcommand*{\thepage}{\small{\roman{page}}}  	% Page number font size set to 11 pt for roman pages - SBÖ
+%   \setcounter{page}{\if@Bez 3\else 1\fi}%{\if@Ingilizce\if@Bez 3\else 1\fi\else 1\fi}
+    \setcounter{page}{\if@Ingilizce \if@Onluarkali 3 \else 1 \fi \else 
        \if@Onluarkali 3 \else 2 \fi \fi}
     \singlespacing
 	\renewcommand{\ttdefault}{pcr}   % MS Times fontu için
 	\normalfont\selectfont	      	 % MS Times fontu için
 
-    \newpage
-    \ToCspacing
-    \tableofcontents
+    \ifthenelse{\equal{\th@Ithaf}{}}{}{\th@IthafSayfasi} 
+    \th@Ethical
+
+	\renewcommand{\ttdefault}{pcr}   % MS Times fontu için
+	\normalfont\selectfont	      	 % MS Times fontu için
+
+        \if@TesekkurVar
+	\th@Onsoz
+        \fi
+    \cleardoublepage
+        \ToCspacing
+        \tableofcontents
+        \if@KisaltmaListesiVar
+	\kisaltmalist
+        \fi
+        \if@SembolListesiVar
+	\symbollist
+        \fi
         \if@TabloListesiVar
 	\LoTspacing
 	\listoftables
         \fi
         \if@SekilListesiVar
-	\LoFspacing	
+	\LoFspacing
 	\listoffigures
         \fi
-    \justify    
-    \setlength{\parindent}{0pt} 
-    \newpage % Used to remove the blank page created by \BolumSagdaKalsinNolu if chosen below instead of this one
-	%\BolumSagdaKalsinNolu
-    \singlespacing %\oneandonehalf
+    \if@Ingilizce
+      \th@Summarypage
+        \th@ozetpage
+	      \else
+	    \th@ozetpage		% Turkish thesis order - SBÖ
+	  \th@Summarypage
+	\fi
+     %\newpage				% Seems like no need (it is defined below) - SBÖ
+	\BolumSagdaKalsinNolu
+    \oneandonehalf
      }
 
 \let\th@OldBeginDocument\document
 \renewcommand*{\document}{
     \th@OldBeginDocument
     \th@MakeThesisPrologue
-    \lfoot{\thepage} % Left foot empty
-    \cfoot{} % Center foot page number included
+    %\oneandonehalf          % Seems like no need that (it is defined above) - SBÖ
     \pagenumbering{arabic}
     \renewcommand*{\thepage}{\small{\arabic{page}}} % Page number font size set to 11 pt = small - SBÖ
 }

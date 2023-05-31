@@ -1,29 +1,6 @@
-% !TEX root = interimreport.tex
 %============================================== NEW INPUTS ==============================================
 \usepackage[T1]{fontenc} 				% For Turkish characters
 \usepackage[utf8]{inputenc}  			% For Turkish characters
-\usepackage{pifont}
-\usepackage{newunicodechar}
-\newunicodechar{✓}{\ding{51}}
-\newunicodechar{✗}{\ding{55}}
-\usepackage{tabularx}
-\usepackage{multirow}
-\usepackage{listings}
-\usepackage{xcolor}
-\usepackage{multicol}
-\usepackage{llvm/lang}  % include custom language for LLVM IR.
-\usepackage{riscv-tex/lang}  % include custom language for RISCV assembly.
-\usepackage{riscv-tex/style} % include custom style for NASM assembly.
-\usepackage{csquotes}
-
-\renewcommand{\lstlistingname}{Code}% Listing -> Algorithm
-\renewcommand{\lstlistlistingname}{List of \lstlistingname s}% List of Listings -> List of Algorithms
-
-
-\definecolor{codegreen}{rgb}{0,0.6,0}
-\definecolor{codegray}{rgb}{0.5,0.5,0.5}
-\definecolor{codepurple}{rgb}{0.58,0,0.82}
-\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
 \usepackage[open,openlevel=1]{bookmark} % It is used to have bookmarks in the PDF file created
 % Abbreviations & Nomenclature
 %\usepackage[refpage]{nomencl}
@@ -31,8 +8,8 @@
 %\usepackage{textcomp}
 %\usepackage{array}
 %\usepackage{lscape}
-%\usepackage{listings} 					% Required for insertion of code
-%\usepackage{xcolor}
+\usepackage{listings} % Required for insertion of code
+\usepackage{xcolor}
 %\usepackage[colorlinks=true,linkcolor=blue,urlcolor=black,bookmarksopen=true]{hyperref}
 %\usepackage{biblatex}
 
@@ -48,8 +25,8 @@
 \usepackage{epsfig}
 \usepackage{enumerate}
 \usepackage{rotating}
-\usepackage{multirow} 					% Multirow in tables
-%\usepackage{subfigure}                 % This is obsolete, therefore use subcaption package instead - SBÖ
+\usepackage{multirow}					% Multirow in tables
+%\usepackage{subfigure} 				% This is obsolete, therefore use subcaption package instead - SBÖ
 \usepackage{colortbl}
 \usepackage{pstricks}
 \usepackage{pst-plot}
@@ -59,7 +36,7 @@
 %\usepackage{hyperref}
 \usepackage{hyperref}\hypersetup{hidelinks} % The line is added for hiding the links in document.
 %\usepackage{url}
-\usepackage{fixltx2e} 		% Bu paketi sembollerde text ler için subscript yazmakta yardımcı olması için ekliyoruz.
+\usepackage{fixltx2e} % Bu paketi sembollerde text ler için subscript yazmakta yardımcı olması için ekliyoruz.
 %\usepackage{ulem} 			% That does destroy Dedication and Bibliography (Use the below version xpatch) - SBÖ 
 \usepackage{xpatch} 		% Added for TOC dot flush to the page number - SBÖ
 \usepackage[normalem]{ulem} % For special underline tricks at the top of kapak pages - SBÖ 
@@ -80,83 +57,94 @@
 %\usepackage{setspace} 					% Provides support for setting the spacing between lines - SBÖ
 %\usepackage{showframe} 				% http://ctan.org/pkg/showframe - To show the margins in a frame on pages - SBÖ
 \usepackage{etoolbox}					% http://ctan.org/pkg/etoolbox - For removing default 50pt TOx stuffs from top - SBÖ
-\makeatletter 															% Used with etoolbox - SBÖ
-%\patchcmd{\@makechapterhead}{\vspace*{50\p@}}{}{}{}					% Removes space above \chapter head
-%\patchcmd{\@makeschapterhead}{\vspace*{50\p@}}{\vspace*{21.5mm}}{}{}	% Removes space above \chapter* head and add 21.5mm
-\patchcmd{\@makechapterhead}{\vspace*{50\p@}}{}{}{}						% Removes space above \chapter head
-\patchcmd{\@makeschapterhead}{\vspace*{50\p@}}{}{}{}					% Removes space above \chapter* head
-\makeatother
-\usepackage{longtable} 			% Include long tables in the text spreading more than one page - SBÖ
-\usepackage{hhline} 			% If desired to eliminate hline in tables - SBÖ
-\usepackage{siunitx}
-%\usepackage{ragged2e}
-\usepackage[document]{ragged2e} % Justfying the text - SBÖ
-\usepackage{tabularx} 
-\usepackage{pgfgantt} 			% Gantt Chart package for thesis time schedule - SBÖ
-%\usepackage{subcaption} % Make subfigure as Figure 1.1a style - SBÖ
-\usepackage[list=true,listformat=simple,position=below]{subcaption} % Make subfigure as Figure 1.1a style - SBÖ
-% Subfigure caption settings - SBÖ
-\DeclareCaptionLabelFormat{subfig}{\normalsize\figurename #1~\arabic{chapter}.\arabic{chapter}\alph{subfigure} :}
-%\DeclareCaptionListFormat{subfigure}{\arabic{chapter}.\arabic{chap
 
-% Bold Equation Number, Unbold Reference
-\makeatletter
-\def\tagform@#1{\maketag@@@{\bfseries(\ignorespaces#1\unskip\@@italiccorr)}} % All bold in eq. number incl. parentheses 
-%\renewcommand{\eqref}[1]{\textup{{\normalfont(\ref{#1}}\normalfont)}}
-\renewcommand{\eqref}[1]{\textup{\bf(\ref{#1})}} % All bold in eq. referencing incl. parentheses - SBÖ
-\makeatother
+\usepackage{ragged2e}
+\usepackage{multicol}
+\usepackage{llvm/lang}  % include custom language for LLVM IR.
+\usepackage{riscv-tex/lang}  % include custom language for RISCV assembly.
+\usepackage{riscv-tex/style} % include custom style for NASM assembly.
+\usepackage{csquotes}
 
-%\renewcommand{\theequation}{{\bf\arabic{chapter}.\arabic{equation}}} % Bold equation, unbold reference - SBÖ
-
+\renewcommand{\lstlistingname}{Code}% Listing -> Algorithm
+\renewcommand{\lstlistlistingname}{List of \lstlistingname s}% List of Listings -> List of Algorithms
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
 \lstdefinestyle{mystyle}{
-    backgroundcolor=\color{backcolour},   
+    %TODO this is a terrible default style
+    backgroundcolor=\color{backcolour},
     commentstyle=\color{codegreen},
     keywordstyle=\color{magenta},
     numberstyle=\tiny\color{codegray},
     stringstyle=\color{codepurple},
     basicstyle=\ttfamily\footnotesize,
-    breakatwhitespace=false,         
-    breaklines=true,                 
-    captionpos=b,                    
-    keepspaces=true,                 
-    numbers=left,                    
-    numbersep=5pt,                  
-    showspaces=false,                
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
     showstringspaces=false,
-    showtabs=false,                  
+    showtabs=false,
     tabsize=2
 }
-
 \lstset{style=mystyle}
+
+\makeatletter 															% Used with etoolbox - SBÖ
+\patchcmd{\@makechapterhead}{\vspace*{50\p@}}{}{}{}						% Removes space above \chapter head
+\patchcmd{\@makeschapterhead}{\vspace*{50\p@}}{\vspace*{21.5mm}}{}{}	% Removes space above \chapter* head and add 21.5mm
+\makeatother
+\usepackage{longtable} 	% Include long tables in the text spreading more than one page - SBÖ
+\usepackage{hhline} 	% If desired to eliminate hline in the tables - SBÖ
+\usepackage{siunitx}
+%\usepackage{subcaption} % Make subfigure as Figure 1.1a style - SBÖ
+\usepackage[list=true,listformat=simple,position=below]{subcaption} % Make subfigure as Figure 1.1a style - SBÖ
+% Subfigure caption settings - SBÖ
+\DeclareCaptionLabelFormat{subfig}{\normalsize\figurename #1~\arabic{chapter}.\arabic{chapter}\alph{subfigure} :}
+%\DeclareCaptionListFormat{subfigure}{\arabic{chapter}.\arabic{chapter}\alph{subfigure}}
+\captionsetup[subfigure]{labelformat=subfig, size=normalsize}
+
+% Bold Equation Number, Unbold Reference
+\makeatletter
+\def\tagform@#1{\maketag@@@{\ignorespaces#1\unskip\@@italiccorr}} % All bold in eq. number incl. parentheses 
+%\renewcommand{\eqref}[1]{\textup{{\normalfont(\ref{#1}}\normalfont)}}
+\renewcommand{\eqref}[1]{\textup{\bf(\ref{#1})}} % All bold in eq. referencing with parentheses - SBÖ
+\makeatother
+
+%\renewcommand{\theequation}{{\bf\arabic{chapter}.\arabic{equation}}} % Bold equation, unbold reference - SBÖ
+
+
 %================================ MAKE THE CODE SHORTER - SOME EXAMPLES ================================
-\def\be{\begin{equation}} 
-\def\ee{\end{equation}}
-\def\beq{\begin{eqnarray}}
-\def\eeq{\end{eqnarray}}
-\def\bse{\begin{subequations}}
-\def\ese{\end{subequations}}
-\def\nonu{\nonumber}
-\def\psibar{\overline{\psi}} 
-\def\Delslash{\partial\!\!\!\!\!/}
-\def\Gslash{G\!\!\!\!\!/}
-\def\Lmbdslash{\lambda\!\!\!\!\!/}
-\def\Jslash{J\!\!\!\!\!/}
-\def\pslash{p\!\!\!\!/}
-\def\qslash{q\!\!\!\!/}
-\def\kslash{k\!\!\!\!/}
+\def\be{\begin{equation}} %
+\def\ee{\end{equation}}%
+\def\beq{\begin{eqnarray}}%
+\def\eeq{\end{eqnarray}}%
+\def\bse{\begin{subequations}}%
+\def\ese{\end{subequations}}%
+\def\nonu{\nonumber}%
+\def\psibar{\overline{\psi}} %
+\def\Delslash{\partial\!\!\!\!\!/}%
+\def\Gslash{G\!\!\!\!\!/}%
+\def\Lmbdslash{\lambda\!\!\!\!\!/}%
+\def\Jslash{J\!\!\!\!\!/}%
+\def\pslash{p\!\!\!\!/}%
+\def\qslash{q\!\!\!\!/}%
+\def\kslash{k\!\!\!\!/}%
 \def\[{\left[}
 \def\]{\right]}
 \def\({\left(}
 \def\){\right)}
 
-\def\Lag{{\cal L}}    
-\def\D{{\cal D}}       
-\def\H{{\cal H}}       
-\def\Z{{\cal Z}}       
-\def\S{{\textbf{S}}}   
-\def\d{{\rm d}}
-\def\dt{{\rm{dt}}}
-\def\Tr{{\rm{Tr}}}
+\def\Lag{{\cal L}}    % 
+\def\D{{\cal D}}      % 
+\def\H{{\cal H}}      % 
+\def\Z{{\cal Z}}      % 
+\def\S{{\textbf{S}}}  % 
+\def\d{{\rm d}}%
+\def\dt{{\rm{dt}}}%
+\def\Tr{{\rm{Tr}}}%
 \def\gm{\gamma^{\mu}}
 \def\ga{\gamma^{\alpha}}
 \def\gb{\gamma^{\beta}}
