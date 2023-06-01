@@ -165,7 +165,7 @@ There are almost 60 transformation passes. The documented transformation passes 
 %TODO Add ASCON introduction to explain what S-box is
 One of the research topics of this study was to observe the changes to a function shown in Code \ref{lst:sbox-c} performing S-box with bitwise operations. As the pattern is large an enormous Assembly is generated without enabling optimizations. However, when the optimizations are enabled the final LLVM IR file shown in Code \ref{lst:sbox-ir} and Assembly is significantly smaller. 
 
-\lstinputlisting[language=C, label={lst:sbox-c}]{../s-box/s-box.c}
+\lstinputlisting[caption={S-box C code},language=C, label={lst:sbox-c}]{../s-box/s-box.c}
 
 At the end of optimization passes the following IR will be generated:
 \begin{minipage}{0.95\linewidth}
