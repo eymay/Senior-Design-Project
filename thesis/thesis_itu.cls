@@ -1480,12 +1480,12 @@ KISALTMALAR\fi\normalfont}
     \end{list}
     \sloppy
     \th@tesekkurStash   % the actual tesekkur
-    \vspace{30pt} \\
+    \vspace{30pt}
     \TarihKucuk \hfill \th@isimsoyisimbir \\
     \hfill \th@isimsoyisimiki \\
     \hfill \th@isimsoyisimuc \\
     
-    \vspace*{-2.54mm} \hfill \th@Unvan\\
+    \vspace*{-2.54mm} \hfill \th@Unvan
     \addcontentsline{toc}{part}{\bf{\protect\onsoznameToC}}
 }
 
