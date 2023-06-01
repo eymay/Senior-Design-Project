@@ -1098,8 +1098,8 @@ KISALTMALAR\fi\normalfont}
 	\begin{textblock*}{\textwidth}[0,0](40mm,80.5mm)
 		\centering
 		\th@titleFtSz\Baslikspacing \Baslikbir \\
-        \th@titleFtSz\Baslikspacing \Baslikiki \\
-        \th@titleFtSz\Baslikspacing \Baslikuc \\
+		\ifthenelse{\equal{\Baslikiki}{}}{}{\th@titleFtSz\Baslikspacing \Baslikiki \\}
+		\ifthenelse{\equal{\Baslikuc}{}}{}{\th@titleFtSz\Baslikspacing \Baslikuc \\}
 	\end{textblock*}
 
 	\begin{textblock*}{\textwidth}[0,0](40mm,150mm)
@@ -1173,8 +1173,8 @@ KISALTMALAR\fi\normalfont}
 	\begin{textblock*}{\textwidth}[0,0](40mm,80.5mm)
 		\centering
 		\th@titleFtSz\Baslikspacing \Baslikbir \\
-		\th@titleFtSz\Baslikspacing \Baslikiki \\
-		\th@titleFtSz\Baslikspacing \Baslikuc \\
+		\ifthenelse{\equal{\Baslikiki}{}}{}{\th@titleFtSz\Baslikspacing \Baslikiki \\}
+		\ifthenelse{\equal{\Baslikuc}{}}{}{\th@titleFtSz\Baslikspacing \Baslikuc \\}
 	\end{textblock*}
 	
 	\begin{textblock*}{\textwidth}[0,0](40mm,150mm)
@@ -1241,8 +1241,8 @@ KISALTMALAR\fi\normalfont}
 	\begin{textblock*}{\textwidth}[0,0](40mm,80.5mm)
 		\centering
         \th@titleFtSz\Baslikspacing \th@baslikbir \\
-		\th@titleFtSz\Baslikspacing \th@baslikiki \\
-		\th@titleFtSz\Baslikspacing \th@baslikuc \\
+		\ifthenelse{\equal{\th@baslikiki}{}}{}{\th@titleFtSz\Baslikspacing \th@baslikiki \\}
+		\ifthenelse{\equal{\th@baslikuc}{}}{}{\th@titleFtSz\Baslikspacing \th@baslikuc \\}
 	\end{textblock*}
 	
 	\begin{textblock*}{\textwidth}[0,0](40mm,150mm)
@@ -1299,7 +1299,7 @@ KISALTMALAR\fi\normalfont}
 	\justifying
 	\makeatother	
 	\vspace*{0pt}
-	We are submitting the Senior Design Project Interim Report entitled as “\MakeUppercase{\th@Titlebir \th@Titleiki \th@Titleuc}”.
+	We are submitting the Senior Design Project Interim Report entitled as “\MakeUppercase{\th@Titlebir} \MakeUppercase{\th@Titleiki} \MakeUppercase{\th@Titleuc}”.
    The  Senior Design Project Interim Report has been prepared as to fulfill the relevant 
    regulations of the Electronics and Communication Engineering Department of Istanbul Technical
     University. We hereby confirm that we have realized all stages of the Senior Design Project 
@@ -1624,7 +1624,7 @@ KISALTMALAR\fi\normalfont}
     \vspace*{-18pt}%
     \renewcommand{\ULdepth}{4pt}%				  Added using ulem package for \uline command - SBÖ
     \renewcommand{\ULthickness}{1.5pt}% 	Added for underline tickness change which was 0.4pt - SBÖ
-    \if@Ingilizce\hfill\vspace*{0truecm}{\bf\uline{Page}}~\else~\hfill\vspace*{0truecm}{\bf\uline{Sayfa}}\fi}\\ % Instead of \underline{text} - SBÖ
+    \if@Ingilizce\hfill\vspace*{0.5truecm}{\bf\uline{Page}}~\else~\hfill\vspace*{0.5truecm}{\bf\uline{Sayfa}}\fi}\\ % Instead of \underline{text} - SBÖ
     %\hfill\vspace*{0.5truecm}{\bf\underline{\if@Ingilizce Page\else Sayfa\fi}}}
 
     \let\orig@numberline\numberline
@@ -1743,7 +1743,8 @@ KISALTMALAR\fi\normalfont}
 	  \th@Summarypage
 	\fi
      %\newpage				% Seems like no need (it is defined below) - SBÖ
-	\BolumSagdaKalsinNolu
+    \cleardoublepage
+	%\BolumSagdaKalsin
     \oneandonehalf
      }
 
