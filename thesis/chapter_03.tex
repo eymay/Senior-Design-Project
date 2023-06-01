@@ -235,8 +235,8 @@ According to the statistics obtained from the "opt" tool of LLVM:
 \end{displayquote}
 
 \subsubsection{Early Common Subexpression Elimination - EarlyCSEPass}\label{sec:earlyCSE1}
-%TODO: Dominator tree explanation to Analysis part
-Performs a simple dominator tree walk, eliminating trivially redundant instructions.
+Performs a simple dominator tree walk, eliminating trivially redundant instructions. Dominator tree is a type of tree where every parent node dominates the child node. The definition of dominance from graph theory is that every path to the dominated node passes through the dominator node \cite{prosserDom}.
+
 
  \lstinputlisting[caption={Redundant Load Instructions in LLVM IR Before EarlyCSEPass},linerange={4-11} ,label={lst:sbox-cse1}, language=llvm, style=nasm]{../s-box/opt/SROAPass.ll}
 In Code \ref{lst:sbox-cse1} you can see that "\%x1" and "\%arrayidx2" are equal to the function argument "\%state". EarlyCSE pass detects this redundant condition and uses the already present "\%state" pointer in the output.
