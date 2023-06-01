@@ -196,8 +196,8 @@ LLVM optimization passes are responsible for the simplification of IR. In this c
 
  This pass adds metadata to LLVM IR, by analyzing it. Function attributes are used to pass information about functions between LLVM passes.
 
- \lstinputlisting[caption={LLVM IR Before InferFunctionAttrsPass},linerange={181-189} , label={lst:sbox-preinfFuncAttr},language=llvm, style=nasm]{../s-box/opt/unoptimized.ll}
- \lstinputlisting[caption={LLVM IR After InferFunctionAttrsPass},linerange={181-189} , label={lst:sbox-infFuncAttr},language=llvm, style=nasm]{../s-box/opt/inferFunctionAttrs.ll}
+ \lstinputlisting[caption={LLVM IR Before InferFunctionAttrsPass},linerange={181-185} , label={lst:sbox-preinfFuncAttr},language=llvm, style=nasm]{../s-box/opt/unoptimized.ll}
+ \lstinputlisting[caption={LLVM IR After InferFunctionAttrsPass},linerange={181-185} , label={lst:sbox-infFuncAttr},language=llvm, style=nasm]{../s-box/opt/inferFunctionAttrs.ll}
 
  Function attribute is inferred as "mustprogress" as the lifetime starting function is interacting with its environment in an observable way making a memory access \cite{llvmref-funcAttrs}. 
  \par
