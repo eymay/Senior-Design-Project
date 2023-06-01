@@ -1511,6 +1511,7 @@ KISALTMALAR\fi\normalfont}
 %   \th@ChapterStyle \abstractname\ \\
 %   \end{list}
     \singlespacing
+    \justifying
     \vspace*{18pt}
     \sloppy
     \th@ozetStash   % the actual ozet
