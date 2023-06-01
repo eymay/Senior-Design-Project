@@ -205,10 +205,12 @@ The lifetime function decides the accessibility of the pointer to the memory. Wh
 
 Aggregate IR instructions such as "alloca" are promoted to registers. The promotion to registers also means the lifetime is under control and the explicit lifetime intrinsic calls can be removed.
 
- \lstinputlisting[caption={Alloca and Lifetime Start Lines Removed From LLVM IR Before SROAPass},linerange={11-22} , label={lst:sbox-infFuncAttr},language=llvm, style=nasm]{../s-box/opt/inferFunctionAttrs.ll}
- \lstinputlisting[caption={Lifetime End Lines Removed From LLVM IR Before SROAPass},linerange={172-177} , label={lst:sbox-infFuncAttr},language=llvm, style=nasm]{../s-box/opt/inferFunctionAttrs.ll}
+ \lstinputlisting[caption={Alloca and Lifetime Start Lines Removed From LLVM IR Before SROAPass},linerange={11-22} ,language=llvm, style=nasm]{../s-box/opt/inferFunctionAttrs.ll}
+ \lstinputlisting[caption={Lifetime End Lines Removed From LLVM IR Before SROAPass},linerange={172-177} ,language=llvm, style=nasm]{../s-box/opt/inferFunctionAttrs.ll}
 
 An important transformation SROA does is promoting the use of registers instead of using the stack for local variables and using "Load/Store" operations to use them in the unoptimized IR \cite{llvmcode-sroa}. "Store/Load" operations are reduced significantly in this stage, especially for intermediate variables where the C code is not referring to the array directly. 
+
+SROA pass relies on the analysis passes of Alias Analysis through the collection of analysis passes for Loads.
 
 \lstinputlisting[linerange={15-19}, caption={NOT operations between Intermediate Variables} ,language=C, label={lst:sbox-c-nots}]{../s-box/s-box.c}
 
