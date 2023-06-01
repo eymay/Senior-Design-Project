@@ -172,7 +172,7 @@ One of the research topics of this study was to observe the changes to a functio
 At the end of optimization passes the following IR will be generated:
 \begin{minipage}{0.95\linewidth}
 
-    \lstinputlisting[caption={Optimized S-box LLVM IR}, label={lst:sbox-ir},language=llvm,style=nasm]{../s-box/opt/postOrderFuncAttrs.ll}
+\lstinputlisting[caption={Optimized S-box LLVM IR}, label={lst:sbox-ir},language=llvm,style=nasm]{../s-box/opt/postOrderFuncAttrs.ll}
 
 \end{minipage}
 LLVM optimization passes are responsible for the simplification of IR. In this case, the following passes were the passes changing the IR and were run sequentially.
@@ -267,12 +267,12 @@ This pass aims to optimize global variables and transforms them to constants if 
 
 \subsubsection{Combine Redundant Instructions - InstCombinePass}
 %TODO move transform explanations to Transforms section and only explain the example code here
-Combines redundant instructions and canonicalizes them. Canonicalization is the form in which a single way of commutability is preferred. For example, if a binary operator has a constant operand it is moved to the right. Canonic instructions can then be used by other passes which can assume the instructions to be in the canonic form \cite{llvmref-instcombine}.
+Combines redundant instructions and canonicalizes them. Canonicalization is the form in which a single way of commutability is preferred. For example, if a binary operator has a constant operand it is moved to the right. Canonic instructions can then be used by other passes which can assume the instructions to be in the canonic form \cite{llvmpass-instcombine}.
 \par 
 
 \lstinputlisting[caption={Redundant Load Instruction in LLVM IR Before InstCombine},linerange={10-17} ,label={lst:sbox-instc1_1}, language=llvm, style=nasm]{../s-box/opt/globalOptPass.ll}
 
-\lstinputlisting[caption={Removed Load Instruction in LLVM IR After InstCombine},linerange={4-11} ,label={lst:sbox-instc1_1}, language=llvm, style=nasm]{../s-box/opt/instCombine1.ll}
+\lstinputlisting[caption={Removed Load Instruction in LLVM IR After InstCombine},linerange={4-11} , language=llvm, style=nasm]{../s-box/opt/instCombine1.ll}
 
 According to the statistics obtained from the "opt" tool of LLVM:
 \begin{displayquote}
