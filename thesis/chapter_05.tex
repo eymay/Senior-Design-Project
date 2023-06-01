@@ -129,7 +129,7 @@ The logic starts from the root of the DAG which in this case is XOR instruction 
 The checks if statements are doing can be summarised in steps. As the function only runs in XOR case the root can be assumed to be XOR safely.
 \begin{enumerate}
     \item Check if the operands are both Load instructions.
-    \item Check if the Second Load instruction has an Add instruction in its second operand
+    \item Check if the second Load instruction has an Add instruction in its second operand
     \item Check if the base offset of the first load and the first addendum of the second load are the same, as they should point to the beginning of the struct.
     \item Check if the second addendum is a constant.
     \item Check if the unsigned value of constant second addendum is equal to 16.
