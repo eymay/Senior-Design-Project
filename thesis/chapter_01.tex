@@ -2,15 +2,15 @@
 % !TEX root = interimreport.tex
 \chapter{INTRODUCTION}\label{Ch1}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%TODO INTRO YAZ
-\justifying
+%%TODO Better Intro
+%Key points:
+%%ASIP are more efficient, fast 
+%%Compilers are needed to be modified to run software already developed
+%%Without compiler support ASIP becomes limited for acceleration
 
-%\section{Interim Report Explanations}\label{plan}
-%TODO remove this section
-%The table we presented in Form 3 is demonstrated in Table \ref{tab:work_plan} with updates. We completed the mac and SHLXOR \cite{Sairoglu} instructions earlier than expected and we consulted Prof. Örs Yalçın about our progress. We presented our work and since the instructions are not based on RISC-V, she advised us to change our instructions. She mentioned the Ibex processor which is a more stable core with RISC-V architecture and was extended in a past graduation project to support the ASCON encryption algorithm. We changed our instructions with compatible ones for the extended Ibex core. Convolution, deg, and AMB are replaced with ROT/ROTI and S-BOX instructions. Prof. Örs Yalçın also mentioned that the Ibex core is not able to implement the immediate rotation instruction and asked us to add the hardware. So our next tasks are implementing the S-BOX, ROT, and ROTI instructions on the LLVM compiler and adding the capability of immediate rotation to the Ibex processor. 
-
+% give hints about the upcoming chapters 
+%%compilers, llvm, riscv, ascon, llvm backend, custom instr, pattern matching and maybe testing
 Recent advances and studies on the integrated circuits caused technology to produce application specific circuits for the various areas of usage. Open source hardware and software environments are becoming more popular in IC area due to their flexible and improvable structures. For the IC mediums that dedicated to a specific application, open source processor architectures can be extended to improve their ability for a special purpose. Extensions for the open source processor architectures became a part of the industrial development. However, loading new abilities to a processor comes with a problem. Coding languages and their compilers are developed for common architecture designs. Coding an extended processor with a high level language causes to lose the use of their new abilities. A compiler extension is needed to use the high level languages. In this project, we aimed to solve this issue for an extended RISC-V processor using the LLVM compiler infrastructure. 
-%\clearpage
 \section{Purpose of Project}
 Application-Specific Instruction Set Processors (ASIPs) are becoming more popular with the development of embedded systems. The specialization of the core causes a tradeoff between flexibility and performance. For special purposes, using ASIPs increases efficiency however, we can program a custom ASIP only by using assembly instructions that we defined. Programming custom processors with assembly language is not a preferred way of coding. We are also not able to use high-level languages because compiling tools are designed for common architectures with certain instructions. The ability to add custom instructions to compilers will enable us to make more use of custom hardware designs.
 
