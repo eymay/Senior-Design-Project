@@ -1308,7 +1308,7 @@ KISALTMALAR\fi\normalfont}
 
   \vskip 30\p@ 
 
-\begin{textblock*}{\textwidth}[0,0](10mm,75mm)
+\begin{textblock*}{\textwidth}[0,0](10mm,95mm)
   \raggedright
 	\hspace{70\p@}\th@titleFtSz \th@isimsoyisimbir  \\
 	\hspace{70\p@}\th@titleFtSz (\th@ogrencinobir) \\
