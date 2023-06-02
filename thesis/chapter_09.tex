@@ -3,21 +3,23 @@
 \clearpage
 \chapter{NEW INSTRUCTIONS}\label{Ch9}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+This chapter contains more examples and demonstrations of new instructions.
 
 \section{SHLXOR Instruction}
-We extended the instruction set by adding the SHLXOR instruction. The purpose of this instruction is to shift the first source operand one bit to the left and then XOR it with the second source operand. Then, the obtained result is stored in the destination register. By adding this instruction, we can perform this operation with a single instruction instead of using shift left and XOR instructions separately, making it more efficient.
+The purpose of SHLXOR instruction is to shift the first source operand one bit to the left and then XOR it with the second source operand. Then, the obtained result is stored in the destination register. By adding this instruction, we can perform this operation with a single instruction instead of using shift left and XOR instructions separately, making it more efficient.
 Let’s give an example to make it clearer what this instruction does. RS1 and RS2 are source operands and RD is the output.
-\\
+\par
 RS1: 0x0101     RS2: 0xFFFF     RD: 0xFDFD
-\\
+\par
 0x0101 is shifted left by one and then XOR’ed with 0xFFFF, giving the result 0xFDFD.
-As we mentioned, this new instruction requires two source registers and one destination register. Therefore, unlike the MLA instruction, we don’t need to create a new class to support it. There is already a class named ALU\_rr in the RISCVInstrinfo.td file that has two source and one destination register. Therefore, the new SHLXOR instruction is going to belong to the ALU\_rr class. The ALU\_rr class is given below.
+As we mentioned, this new instruction requires two source registers and one destination register. Therefore, unlike the MLA instruction, we don’t need to create a new class to support it. There is already a class named ALU\_rr in the RISCVInstrinfo.td file that has two source and one destination register. Therefore, the new SHLXOR instruction is going to belong to the ALU\_rr class. The ALU\_rr class definition is given below.
 
 \begin{lstlisting}
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
 class ALU_rr<bits<7> funct7, bits<3> funct3, string opcodestr,
 bit Commutable = 0>
-: RVInstR<funct7, funct3, OPC_OP, (outs GPR:\$rd), (ins GPR:\$rs1, GPR:\$rs2),
+: RVInstR<funct7, funct3, OPC_OP, (outs GPR:\$rd),
+                                   (ins GPR:\$rs1, GPR:\$rs2),
 opcodestr, "\$rd, \$rs1, \$rs2"> {
 let isCommutable = Commutable;
 }
@@ -28,14 +30,14 @@ In the RISCVInstrInfoCrypt.td file, we add the definition of the SHLXOR instruct
 
 \begin{lstlisting}
 def SHLXOR : ALU_rr<0b0011000, 0b111, "shlxor">,
-Sched<[WriteIALU, ReadIALU, ReadIALU]>;
+                        Sched<[WriteIALU, ReadIALU, ReadIALU]>;
 \end{lstlisting}
 
 Also in the same file, we define the instruction’s pattern. When we examine this definition, we can clearly see what the instruction performs and its pattern. In the inner parentheses, we can see the shifting of the first source operand by one bit. Then, the result of this shifting operation is used as an input for the XOR operation alongside the second source operand.
 
 \begin{lstlisting}
-def : Pat< (xor (shl GPR:\$src1, (i32 1)), GPR:\$src2),
-(SHLXOR GPR:\$src1, GPR:\$src2)>;
+def : Pat< (xor (shl GPR:$src1, (i32 1)), GPR:$src2),
+                              (SHLXOR GPR:$src1, GPR:$src2)>;
 \end{lstlisting}
 
 After doing these, we can try it with a simple C code given below. 
@@ -59,10 +61,7 @@ clang -S -target riscv32-linux-gnu -emit-llvm shlxor.c
 \end{lstlisting}
 
 
-%TODO lets set standard bin directory throughout thesis 
-Here, CustomInstrLLVM is the folder that we built llvm in.
-
-This C code basically shifts the variable a by one bit and XOR’s it with b variable. Then the result is stored in a. We can see that, the register that stores the value a is both the first source register and the destination register. The assembly output is given below.
+This C code basically shifts the variable "a" by one bit and XOR’s it with "b" variable. Then the result is stored in "a". We can see that, the register that stores the value "a" is both the first source register and the destination register. The assembly output is given below.
 %TODO find RISCV latex syntax 
 %TODO and TableGen
 \begin{lstlisting}%[language={[RISC-V]Assembler}]
@@ -104,9 +103,9 @@ shlxor:                                 # @shlxor
 	ret
 \end{lstlisting}
 
-In the assembly output, we can see the SHLXOR instruction in line 29. a1 and a2 are the sources and a1 is also the destination as we can see.
+In the assembly output, we can see the SHLXOR instruction in line 28. a1 and a2 are the sources and a1 is also the destination as we can see.
 
-In addition to that, we can check the DAG in order to see the effect of our newly added instruction. We can compare the DAGs before the new instruction is added and after. We can observe the DAG before SHLXOR is added in Figure \ref{fig:shlxor_before}. In this DAG, shift left (shl) and xor instructions can be seen seperately
+In addition to that, we can check the DAG in order to see the effect of our newly added instruction. We can compare the DAGs before and after the new instruction is added. We can observe the DAG before SHLXOR is added in Figure \ref{fig:shlxor_before}. In this DAG, shift left (shl) and xor instructions can be seen seperately
 
 \begin{figure}[h!]
     \centering
@@ -115,7 +114,7 @@ In addition to that, we can check the DAG in order to see the effect of our newl
     \label{fig:shlxor_before}
 \end{figure}
 
-The DAG after we add the SHLXOR instruction can be seen in figure \ref{fig:shlxor_after}. In this DAG, instead of two seperate instructions, a single SHLXOR instruction can be seen.
+The DAG after we add the SHLXOR instruction can be seen in Figure \ref{fig:shlxor_after}. In this DAG, instead of two separate instructions, a single SHLXOR instruction can be seen.
 
 \begin{figure}[h!]
     \centering
@@ -125,9 +124,9 @@ The DAG after we add the SHLXOR instruction can be seen in figure \ref{fig:shlxo
 \end{figure}
 
 \section{RORI Instruction}
-One of the Instructions that we worked on is RORI instruction. The purpose of this instruction is to take the operand and rotate it to the right by the amount of the immediate value. This is different from shifting right using an immediate. When shifting a number to the right, the rightmost (least significant) bits are deleted and the leftmost (most significant) bits are filled in with zeros. On the other hand, when a number is rotated right, the least significant bits that are pushed out are not deleted but written into the most significant bits. We want to add add an instruction that performs this operation.
+One of the Instructions that we worked on is RORI instruction. The purpose of this instruction is to take the operand and rotate it to the right by the amount of the immediate value. This is different from shifting right using an immediate. When shifting a number to the right, the rightmost (least significant) bits are deleted and the leftmost (most significant) bits are either zero or sign extended. On the other hand, when a number is rotated right, the least significant bits that are pushed out are not deleted but written into the most significant bits. We want to add an instruction that performs this operation.
 
-First of all, we tried pattern matching and added the definition and pattern of our new instruction to the InstrInfoCrypt.td file. However, that didn’t work and we couldn’t see the RORI instruction when we checked our assembly output created by using a simple C code that implements the rotation operation. This is because the pattern can have different combinations and may not match with what we expect. Therefore, the instruction cannot be recognized and we can’t see it in the assembly output.
+First of all, we tried pattern matching and added the definition and pattern of our new instruction to the InstrInfoCrypt.td file. However, the RORI instruction was not observed when we checked the assembly output created by using a simple C code that implements the rotation operation. This is because the pattern can have different combinations and may not match with what we expect. Therefore, the instruction cannot be recognized and we can’t see it in the assembly output.
 
 Realizing that, we looked for other options and tried to make use of intrinsics and builtin functions. We added the definitions into the InstrInfoCrypt.td file.
 
@@ -138,11 +137,11 @@ def ROTI : ALU_ri<0b101, "roti">;
 It is ALU\_ri type because one of the operands is an immediate value and we only need one register for this instruction.
 
 \begin{lstlisting}
-def : Pat<(rotr GPR:\$rs1, simm12:\$imm12),
-(ROTI GPR:\$rs1, simm12:\$imm12)>;
+def : Pat<(rotr GPR:$rs1, simm12:$imm12),
+(ROTI GPR:$rs1, simm12:$imm12)>;
 \end{lstlisting}
 
-We used rotr here because we wanted to make use of the builtin function \_\_builtin\_rotateright32. rotr is defined in the RISVIselLowering.cpp file.
+We used rotr here because we wanted to make use of the builtin function \_\_builtin\_rotateright32. "rotr" is defined in the RISVIselLowering.cpp file.
 
 \begin{lstlisting}[language=C++]
 if (Subtarget.hasStdExtZbb() || Subtarget.hasStdExtZbkb()) {
@@ -153,7 +152,7 @@ setOperationAction({ISD::ROTL, ISD::ROTR}, XLenVT, Expand);
 }
 \end{lstlisting}
 
-However, we need to change the “Expand” to “Legal” in here otherwise we will not see the ROTI instruction in the assembly output.  This way, we are legalizing the action. If we don’t do this, we will see the fshr (funnel shift right) intrinsic in the .ll file but ROTI won’t make it into the assembly output. After doing these, we can try it with a simple C code. As mentioned before, we used a built in rotate function in the C code given below. 
+However, we need to change the “Expand” to “Legal” in here otherwise we will not see the ROTI instruction in the assembly output.  This way, we are legalizing the action. If we don’t do this, we will see the fshr (funnel shift right) intrinsic in the .ll file but ROTI won’t make it into the assembly output. After doing these, we can try it with a simple C code. As mentioned before, we used a built in rotate function in the C code given below to guarantee the generation of "fshl" llvm intrinsic function. 
 %\ref{fig:c_code_with_builtin_function_for_roti}.
 
 \begin{lstlisting}[language=C++]
@@ -174,8 +173,8 @@ clang -S -target riscv32-linux-gnu -emit-llvm roti.c
 
 The simplified contents of the .ll file is given below.
 
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=llvm,style=nasm]
-
 @a = dso_local global i32 0
 
 define void @ROT() {
@@ -186,12 +185,13 @@ define void @ROT() {
   ret void
 }
 \end{lstlisting}
+\end{minipage}
 
-The fshr intrinsic is visible in the twelfth line. After that, the assembly output can be obtained by running the following command. 
+The fshr intrinsic is visible in the sixth line. After that, the assembly output can be obtained by running the following command. 
 %The assembly output is given in figure \ref{fig:roti_assembly_output}.
 
 \begin{lstlisting}[language=Bash]
-~/CustomInstrLLVM/build/bin/llc -mtriple=riscv32 roti.ll$
+<llvm-build-path>/build/bin/llc -mtriple=riscv32 roti.ll$
 \end{lstlisting}
 
 The obtained assembly output is given below.
@@ -231,22 +231,21 @@ ROT:                                    # @ROT
 
 The ROTI instruction can be seen in the assembly output in line 23. As expected, it uses one register as both  the destination and the source alongside an immediate value.
 
-This way, we succesfully obtained the ROTI instruction. However, using the builtin function while writing the C code wasn’t the prettiest solution. Therefore, we looked further into how we can implement this. After that, we realized that there is a bit manipulation extension for RISCV and what we need was in the RISCVInstrInfoZb.td file. This file contains the instruction extensions for bit manipulations. These instructions operate on the bits of the data and RORI is one of those instructions. However, in order to utilize this extension, we need to add some flags to the command while running clang in order to get an assembly output from the C code we write. The simple C code for RORI is given below .%in figure \ref{fig:c_code_for_rori}.
+ After further investigation, we realized that rotation instruction was already implemented in bit manipulation extension for RISC-V and in the RISCVInstrInfoZb.td file. This file contains the instruction extensions for bit manipulations. These instructions operate on the bits of the data and RORI is one of those instructions. However, in order to utilize this extension, we need to add some flags to the command while running Clang in order to get an assembly output from the C code we write. The simple C code for RORI is given below .
 
 \begin{lstlisting}[language=C++]
 #define XLEN 32
 #include <stdint.h>
 #define uint_xlen_t uint32_t
 
-uint_xlen_t rotimm(uint_xlen_t rs1)
-{
-uint_xlen_t a = 0;
-a = ((rs1>>2) | (rs1<<(XLEN-2)));
-return a;
+uint_xlen_t rotimm(uint_xlen_t rs1){
+   uint_xlen_t a = 0;
+   a = ((rs1>>2) | (rs1<<(XLEN-2)));
+   return a;
 }
 \end{lstlisting}
 
-Here, we use 32 as the length because our target is 32-bit and the rotation is implemented in the eighth line. After that, we run the following command with additional flags as mentioned before.
+Here, we use 32 as the length because our target is 32-bit. The rotation is implemented in the seventh line. After that, we run the following command with additional flags as mentioned before.
 
 \begin{lstlisting}[language=Bash]
 clang --target=riscv32 -O -S rori.c -march=rv32imaczbb
@@ -255,44 +254,31 @@ clang --target=riscv32 -O -S rori.c -march=rv32imaczbb
 Here, -O defines the level of optimization. -S is used for getting an assembly file as an output. rori.c is the name of our simple C code. -march=rv32imaczbb designates that we want to utilize the zbb subgroup of the bit manipulation extension. The assembly output is given below.%in figure \ref{fig:rori_assembly_output}.
 
 \begin{lstlisting}
-	.text
-	.attribute	4, 16
-	.attribute	5, "rv32i2p0_m2p0_a2p0_c2p0_zbb1p0"
-	.file	"rori.c"
-	.globl	rotimm
-	.p2align	1
-	.type	rotimm,@function
 rotimm:
 	rori	a0, a0, 2
 	ret
-.Lfunc_end0:
-	.size	rotimm, .Lfunc_end0-rotimm
-
-	.ident	"Ubuntu clang version 14.0.0-1ubuntu1"
-	.section	".note.GNU-stack","",@progbits
-	.addrsig
 \end{lstlisting}
 
 This way, we managed to succesfully obtain RORI instruction in the assembly output.
 
 \section{NAXOR Instruction}
 
-S-box algorithm includes a certain pattern that is used repeatedly. Not and xor pattern is used five times in an s-box cycle. This pattern is lowered into one instruction using TableGen. Definition and specifications of the pattern are added to RISCVInstrInfoCrypt.td file. After matching this pattern 15 rows of the assembly file is reduced to one single instruction. For future works in this field, this pattern can be implemented in a single cycle by adding a new extension to the Ibex core.  
+S-box algorithm includes a certain pattern that is used repeatedly. NOT-AND-XOR pattern is used five times in an s-box cycle. This pattern is lowered into one instruction using TableGen. Definition and specifications of the pattern are added to RISCVInstrInfoCrypt.td file. After matching this pattern 15 rows of the assembly file is reduced to one single instruction. 
 
 \begin{lstlisting}
 def NAXOR : ALU_rrr<0b11, 0b100, "naxor">,
 Sched<[WriteIMul, ReadIMul, ReadIMul]>;
 \end{lstlisting}
 
-Since there are three variables in this instruction, custom ALU\_rrr class is used which is explained in code \ref{lst:ALU_rrr}. 11 and 100 numbers are used for funct2 and funct3.
-\\\\
+Since there are three variables in this instruction, custom ALU\_rrr class is used which is explained in Section \ref{sec:alurrr}. "11" and "100" base 2 numbers are used for funct2 and funct3.
+
 \begin{lstlisting}
 def : Pat< (xor (and (not GPR:$src1), GPR:$src2), GPR:$src3),
-(NAXOR GPR:$src1, GPR:$src2, GPR:$src3)>;
+                           (NAXOR GPR:$src1, GPR:$src2, GPR:$src3)>;
 \end{lstlisting}
 
-This pattern is used 5 times in the rectangular shape of the \ref{fig:bit_manipulation_extension_groupings}. NAXOR instruction reduces 15 instructions into 5 instructions.
-\\\\
+This pattern is repeated 5 times as emphasized in Figure \ref{fig:sbox_naxor_pattern}. NAXOR instruction reduces 15 instructions into 5 instructions.
+
 \begin{figure}
     \centering
     \includegraphics[scale=0.3]{adding_new_instr/sbox_naxor_pattern.png}
@@ -314,65 +300,25 @@ This pattern is used 5 times in the rectangular shape of the \ref{fig:bit_manipu
     \label{fig:naxor_dag_diagram}
 \end{figure}
 
-\begin{lstlisting}[caption= C code input for the S-box algorithm]
-
-	typedef struct {
-  int x[5];
-} ascon_state_t;
-
-void sbox(ascon_state_t state) {
-int t0, t1, t2, t3, t4;
-state.x[0] ^= state.x[4];
-state.x[4] ^= state.x[3];
-state.x[2] ^= state.x[1];
-t0  = state.x[0];
-t1  = state.x[1];
-t2  = state.x[2];
-t3  = state.x[3];
-t4  = state.x[4];
-t0 =~ t0;    
-t1 =~ t1;    
-t2 =~ t2;    
-t3 =~ t3;    
-t4 =~ t4;
-t0 &= state.x[1];
-t1 &= state.x[2];
-t2 &= state.x[3];
-t3 &= state.x[4];
-t4 &= state.x[0];
-state.x[0] ^= t1;
-state.x[1] ^= t2;
-state.x[2] ^= t3;
-state.x[3] ^= t4;
-state.x[4] ^= t0;
-state.x[1] ^= state.x[0];
-state.x[0] ^= state.x[4];
-state.x[3] ^= state.x[2];
-state.x[2] =~ state.x[2];
-
-return;
-}
-
-\end{lstlisting}
-
-\begin{minipage}{0.95\linewidth}
-
-\lstinputlisting[caption={Optimized S-box LLVM IR}, language=llvm, style=nasm]{../s-box/keccakO3.ll}
-
+\begin{minipage}{\linewidth}
+\lstinputlisting[caption={C code input for the S-box algorithm},language=C, label={lst:sbox-c2}]{../s-box/s-box.c}
 \end{minipage}
 
-%\\\\
-\begin{lstlisting}[caption= Assembly output without NAXOR instruction]
-    .text
-	.attribute	4, 16
-	.attribute	5, "rv32i2p0"
-	.file	"s-box.c"
-	.globl	sbox                            # -- Begin function sbox
-	.p2align	1
-	.type	sbox,@function
-sbox:                                   # @sbox
-	.cfi_startproc
-# \%bb.0:
+\begin{minipage}{\linewidth}
+\lstinputlisting[caption={Optimized S-box LLVM IR}, language=llvm, style=nasm]{../s-box/keccakO3.ll}
+\end{minipage}
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.19]{adding_new_instr/naxor_match.png}
+    \caption{Dag diagram output for the s-box algorithm after NAXOR instruction is matched}
+    \label{fig:naxor_match_diagram}
+\end{figure}
+
+%TODO I couldnt bring the two codes together idk why
+\begin{minipage}[t]{.4\linewidth}
+\begin{lstlisting}[caption={Assembly output without NAXOR instruction}]
+sbox:            
 	lw	a1, 16(a0)
 	lw	a2, 0(a0)
 	lw	a3, 12(a0)
@@ -406,35 +352,13 @@ sbox:                                   # @sbox
 	not	a1, a1
 	sw	a1, 8(a0)
 	ret
-.Lfunc_end0:
-	.size	sbox, .Lfunc_end0-sbox
-	.cfi_endproc
-                                        # -- End function
-	.ident	"clang version 17.0.0 (https://github.com/llvm/llvm-project.git e3dd9f7e66fec22986605da2dcd8120a7864455d)"
-	.section	".note.GNU-stack","",@progbits
-
 \end{lstlisting}
+\end{minipage}
 
 
-\begin{figure}
-    \centering
-    \includegraphics[scale=0.19]{adding_new_instr/naxor_match.png}
-    \caption{Dag diagram output for the s-box algorithm after NAXOR instruction is matched}
-    \label{fig:naxor_match_diagram}
-\end{figure}
-
-
-\begin{lstlisting}[caption= Assembly output with NAXOR instruction]
-    .text
-	.attribute	4, 16
-	.attribute	5, "rv32i2p0"
-	.file	"s-box.c"
-	.globl	sbox                            # -- Begin function sbox
-	.p2align	1
-	.type	sbox,@function
-sbox:                                   # @sbox
-	.cfi_startproc
-# \%bb.0:
+\begin{minipage}[t]{.4\linewidth}
+\begin{lstlisting}[caption={Assembly output with NAXOR instruction}]
+sbox:         
 	lw	a1, 16(a0)
 	lw	a2, 0(a0)
 	lw	a3, 12(a0)
@@ -458,26 +382,14 @@ sbox:                                   # @sbox
 	not	a1, a1
 	sw	a1, 8(a0)
 	ret
-.Lfunc_end0:
-	.size	sbox, .Lfunc_end0-sbox
-	.cfi_endproc
-                                        # -- End function
-	.ident	"clang version 17.0.0 (https://github.com/llvm/llvm-project.git e3dd9f7e66fec22986605da2dcd8120a7864455d)"
-	.section	".note.GNU-stack","",@progbits
-
 \end{lstlisting}
+\end{minipage}
 
 15 lines of not, and, xor operations are reduced to 5 NAXOR instructions.
-\\\\
-
-
-
-
-
 
 \section{LXR Instruction}
 
-S-box algorithm uses multiple inputs and outputs and they are supposed to be loaded and stored to the registers during implementation. An example pattern is matched using TableGen. LXR instruction covers an xor operation of two loaded numbers. ALU\_rrr class (\ref{lst:ALU_rrr}) is used to match the pattern since three registers are used in the instruction.
+S-box algorithm uses multiple inputs and outputs and they are supposed to be loaded and stored to the registers during implementation. An example pattern is matched using TableGen. LXR instruction covers an XOR operation of two loaded numbers. ALU\_rr class is used.
 
 \begin{lstlisting}
 let mayLoad = 1 in{
@@ -486,19 +398,19 @@ Sched<[WriteIALU, ReadIALU, ReadIALU]>;
 }
 \end{lstlisting}
 
-ALU\_rr class is used and 0011011, 101 numbers are used for opcodes. mayLoad flag is 1 to enable the load instruction in pattern.
-\\
+ALU\_rr class is used and 0011011, 101 base 2 numbers are used for funct7 and funct3. \textit{mayLoad} flag is 1 to enable the load instruction in pattern.
+
 \begin{lstlisting}
 def : Pat< (xor (load GPR:$rs1),(load GPR:$rs2)),
 (LXR GPR:$rs1,GPR:$rs2)>;
 \end{lstlisting}
 
 LXR instruction covers the xor operation of two loaded numbers.
-\\
+
 
 \begin{figure}
     \centering
-    \includegraphics[scale=0.3]{adding_new_instr/lxr_sched.png}
+    \includegraphics[scale=0.25]{adding_new_instr/lxr_sched.png}
     \caption{Dag diagram for the example LXR algorithm before scheduling}
     \label{fig:lxr_sched_diagram}
 \end{figure}
@@ -506,11 +418,12 @@ LXR instruction covers the xor operation of two loaded numbers.
 
 \begin{figure}
     \centering
-    \includegraphics[scale=0.5]{adding_new_instr/lxr_dag_diagram.png}
+    \includegraphics[scale=0.4]{adding_new_instr/lxr_dag_diagram.png}
     \caption{Dag diagram output for the example LXR algorithm}
     \label{fig:lxr_dag_diagram}
 \end{figure}
 
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[caption={Intermediate Representation code input for LXR algorithm}, language=llvm, style=nasm]
     define i32 @foo(ptr %p1, ptr %p2) {
         %a = load i32, ptr %p1
@@ -519,63 +432,30 @@ LXR instruction covers the xor operation of two loaded numbers.
         ret i32 %res
       }
 \end{lstlisting}
+\end{minipage}
 
-
-%\\\\
 
 \begin{lstlisting}[caption= Assembly output without LXR instruction]
-      
-          .text
-          .attribute	4, 16
-          .attribute	5, "rv32i2p0"
-          .file	"lxr.ll"
-          .globl	foo                             # -- Begin function foo
-          .p2align	2
-          .type	foo,@function
-      foo:                                    # @foo
-          .cfi_startproc
-      # \%bb.0:
+      foo:                 
           lw	a0, 0(a0)
           lw	a1, 0(a1)
           xor	a0, a0, a1
           ret
-      .Lfunc_end0:
-          .size	foo, .Lfunc_end0-foo
-          .cfi_endproc
-                                              # -- End function
-          .section	".note.GNU-stack","",@progbits
-      
-      
 \end{lstlisting}
 
 
 \begin{figure}
     \centering
-    \includegraphics[scale=0.3]{adding_new_instr/lxr_match.png}
+    \includegraphics[scale=0.25]{adding_new_instr/lxr_match.png}
     \caption{Dag diagram output for the example LXR algorithm after LXR instruction is matched}
     \label{fig:lxr_match}
 \end{figure}
 
 
 \begin{lstlisting}[caption= Assembly output with LXR instruction]
-    .text
-	.attribute	4, 16
-	.attribute	5, "rv32i2p0"
-	.file	"lxr.ll"
-	.globl	foo                             # -- Begin function foo
-	.p2align	2
-	.type	foo,@function
-foo:                                    # @foo
-	.cfi_startproc
-# \%bb.0:
+foo:               
 	lxr	a0, a0, a1
 	ret
-.Lfunc_end0:
-	.size	foo, .Lfunc_end0-foo
-	.cfi_endproc
-                                        # -- End function
-	.section	".note.GNU-stack","",@progbits
 \end{lstlisting}
 
 Two loads and one xor instructions are reduced to LXR instruction.
-\\\\
