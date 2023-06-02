@@ -1,4 +1,6 @@
-\chapter{APPENDIX A.1}
+\chapter{APPENDICES}
+%TODO chapter page in pdf contents is 1 only for this section
+\section*{APPENDIX A.1}
 \vglue6pt
 % For Appendix A.1
 % Format the equation environment
@@ -60,7 +62,7 @@ While running ninja, CPU and ram usage significantly increases. All available co
 \section{Unoptimized S-box IR Code}
 The output of the unoptimized S-box function is provided below. The C code used to produce this LLVM IR is in Code \ref{lst:sbox-c}
 
-\lstinputlisting[language=llvm,style=nasm]{../s-box/opt/unoptimized.ll}
+\lstinputlisting[language=llvm,style=nasm, label={lst:unopt-sbox}]{../s-box/opt/unoptimized.ll}
 
 \newpage
 
