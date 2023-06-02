@@ -158,7 +158,10 @@
 \@KisaltmaListesiVarfalse
 
 \newif\if@TabloListesiVar   %% Tablo Listesi Olsun mu?
-\@TabloListesiVartrue       %% Default = Var
+\@TabloListesiVarfalse       %% Default = Var
+
+\newif\if@KodListesiVar   %% Kod Listesi Olsun mu?
+\@KodListesiVarfalse       %% Default = Var
 
 \newif\if@SekilListesiVar   %% Sekil Listesi Olsun mu?
 \@SekilListesiVartrue       %% Default = Var
@@ -447,6 +450,7 @@
 \newcommand{\oneandonehalf}{\setlength{\baselineskip}{1.5\defbaselineskip}}            %%\oneandonehalf = 1.5*\defbaselineskip
 \newcommand{\LoFspacing}{\setlength{\baselineskip}{1.0\defbaselineskip}}               %%\LoFspacing = 1.0*\defbaselineskip 08-05-2006
 \newcommand{\LoTspacing}{\setlength{\baselineskip}{1.0\defbaselineskip}}               %%\LoTspacing = 1.0*\defbaselineskip 08-05-2006
+\newcommand{\LoCspacing}{\setlength{\baselineskip}{1.0\defbaselineskip}}               %%\LoTspacing = 1.0*\defbaselineskip 08-05-2006
 \newcommand{\ToCspacing}{\setlength{\baselineskip}{1.0\defbaselineskip}}               %%\ToCspacing = 1.0*\defbaselineskip 08-05-2006
 \newcommand{\Baslikspacing}{\setlength{\baselineskip}{1.0\defbaselineskip}}            %%\Baslikspacing = 1.3*\defbaselineskip 08-05-2006
 
@@ -511,6 +515,8 @@
 İÇİNDEKİLER\fi\normalfont}
 \newcommand*{\listtablenameToC}{\fontfamily{ptm}\normalsize\selectfont \if@Ingilizce LIST OF TABLES\else ÇİZELGE
 LİSTESİ\fi\normalfont}
+\newcommand*{\listcodenameToC}{\fontfamily{ptm}\normalsize\selectfont \if@Ingilizce LIST OF CODES\else KOD
+LİSTESİ\fi\normalfont}
 \newcommand*{\listfigurenameToC}{\fontfamily{ptm}\normalsize\selectfont \if@Ingilizce LIST OF FIGURES\else ŞEKİL
 LİSTESİ\fi\normalfont}
 \newcommand*{\abstractnameToC}{\fontfamily{ptm}\normalsize\selectfont SUMMARY\normalfont}
@@ -538,9 +544,11 @@ KISALTMALAR\fi\normalfont}
 \def\contentsname{\th@ChapHead{\if@Ingilizce TABLE OF CONTENTS\else İÇİNDEKİLER\fi}}
 \def\listfigurename{\th@ChapHead{\if@Ingilizce LIST OF FIGURES\else ŞEKİL LİSTESİ\fi}}
 \def\listtablename{\th@ChapHead{\if@Ingilizce LIST OF TABLES\else ÇİZELGE LİSTESİ\fi}}
+\def\listcodename{\th@ChapHead{\if@Ingilizce LIST OF CODES\else KOD LİSTESİ\fi}}
 \def\indexname{\th@ChapHead{\if@Ingilizce INDEX\else DİZİN\fi}}
 \def\figurename{\bf \if@Ingilizce Figure\else Şekil\fi}
 \def\tablename{\bf \if@Ingilizce Table\else Çizelge\fi}
+\def\codename{\bf \if@Ingilizce Code\else Kod\fi}
 \def\partname{\th@ChapHead{\if@Ingilizce PART\else KISIM\fi}}
 \def\glossaryname{\th@ChapHead{\if@Ingilizce DICTIONARY\else TERİMLER SÖZLÜĞÜ\fi}}
 
@@ -1732,6 +1740,10 @@ KISALTMALAR\fi\normalfont}
         \if@TabloListesiVar
 	\LoTspacing
 	\listoftables
+        \fi
+        \if@KodListesiVar
+	\LoCspacing
+	\lstlistoflistings
         \fi
         \if@SekilListesiVar
 	\LoFspacing
