@@ -1294,10 +1294,10 @@ KISALTMALAR\fi\normalfont}
 	%\thispagestyle{empty}
 	%\addtocontents{toc}{\protect\addvspace{-10\p@}}
 	%\addcontentsline{toc}{chapter}{\bf{\protect\frontcoverToC}}
-	\singlespacing  				% For single spacing in the top portion of kapak - SBÖ
+	%\singlespacing  				% For single spacing in the top portion of kapak - SBÖ
 	\makeatletter
 	\makeatother	
-	\vspace*{0pt}
+    \vspace*{\UstenBosluk}
 	We are submitting the Senior Design Project Report entitled as “\MakeUppercase{\th@Titlebir} \MakeUppercase{\th@Titleiki} \MakeUppercase{\th@Titleuc}”.
    The  Senior Design Project Report has been prepared as to fulfill the relevant 
    regulations of the Electronics and Communication Engineering Department of Istanbul Technical
