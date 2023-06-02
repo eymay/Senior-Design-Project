@@ -5,7 +5,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\vspace*{-12pt} % If no text above section, use this vspacing to lift the whole part to the proper starting point - SBÖ
 
-LLVM is a collection of modular and flexible libraries and a toolchain software that can be used to build a wide variety of compilers and other tools. LLVM compilers are organized into a set of libraries that implement the parts of a compiler. There are different front-end libraries a for every language and different back-end libraries for every architecture. There is only one common intermediate representation optimizer that connects specific front-end and back-end.
+LLVM is a collection of modular and flexible libraries and a toolchain software that can be used to build a wide variety of compilers and other tools. LLVM compilers consist of a set of libraries that implement the parts of a compiler. There are different front-end libraries a for every language and different back-end libraries for every architecture. There is only one common intermediate representation optimizer that connects specific front-end and back-end.
 
 \begin{figure}
     \centering
@@ -14,13 +14,13 @@ LLVM is a collection of modular and flexible libraries and a toolchain software 
     \label{fig:llvm_diagram}
 \end{figure}
 
-LLVM IR is the common representation of languages. Various LLVM front-ends translate related languages into IR. Related back-end compiles IR into assembly according to the target hardware. This structure helps to increase flexibility between front-ends and back-ends. With this structure, we are able to have compilers for every combination of M source codes and N targets with M front-end and N back-end instead of M*N compilers. In our case, we do not have to struggle with the front-end also our back-end will be working for every source code of LLVM because of this benefit. The front-end we use in the developing process will be clang which is the LLVM C/C++ front-end\cite{clang}.
+LLVM IR is the common target of programming languages and is the source for every target hardware. Various LLVM front-ends translate related languages into IR. Related back-end compiles IR into assembly according to the target hardware. This structure helps to increase flexibility between front-ends and back-ends. With this structure, we are able to have compilers for every combination of $M$ source codes and $N$ targets with $M$ front-end and $N$ back-end instead of $MxN$ compilers. In our case, we do not have to deal with the front-end as our customised back-end will be lowering any input programming language thanks to LLVM IR. The front-end we use in the development process will be Clang which is the LLVM C/C++ front-end\cite{clang}.
 
-The concept of instrinsic function is supported by LLVM. They are internal functions and they have their semantics directly defined by LLVM itself. LLVM provides both target-independent and target-specific intrinsics. \cite{llvmdevmeeting} These intrinsics have well known semantics and names and they must adhere to certain restrictions. In general, these intrinsics serve as an expansion mechanism for the LLVM language that does not necessitate modifying all of the transformations in LLVM when introducing changes to the language. Intrinsic function names start with “llvm.” \cite{googlesiteintrinsic}
+In LLVM, instrinsic functions are internal functions and they have their semantics directly defined by LLVM itself. LLVM provides both target-independent and target-specific intrinsics. \cite{llvmdevmeeting} These intrinsics have well known semantics and names and they must adhere to certain restrictions. In general, these intrinsics serve as an expansion mechanism for the LLVM language that does not necessitate modifying all of the transformations in LLVM when introducing changes to the language. Intrinsic function names start with “llvm.” \cite{googlesiteintrinsic}
 
-There are also builtin functions that are supported by Clang. Some of these have the same syntax as GCC. In addition to these, Clang supports other builtin functions that GCC doesn’t. Some of these are \_\_builtin\_shufflevector, \_\_builtin\_unreachable etc. As we can see, these builtin functions start with double underscores.
+Clang supports the notion of builtin functions used in GCC. Some of these have the same syntax as in GCC to not disrupt portability. In addition to these, Clang supports other builtin functions that GCC doesn’t. Some of these are \_\_builtin\_shufflevector, \_\_builtin\_unreachable etc. As we can see, these builtin functions start with double underscores. 
 
-Intrinsic functions and builtin functions are two seperate things and should not be confused. Builtins are at C level (source code) while intrinsics are LLVM IR level and a builtin may or may not be expanded into intrinsic calls.
+Intrinsic functions and builtin functions are two seperate things and should not be confused. Builtins are at C level (source code) while intrinsics are LLVM IR level and are not exposed to the user. A builtin function may or may not be expanded into intrinsic calls. It is possible to connect a new builtin function in the front-end to an intrinsic in the middle-end.
 
 \section{Parts of the Clang Front-end}
 
@@ -38,7 +38,7 @@ Clang Sema Library is a semantic analyzer that involves examining the meaning an
 
 \subsection{Clang CodeGen Library}
 
-Clang CodeGen is the code generation library that takes the abstract syntax tree which is generated by the parser and corrected by the semantic analyzer as input. It generates the intermediate representation code and produces a .ll file which will be used in the back-end. The implementation files of the Clang lexer can be found in the llvm-project/clang/lib/CodeGen directory within the LLVM infrastructure. 
+Clang CodeGen is the code generation library that takes the abstract syntax tree as input which is generated by the parser and corrected by the semantic analyzer. It generates the intermediate representation code and produces a .ll file which will be used in the back-end. The implementation files of the Clang lexer can be found in the llvm-project/clang/lib/CodeGen directory within the LLVM infrastructure. 
 
 \section{LLVM IR Optimizer}\label{sec:opt}
 LLVM IR is an intermediate representation which serves as a common ground for front-ends and back-ends. LLVM IR is not as high level as programming languages but it provides more information than assembly by having types or more expressive functions. LLVM IR instructions are stored in Basic Block structures which contain sequential IR instructions with an entry and exit. 
@@ -163,15 +163,15 @@ There are almost 60 transformation passes. The documented transformation passes 
 
 \subsection{Case Study: Optimizations on S-box }\label{sbox-case}
 %TODO Add ASCON introduction to explain what S-box is
-One of the research topics of this study was to observe the changes to a function shown in Code \ref{lst:sbox-c} performing S-box with bitwise operations. As the pattern is large an enormous Assembly is generated without enabling optimizations. However, when the optimizations are enabled the final LLVM IR file shown in Code \ref{lst:sbox-ir} and Assembly is significantly smaller. 
+One of the research topics of this study was to observe the changes to a function shown in Code \ref{lst:sbox-c} performing S-box with bitwise operations. As the pattern is large hundreds of lines of LLVM IR and RISC-V Assembly are generated without enabling optimizations. The unoptimized LLVM IR is given in Appendices in Code shown in Code \ref{lst:unopt-sbox}. However, when the optimizations are enabled the final LLVM IR file shown in Code \ref{lst:sbox-ir} and the RISC-V Assembly is significantly smaller. 
 
+\begin{minipage}{\linewidth}
 \lstinputlisting[caption={S-box C code},language=C, label={lst:sbox-c}]{../s-box/s-box.c}
+\end{minipage}
 
 At the end of optimization passes the following IR will be generated:
-\begin{minipage}{0.95\linewidth}
-
+\begin{minipage}{\linewidth}
 \lstinputlisting[caption={Optimized S-box LLVM IR}, label={lst:sbox-ir},language=llvm,style=nasm]{../s-box/opt/postOrderFuncAttrs.ll}
-
 \end{minipage}
 LLVM optimization passes are responsible for the simplification of IR. In this case, the following passes were the passes changing the IR and were run sequentially.
 \begin{enumerate}
@@ -187,7 +187,7 @@ LLVM optimization passes are responsible for the simplification of IR. In this c
     \item DSEPass 
     \item PostOrderFunctionAttrsPass 
 \end{enumerate}
- As it can be observed some passes can run several times.
+ As it can be observed some passes can run several times. For example InstCombinePass runs to canonicalize and prepare the expressions for the following pass which is the reason why it is running prior to three distinct passes.
 
 
  \subsubsection{Infer Function Attributes - InferFunctionAttrsPass}\label{sec:funcAttrs}
@@ -239,7 +239,7 @@ Performs a simple dominator tree walk, eliminating trivially redundant instructi
 
 Early CSE pass relies on MemorySSA analysis which analyses by representing memory operations in SSA form \cite{llvmdoc-memoryssa, novillo2007memory}.
 
- \lstinputlisting[caption={Redundant Load Instructions in LLVM IR Before EarlyCSEPass},linerange={4-11} ,label={lst:sbox-cse1}, language=llvm, style=nasm]{../s-box/opt/SROAPass.ll}
+ \lstinputlisting[caption={Redundant Load Instructions in LLVM IR Before EarlyCSEPass},linerange={4-10},label={lst:sbox-cse1}, language=llvm, style=nasm]{../s-box/opt/SROAPass.ll}
 In Code \ref{lst:sbox-cse1} you can see that "\%x1" and "\%arrayidx2" are equal to the function argument "\%state". EarlyCSE pass detects this redundant condition and uses the already present "\%state" pointer in the output.
 
 \lstinputlisting[caption={Optimized Load Instructions in LLVM IR After EarlyCSEPass},linerange={2-6} , label={lst:sbox-cseLoad}, language=llvm, style=nasm]{../s-box/opt/earlyCSE.ll}
