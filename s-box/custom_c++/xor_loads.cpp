@@ -2,7 +2,8 @@ bool RISCVDAGToDAGISel::selectSBox(SDNode *Node) {
     SDValue LOAD0 = Node->getOperand(0);
     SDValue LOAD1 = Node->getOperand(1);
     //Check if there is a load pair
-    if(LOAD0.getOpcode() != ISD::LOAD || LOAD1.getOpcode() != ISD::LOAD)
+    if(LOAD0.getOpcode() != ISD::LOAD 
+            || LOAD1.getOpcode() != ISD::LOAD)
       return false;
     SDValue LOAD0_op0 = LOAD0.getOperand(0);
     SDValue LOAD0_op1_offset = LOAD0.getOperand(1); // t0
@@ -17,11 +18,11 @@ bool RISCVDAGToDAGISel::selectSBox(SDNode *Node) {
         return false;
 
    //Check if the addendum0 is the same as the second 
-    SDValue LOAD1_op1_offset_Addendum0 = LOAD1_op1_offset.getOperand(0);
-    if(LOAD1_op1_offset_Addendum0 != LOAD0_op1_offset)
+    SDValue LOAD1_op1_off_Addend0 = LOAD1_op1_offset.getOperand(0);
+    if(LOAD1_op1_off_Addend0 != LOAD0_op1_offset)
         return false;
 
-    SDValue LOAD1_op1_offset_Addendum1 = LOAD1_op1_offset.getOperand(1);
+    SDValue LOAD1_op1_off_Addend1 = LOAD1_op1_offset.getOperand(1);
 
     auto *LOAD1_op1_offset_Addendum1C = 
         dyn_cast<ConstantSDNode>(LOAD1_op1_offset_Addendum1);
