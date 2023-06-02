@@ -3,12 +3,16 @@
 \clearpage
 \chapter{ADDING CUSTOM INSTRUCTIONS}\label{ch:custom_instr}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-The instruction selection system we focused on at the back-end of the LLVM compiler is SelectionDAG among FastISel and GlobalIsel. SelectionDAG is the most mature Instruction Selection framework with more target support. However, shortly it is worth considering GlobalISel as it is developed recently as an alternative to SelectionDAG. The reasons to replace it are to make it faster, smaller, and more open to low-level optimizations.
+The instruction selection system we focused on at the back-end of the LLVM compiler is SelectionDAG among FastISel and GlobalIsel. SelectionDAG is the most mature Instruction Selection framework with more target support. However, shortly it is worth considering GlobalISel as it is developed recently as an alternative to SelectionDAG. The reasons to replace it are to make it faster, smaller, more testable and open to low-level optimizations.
 \section{TableGen Reference}
-TableGen is a domain-specific language used in the LLVM backend side to generate CPP header files. The purpose it serves is that it reduces redundancy of instruction declaration code which can be common to numerous architectures with minor differences. To maintain and scale the framework the minor differences are implemented level by level at a series of inheritance operations between TableGen classes. 
+TableGen is a domain-specific language used in the LLVM backend side to generate CPP header files. The purpose it serves is that it removes the redundancy of instruction declaration code which can be common to numerous architectures with minor differences. To maintain and scale the framework the minor differences are implemented level by level at a series of inheritance operations between TableGen classes. 
 
 \par
- LLVM Static Compiler, LLC, is responsible for converting LLVM IR to Assembly codes. To add new instructions LLC is recompiled and its internals change. During the compilation operation of the LLC program, TableGen records are created which declare every instruction’s encoding and describe its features. Referring to the records, directed acyclic graphs (DAG) are used in the process of instruction selection. DAG is a graph structure that has no cycles and has directions on the edges. Operations or functions are represented as nodes in the DAG. They are critical parts of declaring the logic or pattern of the new instruction. 
+ LLVM Static Compiler, LLC, is responsible for converting LLVM IR to Assembly codes. To add new instructions, changes are made in TableGen files and LLC is recompiled. During the compilation operation of the LLC program, TableGen records are created which declare every instruction’s encoding and describe its features. Referring to the records, directed acyclic graphs (DAG) are used in the process of instruction selection. 
+%TODO is this unnecessary def?
+ DAG is a graph structure that has no cycles and has directions on the edges.
+
+ Operations or functions are represented as nodes in the DAG. They are critical parts of declaring the logic or pattern of the new instruction. 
 \par
 
 The operations represented on the DAG can be LLVM intrinsics as well as instructions. LLVM instructions resemble conventional assembly instructions, in contrast, LLVM intrinsics have higher level abstraction depending on their functionality. Their instruction generation may vary depending on the target hardware. It is possible to define a new complicated instruction either by combining simple LLVM instructions and higher level intrinsics in DAG level or by creating a new LLVM intrinsic which gets created at the Intermediate Level of the compilation process.
@@ -23,15 +27,15 @@ The general class gets inherited to every target-specific class. In RISC-V’s c
 The RISC-V formats mentioned are included in the llvm/lib/Target/RISCV/RISCVInstrInfo.td file which is in the same directory as the RISCVInstrFormats.td file. After inclusion, the “RVInstR” class gets inherited by the “ALU\_rr” class. The “ALU\_rr” class adds the commutability feature which means swapping source 1 and source 2 does not create a different result like in addition but not in subtraction. At the end, XOR’s record is defined by putting funct7, funct3 and assembly string manually in a single line with scheduling information added. 
 
 \section{Adding a New Instruction Using TableGen}\label{sec:MLA_add_section}
-We created a tutorial to use as a reference while adding more complex instructions.
+This section will guide the reader for introducing new instructions via TableGen.
 Create a new TableGen file for custom additions and include it at the end of the RISCVInstrInfo.td file. We named it RISCVInstrInfoCrypt.td as it is going to be cryptography related.
 \begin{lstlisting}[caption= Include file]
 include "RISCVInstrInfoCrypt.td"
 \end{lstlisting}
 
-Add the specifications of the instruction to the RISCVInstrInfoCrypt.td file. Here we created a new class of instruction is defined named ALU\_rrr. For the MLA instruction, the specifications are:
+Add the specifications of the instruction to the RISCVInstrInfoCrypt.td file. Here we created a new class of instruction named as ALU\_rrr. MLA instruction requires three source registers and is defined to be ALU type so the specifications are:
 
-\begin{lstlisting}[caption= ALU\_rrr,label={lst:ALU_rrr}]
+\begin{lstlisting}[caption={ALU\_rrr class definition},label={lst:ALU_rrr}]
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
 class ALU_rrr<bits<2> funct2, bits<3> funct3, string opcodestr,
             bit Commutable = 0>
@@ -41,14 +45,17 @@ class ALU_rrr<bits<2> funct2, bits<3> funct3, string opcodestr,
  let isCommutable = Commutable;
 }
 \end{lstlisting}
-Explanation of ALU\_rrr:
+\subsection{Newly Introduced ALU\_rrr TableGen Class}
+The class is wrapped with three flags:
 \begin{lstlisting}
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
 \end{lstlisting}
 
-If the instruction has no side effect, hasSideEffects will be 0
-If there is no need or possibility to load data from memory, mayLoad will be 0
-If there is no need or possibility to store data from memory, mayStore will be 0
+\begin{itemize}
+    \item If the instruction has no side effect, hasSideEffects will be 0.
+    \item If there is no need or possibility to load data from memory, mayLoad will be 0.
+    \item If there is no need or possibility to store data from memory, mayStore will be 0.
+\end{itemize}
 
 
 \begin{lstlisting}
