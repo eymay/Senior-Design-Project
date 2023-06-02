@@ -15,7 +15,7 @@ These parts of the compiler are also called the analysis and synthesis parts of 
 
 
 \section{Front-End}
-
+%TODO mention parsing here in a paragraph
 
 \subsection{Lexical Analysis}
 The compiler breaks down the source code into smaller units called lexemes, which are pieces of code that correspond to specific patterns in the code. These lexemes are then converted into tokens that can be used for syntax and semantic analyses.
@@ -24,17 +24,21 @@ The compiler breaks down the source code into smaller units called lexemes, whic
 The compiler checks that the code follows the proper syntax for the programming language it is written in. This process is also called parsing. As part of this step, the compiler often creates abstract syntax trees in order to represent the logical structure of different parts of the code.
 
 \subsection{Semantic Analysis}
-The compiler checks that the code makes logical sense, not just that it follows the syntax of the programming language. This step goes beyond syntax analysis by ensuring that the code is correct. For example, the compiler might check that variables have been declared correctly and given the appropriate data types. This process is known as semantic analysis.
+The compiler checks that the code makes logical sense, going beyond syntax analysis by ensuring that the code is correct. For example, the compiler might check that variables have been declared correctly and given the appropriate data types. This process is known as semantic analysis.
 
 \subsection{IR Code Generation}
 After the source code has been analyzed for lexemes, syntax, and semantics, the compiler creates an intermediate representation (IR) of the code.
 This intermediate code is going to be converted to machine code in the last two phases. These two phases are platform-dependent, meaning they are specific to a particular hardware architecture but the previous phases were not. Therefore, to create a new compiler, it is not necessary to start from scratch. Instead, it is possible to use the intermediate code from an existing compiler and build the final stages of the process for a specific platform. Because of that, we are interested in the back-end part for our project.
 
-\section{Back-End}
+\section{Middle-End}
 
 \subsection{Optimization}
 The intermediate code is prepared for the final code generation step. This process does not change the meaning or functionality of the code, but it can make the program run faster and more efficiently.
 A directed acyclic graph (DAG) used in the compiler design process might represent the dependencies between different instructions in the IR code, such as the order in which those instructions need to be executed or the data dependencies between them. The DAG can be used by the compiler to identify opportunities for optimization, such as removing unnecessary instructions, combining some of them, or rearranging the order of execution to reduce the number of resources required by the code.
+%TODO we should mention SSA form as well
+
+\section{Back-End}
+
 
 
 \subsection{Target Code Generation}
