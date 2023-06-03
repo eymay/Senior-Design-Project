@@ -29,16 +29,14 @@ cmake -S ../llvm . -G Ninja -DCMAKE_BUILD_TYPE="Debug"  \
 With this command, we are choosing the type as debug. Shared\_libs=TRUE causes all libraries to be built shared instead of static libraries. ..SPLIT\_DWARF is set to True to minimize memory usage at link time. We want to use clang as the C compiler. Therefore, it is specified in the command as DCMAKE\_C\_COMPILER=clang. In addition to that, we want to use lld as the linker instead of gold, so we specify that as well.
 This configuration is the most efficient in terms of memory and disk usage among our previous attempts at building LLVM from source.
 \noindent
-\begin{minipage}[t]{0.35\linewidth}
+\begin{minipage}[t]{\linewidth}
 \begin{lstlisting}[language=Bash, caption={To build from scratch or to rebuild files with change, automatically}]
-Ninja
+ninja
 \end{lstlisting}
 \end{minipage}
 % \hspace{2em}
-\begin{minipage}[t]{0.25\linewidth}
-\hfill
-\end{minipage}
-\begin{minipage}[t]{0.35\linewidth}
+
+\begin{minipage}[t]{\linewidth}
 \begin{lstlisting}[language=Bash, caption={To build llc only which is the binary we modify}]
 ninja llc	
 \end{lstlisting}
@@ -51,7 +49,7 @@ While running ninja, CPU and ram usage significantly increases. All available co
 	ninja llc -j<number of cores to use>
 \end{lstlisting}
 
-
+\newpage
 \section*{APPENDIX A.2}
 \vglue6pt
 % For Appendix A.2
