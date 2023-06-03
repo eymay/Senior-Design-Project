@@ -290,7 +290,6 @@ bool RISCVDAGToDAGISel::selectSHXADDOp(SDValue N, unsigned ShAmt,
 }
 \end{lstlisting}
 
-%TODO what is materialization
 Despite using TableGen and SelectionDAG, there is an optimization opportunity for "SH1ADD" in MCInst form. It is done in immediate materialisation where a constant node in the DAG representation is not converted to instructions until needed. In the MCTargetDesc/RISCVMatInt.cpp file, an optimisation for representing immediates is provided as follows:
 
 \begin{lstlisting}[language=C++, caption={Immediate Materialisation for "SH1ADD"}]
