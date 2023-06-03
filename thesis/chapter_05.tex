@@ -9,7 +9,6 @@ TableGen is a domain-specific language used in the LLVM backend side to generate
 
 \par
  LLVM Static Compiler, LLC, is responsible for converting LLVM IR to Assembly codes. To add new instructions, changes are made in TableGen files and LLC is recompiled. During the compilation operation of the LLC program, TableGen records are created which declare every instruction’s encoding and describe its features. Referring to the records, directed acyclic graphs (DAG) are used in the process of instruction selection. 
-%TODO is this unnecessary def?
  DAG is a graph structure that has no cycles and has directions on the edges.
 
  Operations or functions are represented as nodes in the DAG. They are critical parts of declaring the logic or pattern of the new instruction. 
