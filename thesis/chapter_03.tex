@@ -270,7 +270,6 @@ This pass aims to optimize global variables and transforms them to constants if 
 \lstinputlisting[caption={"local\_unnamed\_addr" Attribute Added to LLVM IR After GlobalOpt},linerange={7-7} ,label={lst:sbox-globvar}, language=llvm, style=nasm]{../s-box/opt/globalOptPass.ll}
 
 \subsubsection{Combine Redundant Instructions - InstCombinePass}
-%TODO move transform explanations to Transforms section and only explain the example code here
 Combines redundant instructions and canonicalizes them. Canonicalization is the form in which a single way of commutability is preferred. For example, if a binary operator has a constant operand it is moved to the right. Canonic instructions can then be used by other passes which can assume the instructions to be in the canonic form \cite{llvmpass-instcombine}.
 \par 
 
