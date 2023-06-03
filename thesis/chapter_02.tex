@@ -5,7 +5,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 A compiler is a software that converts source code written in a high-level programming language into machine code appropriate for a particular computer architecture.
 There are different stages of a compiler but they can be grouped into two main parts such as “Front-End” and “Back-End”. %\cite{phasesofcomp}. 
-These parts of the compiler are also called the analysis and synthesis parts of the compiler. The analysis stage separates the source program into its individual components and applies a grammatical structure to them. The source code is then represented in an intermediate stage using this structure. The synthesis phase creates the final target program by using the intermediate representation. We can think of the compilation process as a series of phases, each of which takes the source program and transforms it into another representation \cite{compileralfredaho}. These phases can be seen in Figure \ref{fig:comp_stages}.
+These parts of the compiler are also called the analysis and synthesis parts of the compiler. The analysis stage separates the source program into its individual components and applies a grammatical structure to them. The source code is then represented in an intermediate stage using this structure. The synthesis phase creates the final target program by using the IR. We can think of the compilation process as a series of phases, each of which takes the source program and transforms it into another representation \cite{compileralfredaho}. These phases can be seen in Figure \ref{fig:comp_stages}.
 \begin{figure}
     \centering
     \includegraphics[scale=0.25]{basics_of_compiler/comp_stages.jpeg}
@@ -26,7 +26,7 @@ The compiler checks that the code follows the proper syntax for the programming 
 The compiler checks that the code makes logical sense, going beyond syntax analysis by ensuring that the code is correct. For example, the compiler might check that variables have been declared correctly and given the appropriate data types. This process is known as semantic analysis.
 
 \subsection{IR Code Generation}
-After the source code has been analyzed for lexemes, syntax, and semantics, the compiler creates an intermediate representation (IR) of the code.
+After the source code has been analyzed for lexemes, syntax, and semantics, the compiler creates an IR of the code.
 This intermediate code is going to be converted to machine code in the last two phases. These two phases are platform-dependent, meaning they are specific to a particular hardware architecture but the previous phases were not. Therefore, to create a new compiler, it is not necessary to start from scratch. Instead, it is possible to use the intermediate code from an existing compiler and build the final stages of the process for a specific platform. Because of that, we are interested in the back-end part for our project.
 
 \section{Middle-End}
@@ -34,7 +34,7 @@ This intermediate code is going to be converted to machine code in the last two 
 \subsection{Optimization}
 The intermediate code is prepared for the final code generation step. This process does not change the meaning or functionality of the code, but it can make the program run faster and more efficiently.
 A Directed Acyclic Graph (DAG) used in the compiler design process might represent the dependencies between different instructions in the IR code, such as the order in which those instructions need to be executed or the data dependencies between them. The DAG can be used by the compiler to identify opportunities for optimization, such as removing unnecessary instructions, combining some of them, or rearranging the order of execution to reduce the number of resources required by the code.
-Static single assignment (SSA) is also an important part of optimization. It is a technique that is used to organize the intermediate representation in a way that ensures each variable is assigned a value only once and that each variable is defined before it is used.
+Static single assignment (SSA) is also an important part of optimization. It is a technique that is used to organize the IR in a way that ensures each variable is assigned a value only once and that each variable is defined before it is used.
 %TODO we should mention SSA form as well
 
 \section{Back-End}

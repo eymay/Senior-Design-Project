@@ -73,7 +73,7 @@ The output of the unoptimized S-box function is provided below. The C code used 
 
 LLVM consists of many flexible libraries which allows user to use different libraries with preffered  options. To create RISC-V assembly from c code, Clang and LLC are used with the following commands. \\
 
-Clang is the C compiler front-end which is mainly used with LLVM back-end. Clang is used in this project to produce LLVM intermediate representation code. Following command produces a .ll file in the current directory. 
+Clang is the C compiler front-end which is mainly used with LLVM back-end. Clang is used in this project to produce LLVM IR code. Following command produces a .ll file in the current directory. 
 
 \begin{lstlisting}[language=Bash]
 -clang -S -target riscv32-linux-gnu -emit-llvm foo.c
@@ -83,7 +83,7 @@ Clang is the C compiler front-end which is mainly used with LLVM back-end. Clang
 -target option specifies the 32-bit RISC-V target architecture. \\
 -emit-llvm is for targeting the LLVM back-end. \\
 
-LLC is the LLVM compiler back-end which converts LLVM intermediate representation (IR) into native machine code for a specific target architecture. Following command produces a .s file for RISC-V architecture in the current directory. 
+LLC is the LLVM compiler back-end which converts LLVM IR into native machine code for a specific target architecture. Following command produces a .s file for RISC-V architecture in the current directory. 
 
 \begin{lstlisting}[language=Bash]
 llvm-project/build/bin/llc -debug-only=isel -view-isel-dags -mtriple=riscv32 lxr.ll
