@@ -79,7 +79,7 @@ Figure \ref{fig:legalize} shows the DAG before legalization. The first optimizat
     \label{fig:legalize}
 \end{figure}
 
-Figure \ref{fig:combine2} shows the DAG before the second optimization pass. The DAG is legalized by introducing RISCVISD::ADD\_LO and RISCVISD::HI nodes. These SelectionDAG nodes act as flags to give target-specific information to target-independent algorithms. These definitions are introduced at lib/Target/RISCV/RISCVISelLowering.h file \cite{riscvIselh}. It is the RISCV DAG lowering interface. 
+Figure \ref{fig:combine2} shows the DAG before the second optimization pass. The DAG is legalized by introducing RISCVISD::ADD\_LO and RISCVISD::HI nodes. These SDnodes act as flags to give target-specific information to target-independent algorithms. These definitions are introduced at lib/Target/RISCV/RISCVISelLowering.h file \cite{riscvIselh}. It is the RISCV DAG lowering interface. 
 \par
 According to the interface file, RISCVISD::ADD\_LO is meant to add Lo 12 bits from an address and to be replaced by ADDI (Add Immediate) at Instruction Selection. Similarly, RISCVISD::HI is meant to get Hi 20 bits from an address and to be replaced by LUI (Load Upper Immediate). With a legalized DAG the second optimization pass begins.
 \subsection{Second Optimization Pass}

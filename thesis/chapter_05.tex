@@ -119,10 +119,10 @@ The process for adding an instruction via C++ is as follows:
     \item Create a record declaration in TableGen to provide the Assembler support, ignoring the Pattern declaration.
     \item Observe the DAG in the debug output or dot file and locate the root of it. 
     \item Add a function in RISCVISelDAGToDAG.cpp file in the root instruction case. 
-    \item Implement pattern matching and replacement with SelectionDAG node.
+    \item Implement pattern matching and replacement with SDnode.
 \end{enumerate}
 
-SelectionDAG consists of numerous files but the most relevant ones to the developer can be few if the complexity of the pattern is small. The order of files will be from IR to Assembly. RISCVCodeGenPrepare.cpp file provides mechanisms for matching in IR form. This file exists mainly due to the limitation of SelectionDAG which is running per basic-block. RISCVISelLowering.cpp contains the lowering of IR to SelectionDAG nodes. It can decide on whether a type or expression should be legalized or expanded. RISCVISelDAGToDAG.cpp is the instruction selector in C++. Its implementation traverses the DAG from the root and runs the selection functions depending on the SelectionDAG node type which is parallel to instructions. 
+SelectionDAG consists of numerous files but the most relevant ones to the developer can be few if the complexity of the pattern is small. The order of files will be from IR to Assembly. RISCVCodeGenPrepare.cpp file provides mechanisms for matching in IR form. This file exists mainly due to the limitation of SelectionDAG which is running per basic-block. RISCVISelLowering.cpp contains the lowering of IR to SDnodes. It can decide on whether a type or expression should be legalized or expanded. RISCVISelDAGToDAG.cpp is the instruction selector in C++. Its implementation traverses the DAG from the root and runs the selection functions depending on the SDnode type which is parallel to instructions. 
 
 
 \lstinputlisting[caption={The corresponding Optimized and Legalized DAG of Code \ref{lst:sbox-xor}},linerange={3-3,4-4,8-9,13-13,16-16} ,label={lst:sbox-xor-dag},language=llvm,style=nasm]{../s-box/opt-lowered-dag.td}
@@ -137,7 +137,7 @@ The C++ logic for matching this pattern is provided below.
 
 \lstinputlisting[caption={C++ logic for Pattern Matching the DAG in Code \ref{lst:sbox-xor-dag}},label={lst:sbox-cpp},language=C++]{../s-box/custom_c++/xor_loads.cpp}
 
-The logic starts from the root of the DAG which in this case is XOR instruction or the ISD::XOR SelectionDAG node. Then we iterate through its leaves and check the distinctive features of the pattern. In this pattern we are interested in the distance of offset addresses of Load instructions so we progressively approach them by assuming the pattern holds and quitting if not. Progressive checking is a common theme in LLVM and as Instruction Selection is one of the stages affecting the compilation times significantly, patterns should not be checked in a single if statement by logical combinations. 
+The logic starts from the root of the DAG which in this case is XOR instruction or the ISD::XOR SDnode. Then we iterate through its leaves and check the distinctive features of the pattern. In this pattern we are interested in the distance of offset addresses of Load instructions so we progressively approach them by assuming the pattern holds and quitting if not. Progressive checking is a common theme in LLVM and as Instruction Selection is one of the stages affecting the compilation times significantly, patterns should not be checked in a single if statement by logical combinations. 
 
 The checks, if statements are doing can be summarised in steps. As the function only runs when the instruction selection finds an XOR SDNode, the root can be assumed as XOR safely.
 \begin{enumerate}
@@ -471,7 +471,7 @@ Instruction *InstCombinerImpl::visitOr(BinaryOperator &I) {
 
 \end{lstlisting}
 
-The intrinsic function is converted to ROTR SelectionDAG node in the general SelectionDAGBuilder.cpp file.
+The intrinsic function is converted to ROTR SDnode in the general SelectionDAGBuilder.cpp file.
 \begin{lstlisting}[language=C++, caption={Funnel Shift Intrinsic converted to ROTL}]
 /// Lower the call to the specified intrinsic function.
 void SelectionDAGBuilder::visitIntrinsicCall(const CallInst &I,
