@@ -162,7 +162,6 @@ For simple cases where for example a combination of R-type instructions will be 
 Another reason to consider different stages is that there can be multiple patterns mapped to the same instruction. Further optimization opportunities can rise in further stages. 
 
 \subsection{Case Study: SH1ADD in SelectionDAG and MC Layer}
-%TODO make sure MC layer is explained previously
 
 It was discussed that dealing with the lowered DAG to MC layer can provide more optimization opportunities. In this section the case of "SH1ADD" instruction which is ratified in RISC-V Zba extension will be analyzed. The instruction shifts rs1 left by one, adds rs2 and writes to rd. Its encoding and pattern in the standard implementation of LLVM in TableGen is as follows:
 
