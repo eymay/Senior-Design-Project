@@ -123,7 +123,7 @@ The DAG after we add the SHLXOR instruction can be seen in Figure \ref{fig:shlxo
     \label{fig:shlxor_after}
 \end{figure}
 
-\section{RORI Instruction}
+\section{RORI Instruction}\label{sec:rori}
 One of the Instructions that we worked on is RORI instruction. The purpose of this instruction is to take the operand and rotate it to the right by the amount of the immediate value. This is different from shifting right using an immediate. When shifting a number to the right, the rightmost (least significant) bits are deleted and the leftmost (most significant) bits are either zero or sign extended. On the other hand, when a number is rotated right, the least significant bits that are pushed out are not deleted but written into the most significant bits. We want to add an instruction that performs this operation.
 
 First of all, we tried pattern matching and added the definition and pattern of our new instruction to the InstrInfoCrypt.td file. However, the RORI instruction was not observed when we checked the assembly output created by using a simple C code that implements the rotation operation. This is because the pattern can have different combinations and may not match with what we expect. Therefore, the instruction cannot be recognized and we can’t see it in the assembly output.
@@ -261,7 +261,7 @@ rotimm:
 
 This way, we managed to succesfully obtain RORI instruction in the assembly output.
 
-\section{NAXOR Instruction}
+\section{NAXOR Instruction}\label{sec:naxor}
 
 S-box algorithm includes a certain pattern that is used repeatedly. NOT-AND-XOR pattern is used five times in an s-box cycle. This pattern is lowered into one instruction using TableGen. Definition and specifications of the pattern are added to RISCVInstrInfoCrypt.td file. After matching this pattern 15 rows of the assembly file is reduced to one single instruction. 
 
