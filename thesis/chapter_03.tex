@@ -544,7 +544,7 @@ At the last phase of the instruction selection, SelectionDAG selects the suitabl
 Scheduling is the phase of assigning an order to the DAG form of RISC-V instructions. The formation phase is responsible for converting the DAG into a list of machine instructions.  
 
 \subsection{SSA-based Machine Code Optimizations}
-LLVM uses static single assignment (SSA) based optimizations before register allocation. SSA optimizations ensure that each variable is assigned and defined only once before it is used. 
+LLVM uses SSA based optimizations before register allocation. SSA optimizations ensure that each variable is assigned and defined only once before it is used. 
 
 
 \subsection{Register Allocation}
@@ -556,7 +556,7 @@ Prolog and epilog code insertion is another optimization phase that is responsib
 %TODO https://llvm.org/docs/CodeGenerator.html#the-mc-layer
 %MCInst Açıklama
 \subsection{Code Emission}
-The code emission stage is responsible for lowering the code generator abstractions down to the MC layer abstractions. It takes the assembly as input and creates the final RISC-V machine codes. 
+The code emission stage is responsible for lowering the code generator abstractions down to the Machine Code layer abstractions. It takes the assembly as input and creates the final RISC-V machine codes. 
 
 \subsection{Linking}
 LLD is the LLVM linker library that is responsible for combining multiple object files into a single executable file. LLD is invoked after the code emission and generates a file by resolving symbol references, adjusting addresses, and performing other tasks as necessary.
