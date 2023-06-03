@@ -28,4 +28,6 @@ LLVM project is very selective on the technologies they use. Latest versions of 
 Since we are working on software area, there is no possible risk of harm to users.
 
 \section{Future Work and Recommendations}
-%bknz form 1/2
+For pattern matching process, we recommend future work to focus on LLVM IR transformations and optimizations. As dicussed in Section \ref{sec:patmatchdisc}, LLVM IR provides flexibility to perform source matching and transformation and thus pattern matching. For more complicated patterns MLIR is recommened to be focused on. Despite it being under active development, MLIR provides higher level pattern matching potential.
+
+For LLVM RISC-V backend, we recommend working on GlobalISel which is developed to replace SelectionDAG. GlobalISel may have less limitations than SelectionDAG so it can be useful for complex patterns. GlobalISel has a modular pass based structure which is easier to work with than the monolithic SelectionDAG.
