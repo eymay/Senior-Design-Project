@@ -18,9 +18,9 @@ As we mentioned, this new instruction requires two source registers and one dest
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
 class ALU_rr<bits<7> funct7, bits<3> funct3, string opcodestr,
 bit Commutable = 0>
-: RVInstR<funct7, funct3, OPC_OP, (outs GPR:\$rd),
-                                   (ins GPR:\$rs1, GPR:\$rs2),
-opcodestr, "\$rd, \$rs1, \$rs2"> {
+: RVInstR<funct7, funct3, OPC_OP, (outs GPR:$rd),
+                                   (ins GPR:$rs1, GPR:$rs2),
+opcodestr, "$rd, $rs1, $rs2"> {
 let isCommutable = Commutable;
 }
 \end{lstlisting}
@@ -387,9 +387,9 @@ sbox:
 
 15 lines of not, and, xor operations are reduced to 5 NAXOR instructions.
 
-\section{LXR Instruction}
+\section{LXR Instruction}\label{sec:lxr}
 
-S-box algorithm uses multiple inputs and outputs and they are supposed to be loaded and stored to the registers during implementation. An example pattern is matched using TableGen. LXR instruction covers an XOR operation of two loaded numbers. ALU\_rr class is used.
+ LXR instruction covers an XOR operation of two loads from independant addresses. ALU\_rr class is used. Note that in order to match loads with dependant addresses, C++ logic must be implemented as discussed in Section \ref{sec:cpp}.
 
 \begin{lstlisting}
 let mayLoad = 1 in{
