@@ -396,7 +396,7 @@ According to the statistics obtained from the "opt" tool of LLVM:
 
 
 \subsubsection{Dead Store Elimination - DSEPass}
-Dead code in the Dead Code Elimination (DCE) pass refers to the variables in any point of the program which are not used in the future. DCE does not eliminate control flow and store instructions, for this reason Dead Store Elimination pass is used to simplify the store instructions of the given program.
+Dead code in the Dead Code Elimination (DCE) pass refers to the variables in any point of the program which are not used in the future. DCE does not eliminate control flow and store instructions, for this reason Dead Store Elimination (DSE) pass is used to simplify the store instructions of the given program.
 
 Trivial dead stores are eliminated. As the load operations are optimized, most of the store instructions become dead meaning that they do not affect the flow in any way.
 
