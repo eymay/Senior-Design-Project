@@ -1,10 +1,19 @@
-1 line spacing must be set for summaries. For theses in Turkish, the summary in Turkish must have 300 words minimum and span 1 to 3 pages, whereas the extended summary in English must span 3-5 pages.
 
-For theses in English, the summary in English must have 300 words minimum and span 1-3 pages, whereas the extended summary in Turkish must span 3-5 pages.
+The rise of hardware accelerators with custom instructions necessitates custom compiler backends supporting these accelerators. This study provides detailed analyses of LLVM and its RISC-V backend, supplemented with case studies providing end-to-end overview of the mentioned transformations. 
 
-A summary must briefly mention the subject of the thesis, the method(s) used and the conclusions derived.
-References, figures and tables must not be given in Summary.
+We discuss that instruction design should consider both hardware and software design space. The necessary compiler modifications may mean that the instruction is not well designed and need to be reconsidered. We discuss that RISC-V standard extensions provide exemplary instructions that can guide instruction designers.
 
-Above the Summary, the thesis title in first level title format (i.e., 72 pt before and 18 pt after paragraph spacing, and 1 line spacing) must be placed. Below the title, the expression {\bf ÖZET} (for summary in Turkish) and {\bf SUMMARY} (for summary in English) must be written horizontally centered.
+In this study the process of adding a custom instruction to compiler is split into two parts as Assembler support and pattern matching support. Without pattern matching support, conventional software requires manual entries of inline Assembly for the accelerator which is not scalable. While it is trivial to add Assembler support regardless of the instruction semantics, pattern matching support is on the contrary. Pattern matching support and choosing the right stage for the modification, requires the knowledge of the internal transformations in the compiler. This study delves deep into pattern matching and presents multiple ways to approach the problem of pattern matching support. It is discussed that depending on the pattern's complexity, higher level transformations, e.g. IR level, can be more maintainable compared to Instruction Selection phase. 
 
-It is recommended that the summary in English is placed before the summary in Turkish.
+
+
+%1 line spacing must be set for summaries. For theses in Turkish, the summary in Turkish must have 300 words minimum and span 1 to 3 pages, whereas the extended summary in English must span 3-5 pages.
+
+%For theses in English, the summary in English must have 300 words minimum and span 1-3 pages, whereas the extended summary in Turkish must span 3-5 pages.
+
+%A summary must briefly mention the subject of the thesis, the method(s) used and the conclusions derived.
+%References, figures and tables must not be given in Summary.
+
+%Above the Summary, the thesis title in first level title format (i.e., 72 pt before and 18 pt after paragraph spacing, and 1 line spacing) must be placed. Below the title, the expression {\bf ÖZET} (for summary in Turkish) and {\bf SUMMARY} (for summary in English) must be written horizontally centered.
+
+%It is recommended that the summary in English is placed before the summary in Turkish.
