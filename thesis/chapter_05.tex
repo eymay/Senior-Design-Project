@@ -102,7 +102,7 @@ def : Pat< (add (mul GPR:$src1, GPR:$src2), GPR:$src3),
 (MLA GPR:$src1, GPR:$src2, GPR:$src3)>;
 \end{lstlisting}
 
-Note that it is possible to define more patterns to introduce optimisations. There can be multiple source patterns for the same target pattern. The target pattern can also be a tree of SDNodes containing the custom instruction.
+Note that it is possible to define more patterns to introduce optimizations. There can be multiple source patterns for the same target pattern. The target pattern can also be a tree of SDNodes containing the custom instruction.
 
 \section{Adding Pattern Matching Support for New Instruction Using C++ in SelectionDAG}\label{sec:cpp}
 TableGen aims to provide a declarative way to introduce new patterns for new instruction developers. However, not all instructions can be described in this scheme.  Although it is called "dag" as a keyword in TableGen, it expects a tree of instructions. For certain usecases, custom C++ can be the only way to match until the TableGen based system improves. It is also possible to use C++ in complex patterns together with TableGen, which can make the most of the pattern declarative and only the necessary part in imperative style.
@@ -154,7 +154,7 @@ At this point, it can be safely assumed that the only XOR that conforms to the p
 To interact with the DAG, SelectionDAG's API is used. We encourage the developers to read the source code and learn to use the public functions exposed by SelectionDAG in order to interact with the DAG most effectively. RISCVISelDAGToDAG.cpp file already has many instruction selection mechanisms in place which can be read through. 
 
 \section{Discussion of Pattern Matching in Other Stages of the Compiler}\label{sec:patmatchdisc}
-Pattern Matching can be assumed to mainly be an Instruction Selection problem where the pattern will be simply identified and replaced. However, when we take a look at the baseline problem any Compiler technology solves, it is to convert more familiar patterns in some language to a more unfamiliar pattern in machine language. Also this conversion occurs in a large number of steps through optimisation in IR form as discussed in Section \ref{sec:opt}, to DAG formation in SelectionDAG to MCInstr form down the pipeline. Their data structures can differ in representing the instructions which can make some pattern matching schemes to be more fragile than others. Also, as the lowering gets performed high level information about the program is lost but the formation gets closer to the final output of Assembly. 
+Pattern Matching can be assumed to mainly be an Instruction Selection problem where the pattern will be simply identified and replaced. However, when we take a look at the baseline problem any Compiler technology solves, it is to convert more familiar patterns in some language to a more unfamiliar pattern in machine language. Also this conversion occurs in a large number of steps through optimization in IR form as discussed in Section \ref{sec:opt}, to DAG formation in SelectionDAG to MCInstr form down the pipeline. Their data structures can differ in representing the instructions which can make some pattern matching schemes to be more fragile than others. Also, as the lowering gets performed high level information about the program is lost but the formation gets closer to the final output of Assembly. 
 
 For simple cases where for example a combination of R-type instructions will be matched and replaced, Instruction Selection might be the most convenient stage to extend. However if the pattern requires the instruction selection to be performed already, pattern match can be done in MC layer. In contrary, if higher level information of the pattern is required, a pattern can be matched to an intrinsic function in IR level. 
 
@@ -288,9 +288,9 @@ bool RISCVDAGToDAGISel::selectSHXADDOp(SDValue N, unsigned ShAmt,
 }
 \end{lstlisting}
 
-Despite using TableGen and SelectionDAG, there is an optimization opportunity for "SH1ADD" in MCInst form. It is done in immediate materialisation where a constant node in the DAG representation is not converted to instructions until needed. In the MCTargetDesc/RISCVMatInt.cpp file, an optimisation for representing immediates is provided as follows:
+Despite using TableGen and SelectionDAG, there is an optimization opportunity for "SH1ADD" in MCInst form. It is done in immediate materialization where a constant node in the DAG representation is not converted to instructions until needed. In the MCTargetDesc/RISCVMatInt.cpp file, an optimization for representing immediates is provided as follows:
 
-\begin{lstlisting}[language=C++, caption={Immediate Materialisation for "SH1ADD"}]
+\begin{lstlisting}[language=C++, caption={Immediate Materialization for "SH1ADD"}]
 namespace llvm::RISCVMatInt {
 InstSeq generateInstSeq(int64_t Val,
                               const FeatureBitset &ActiveFeatures) {
@@ -353,7 +353,7 @@ InstSeq generateInstSeq(int64_t Val,
 
 By using "SH1ADD" in immediate materialization, a single instruction can be used instead of two. It can be checked that in the standard testing suite there is the following function which returns a 64 bit integer:
 \begin{minipage}{\linewidth}
-\begin{lstlisting}[language=llvm,style=nasm, caption={Function for Immediate Materialisation}]
+\begin{lstlisting}[language=llvm,style=nasm, caption={Function for Immediate Materialization}]
 define i64 @PR54812() {
 ; RV64I-LABEL: PR54812:
 ; RV64I:       # %bb.0:

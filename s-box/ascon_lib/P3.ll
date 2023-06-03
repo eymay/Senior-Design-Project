@@ -20,7 +20,7 @@ entry:
 ;store i64 %3, ptr %arrayidx7.i
 ;store i64 %1, ptr %arrayidx2.i
 
-;optimisation to store only changed values would result 
+;optimization to store only changed values would result 
 
 ;store i64 %xor.i, ptr %arrayidx.i
 
