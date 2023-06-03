@@ -18,7 +18,7 @@ LLVM IR is the common target of programming languages and is the source for ever
 
 In LLVM, instrinsic functions are internal functions and they have their semantics directly defined by LLVM itself. LLVM provides both target-independent and target-specific intrinsics. \cite{llvmdevmeeting} These intrinsics have well known semantics and names and they must adhere to certain restrictions. In general, these intrinsics serve as an expansion mechanism for the LLVM language that does not necessitate modifying all of the transformations in LLVM when introducing changes to the language. Intrinsic function names start with “llvm.” \cite{googlesiteintrinsic}
 
-Clang supports the notion of builtin functions used in GCC. Some of these have the same syntax as in GCC to not disrupt portability. In addition to these, Clang supports other builtin functions that GCC doesn’t. Some of these are \_\_builtin\_shufflevector, \_\_builtin\_unreachable etc. As we can see, these builtin functions start with double underscores. 
+Clang supports the notion of builtin functions used in GNU Compiler Collection (GCC). Some of these have the same syntax as in GCC to not disrupt portability. In addition to these, Clang supports other builtin functions that GCC doesn’t. Some of these are \_\_builtin\_shufflevector, \_\_builtin\_unreachable etc. As we can see, these builtin functions start with double underscores. 
 
 Intrinsic functions and builtin functions are two seperate things and should not be confused. Builtins are at C level (source code) while intrinsics are LLVM IR level and are not exposed to the user. A builtin function may or may not be expanded into intrinsic calls. It is possible to connect a new builtin function in the front-end to an intrinsic in the middle-end.
 
