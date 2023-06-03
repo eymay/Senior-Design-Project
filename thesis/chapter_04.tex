@@ -33,7 +33,7 @@ void maddFunc() {
 \end{figure}
 
 \section{Clang AST}
-The simplified Abstract Syntax Tree (AST) of the expression is shown in Figure \ref{fig:ast_mla}. The AST consists of an expression tree with three levels. At the highest level, there is an expression tree of multiplication between variables 'a' and 'b'. This expression tree's result becomes an argument for another expression tree with the addition operator. The second argument at this addition subtree is the variable 'c'. The expression tree at the root has assignment as an operator. The first argument to this tree is 'a' and the second argument is the result of multiplication and addition. Figure \ref{fig:clang_ast} shows the AST output of Clang for Code \ref{maddc}. 
+The simplified AST of the expression is shown in Figure \ref{fig:ast_mla}. The AST consists of an expression tree with three levels. At the highest level, there is an expression tree of multiplication between variables 'a' and 'b'. This expression tree's result becomes an argument for another expression tree with the addition operator. The second argument at this addition subtree is the variable 'c'. The expression tree at the root has assignment as an operator. The first argument to this tree is 'a' and the second argument is the result of multiplication and addition. Figure \ref{fig:clang_ast} shows the AST output of Clang for Code \ref{maddc}. 
 
 \begin{figure}
     \centering
