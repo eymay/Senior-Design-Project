@@ -33,7 +33,7 @@ This intermediate code is going to be converted to machine code in the last two 
 
 \subsection{Optimization}
 The intermediate code is prepared for the final code generation step. This process does not change the meaning or functionality of the code, but it can make the program run faster and more efficiently.
-A directed acyclic graph (DAG) used in the compiler design process might represent the dependencies between different instructions in the IR code, such as the order in which those instructions need to be executed or the data dependencies between them. The DAG can be used by the compiler to identify opportunities for optimization, such as removing unnecessary instructions, combining some of them, or rearranging the order of execution to reduce the number of resources required by the code.
+A Directed Acyclic Graph (DAG) used in the compiler design process might represent the dependencies between different instructions in the IR code, such as the order in which those instructions need to be executed or the data dependencies between them. The DAG can be used by the compiler to identify opportunities for optimization, such as removing unnecessary instructions, combining some of them, or rearranging the order of execution to reduce the number of resources required by the code.
 Static single assignment (SSA) is also an important part of optimization. It is a technique that is used to organize the intermediate representation in a way that ensures each variable is assigned a value only once and that each variable is defined before it is used.
 %TODO we should mention SSA form as well
 
