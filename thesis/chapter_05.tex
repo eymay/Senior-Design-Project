@@ -25,7 +25,9 @@ The general class gets inherited to every target-specific class. In RISC-V’s c
 
 The RISC-V formats mentioned are included in the llvm/lib/Target/RISCV/RISCVInstrInfo.td file which is in the same directory as the RISCVInstrFormats.td file. After inclusion, the “RVInstR” class gets inherited by the “ALU\_rr” class. The “ALU\_rr” class adds the commutability feature which means swapping source 1 and source 2 does not create a different result like in addition but not in subtraction. At the end, XOR’s record is defined by putting funct7, funct3 and assembly string manually in a single line with scheduling information added. 
 
+\pagebreak
 \section{Adding a New Instruction Using TableGen}\label{sec:MLA_add_section}
+
 This section will guide the reader for introducing new instructions via TableGen.
 Create a new TableGen file for custom additions and include it at the end of the RISCVInstrInfo.td file. We named it RISCVInstrInfoCrypt.td as it is going to be cryptography related.
 \begin{lstlisting}[caption= Include file]
