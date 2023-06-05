@@ -25,8 +25,8 @@ let isCommutable = Commutable;
 }
 \end{lstlisting}
 
-As we can see, encoding of this type of instructions consists of funct7, funct3, opcode, source registers, and the destination register. The encoding format and the other properties are described in the class. The source registers are described as inputs and the destination register is described as the output.
-In the RISCVInstrInfoCrypt.td file, we add the definition of the SHLXOR instruction by using the ALU\_rr class. In this part, we define funct7, funct3, and the mnemonic of the new instruction as well as the schedulings.
+As we can see, encoding of this type of instruction consists of funct7, funct3, opcode, source registers, and the destination register. The encoding format and the other properties are described in the class. The source registers are described as inputs and the destination register is described as the output.
+In the RISCVInstrInfoCrypt.td file, we add the definition of the SHLXOR instruction by using the ALU\_rr class. In this part, we define funct7, funct3, and the mnemonic of the new instruction as well as the scheduling.
 
 \begin{lstlisting}
 def SHLXOR : ALU_rr<0b0011000, 0b111, "shlxor">,
@@ -61,7 +61,7 @@ clang -S -target riscv32-linux-gnu -emit-llvm shlxor.c
 \end{lstlisting}
 
 
-This C code basically shifts the variable "a" by one bit and XOR’s it with "b" variable. Then the result is stored in "a". We can see that, the register that stores the value "a" is both the first source register and the destination register. The assembly output is given below.
+This C code basically shifts the variable "a" by one bit and XOR’s it with the "b" variable. Then the result is stored in "a". We can see that, the register that stores the value "a" is both the first source register and the destination register. The assembly output is given below.
 %TODO find RISCV latex syntax 
 %TODO and TableGen
 \begin{lstlisting}%[language={[RISC-V]Assembler}]
@@ -105,7 +105,7 @@ shlxor:                                 # @shlxor
 
 In the assembly output, we can see the SHLXOR instruction in line 28. a1 and a2 are the sources and a1 is also the destination as we can see.
 
-In addition to that, we can check the DAG in order to see the effect of our newly added instruction. We can compare the DAGs before and after the new instruction is added. We can observe the DAG before SHLXOR is added in Figure \ref{fig:shlxor_before}. In this DAG, shift left (shl) and xor instructions can be seen seperately
+In addition to that, we can check the DAG in order to see the effect of our newly added instruction. We can compare the DAGs before and after the new instruction is added. We can observe the DAG before SHLXOR is added in Figure \ref{fig:shlxor_before}. In this DAG, shift left (shl) and xor instructions can be seen separately
 
 \begin{figure}[h!]
     \centering
@@ -126,9 +126,9 @@ The DAG after we add the SHLXOR instruction can be seen in Figure \ref{fig:shlxo
 \section{RORI Instruction}\label{sec:rori}
 One of the Instructions that we worked on is RORI instruction. The purpose of this instruction is to take the operand and rotate it to the right by the amount of the immediate value. This is different from shifting right using an immediate. When shifting a number to the right, the LSBs are deleted and the MSBs are either zero or sign extended. On the other hand, when a number is rotated right, the LSBs that are pushed out are not deleted but written into the most significant bits. We want to add an instruction that performs this operation.
 
-First of all, we tried pattern matching and added the definition and pattern of our new instruction to the InstrInfoCrypt.td file. However, the RORI instruction was not observed when we checked the assembly output created by using a simple C code that implements the rotation operation. This is because the pattern can have different combinations and may not match with what we expect. Therefore, the instruction cannot be recognized and we can’t see it in the assembly output.
+First of all, we tried pattern matching and added the definition and pattern of our new instruction to the InstrInfoCrypt.td file. However, the RORI instruction was not observed when we checked the assembly output created by using a simple C code that implements the rotation operation. This is because the pattern can have different combinations and may not match what we expect. Therefore, the instruction cannot be recognized and we can’t see it in the assembly output.
 
-Realizing that, we looked for other options and tried to make use of intrinsics and builtin functions. We added the definitions into the InstrInfoCrypt.td file.
+Realizing that, we looked for other options and tried to make use of intrinsics and builtin functions. We added the definitions to the InstrInfoCrypt.td file.
 
 \begin{lstlisting}
 def ROTI : ALU_ri<0b101, "roti">;
@@ -152,7 +152,7 @@ setOperationAction({ISD::ROTL, ISD::ROTR}, XLenVT, Expand);
 }
 \end{lstlisting}
 
-However, we need to change the “Expand” to “Legal” in here otherwise we will not see the ROTI instruction in the assembly output.  This way, we are legalizing the action. If we don’t do this, we will see the fshr (funnel shift right) intrinsic in the .ll file but ROTI won’t make it into the assembly output. After doing these, we can try it with a simple C code. As mentioned before, we used a built in rotate function in the C code given below to guarantee the generation of "fshl" llvm intrinsic function. 
+However, we need to change the “Expand” to “Legal” here otherwise we will not see the ROTI instruction in the assembly output.  This way, we are legalizing the action. If we don’t do this, we will see the fshr (funnel shift right) intrinsic in the .ll file but ROTI won’t make it into the assembly output. After doing these, we can try it with a simple C code. As mentioned before, we used a builtin rotate function in the C code given below to guarantee the generation of "fshl" llvm intrinsic function. 
 %\ref{fig:c_code_with_builtin_function_for_roti}.
 
 \begin{lstlisting}[language=C++]
@@ -251,7 +251,7 @@ Here, we use 32 as the length because our target is 32-bit. The rotation is impl
 clang --target=riscv32 -O -S rori.c -march=rv32imaczbb
 \end{lstlisting}
 
-Here, -O defines the level of optimization. -S is used for getting an assembly file as an output. rori.c is the name of our simple C code. -march=rv32imaczbb designates that we want to utilize the zbb subgroup of the bit manipulation extension. The assembly output is given below.%in figure \ref{fig:rori_assembly_output}.
+Here, -O defines the level of optimization. -S is used for getting an assembly file as an output. rori.c is the name of our simple C code. -march=rv32imaczbb designates that we want to utilize the Zbb subgroup of the bit manipulation extension. The assembly output is given below.%in figure \ref{fig:rori_assembly_output}.
 
 \begin{lstlisting}
 rotimm:
@@ -259,11 +259,11 @@ rotimm:
 	ret
 \end{lstlisting}
 
-This way, we managed to succesfully obtain RORI instruction in the assembly output.
+This way, we managed to successfully obtain RORI instruction in the assembly output.
 
 \section{NAXOR Instruction}\label{sec:naxor}
 
-S-box algorithm includes a certain pattern that is used repeatedly. NOT-AND-XOR pattern is used five times in an s-box cycle. This pattern is lowered into one instruction using TableGen. Definition and specifications of the pattern are added to RISCVInstrInfoCrypt.td file. After matching this pattern 15 rows of the assembly file is reduced to one single instruction. 
+The S-box algorithm includes a certain pattern that is used repeatedly. NOT-AND-XOR pattern is used five times in an s-box cycle. This pattern is lowered into one instruction using TableGen. The definition and specifications of the pattern are added to RISCVInstrInfoCrypt.td file. After matching this pattern 15 rows of the assembly file are reduced to one single instruction. 
 
 \begin{lstlisting}
 def NAXOR : ALU_rrr<0b11, 0b100, "naxor">,
@@ -389,7 +389,7 @@ sbox:
 
 \section{LXR Instruction}\label{sec:lxr}
 
- LXR instruction covers an XOR operation of two loads from independant addresses. ALU\_rr class is used. Note that in order to match loads with dependant addresses, C++ logic must be implemented as discussed in Section \ref{sec:cpp}.
+ LXR instruction covers an XOR operation of two loads from independent addresses. ALU\_rr class is used. Note that in order to match loads with dependant addresses, C++ logic must be implemented as discussed in Section \ref{sec:cpp}.
 
 \begin{lstlisting}
 let mayLoad = 1 in{
@@ -398,7 +398,7 @@ Sched<[WriteIALU, ReadIALU, ReadIALU]>;
 }
 \end{lstlisting}
 
-ALU\_rr class is used and 0011011, 101 base 2 numbers are used for funct7 and funct3. \textit{mayLoad} flag is 1 to enable the load instruction in pattern.
+ALU\_rr class is used and 0011011, 101 base 2 numbers are used for funct7 and funct3. \textit{mayLoad} flag is 1 to enable the load instruction in the pattern.
 
 \begin{lstlisting}
 def : Pat< (xor (load GPR:$rs1),(load GPR:$rs2)),

@@ -4,7 +4,7 @@
 \chapter{RISC-V}\label{ch:riscv}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 In this project, our target is a 32-bit RISC-V core. RISC stands for reduced instruction set computer and RISC-V is an open standard ISA. \cite{riscvorgabout} It is structured as a small base ISA and it has different additional extensions. The base ISA is straightforward, rendering RISC-V appropriate for academic and learning purposes, yet extensive enough to function as a cost-effective and energy-efficient ISA for embedded systems \cite{watermanriscv}. Being open-source and royalty-free is another significant advantage and is an important reason why RISC-V is being commonly used. 
-RISC-V was developed by Prof. Krste Asanović and his students Andrew Waterman and Yunsup Lee. They started working on this project in 2010 as a part of as part of the Parallel Computing Laboratory which was in UC Berkeley. Par Lab was sponsored by several companies and worked on advancing parallel computing.
+RISC-V was developed by Prof. Krste Asanović and his students Andrew Waterman and Yunsup Lee. They started working on this project in 2010 as a part of as part of the Parallel Computing Laboratory which was in UC Berkeley. Par Lab was sponsored by several companies and worked on advancing parallel computing.
 
 \section{RISC-V ISA}
 The ISA constitutes a part of a computer’s abstract design that defines how the Central Processing Unit (CPU) is managed by the software. It serves as a bridge between the software and hardware, defining the processor’s abilities and the methods by which it performs tasks. Its level in the system can be seen in Figure \ref{fig:level_of_abstraction_diagram}.
@@ -16,7 +16,7 @@ The ISA constitutes a part of a computer’s abstract design that defines how th
     \label{fig:level_of_abstraction_diagram}
 \end{figure}
 
-There are different base integer variants of RISC-V such as RV32I, RV64I, and RV128I. These have address spaces of 32, 64, and 128 bits respectively \cite{Altinayozlem}. In our project, we are interested in 32-bits. RISC-V has 32 general-purpose registers. Their Application Binary Interface (ABI) names and purposes can be seen in Figure \ref{fig:riscv_registers}. Also in the Figure, we can see a different set of registers. These registers are used for floating point operations. Their ABI and purposes are also given.
+There are different base integer variants of RISC-V such as RV32I, RV64I, and RV128I. These have address spaces of 32, 64, and 128 bits respectively \cite{Altinayozlem}. In our project, we are interested in 32 bits. RISC-V has 32 general-purpose registers. Their Application Binary Interface (ABI) names and purposes can be seen in Figure \ref{fig:riscv_registers}. Also in the Figure, we can see a different set of registers. These registers are used for floating point operations. Their ABI and purposes are also given.
 
 \begin{figure}[h!]
     \centering
@@ -55,7 +55,7 @@ We had mentioned the extensions previously. Abbreviations for these extensions a
 \end{figure}
 
 Thanks to these instruction extensions, more specific tasks can be implemented since we are not limited by the base instructions.
-Among these, the bit manipulation (B) standard extension containining numerous instructions that can be useful in a wide range of applications. This extension's instructions mainly operate on the bits. These extensions are also divided into several groups according to common properties. These subgroups and their purposes can be seen in Figure \ref{fig:bit_manipulation_extension_groupings}.
+Among these, the bit manipulation (B) standard extension contains numerous instructions that can be useful in a wide range of applications. This extension's instructions mainly operate on bits. These extensions are also divided into several groups according to common properties. These subgroups and their purposes can be seen in Figure \ref{fig:bit_manipulation_extension_groupings}.
 \begin{figure}[h!]
     \centering
     \includegraphics{riscv/bit_manipulation_extension_groupings.png}
@@ -91,7 +91,7 @@ There is also a scalar cryptography instruction set extension for RISC-V. The RI
     \item Zkr can be useful to seed cryptographic random bit generators \cite{cryptoextensiondoc}.
 \end{itemize}
 
-These extensions are supported by the compiler but pattern matching support for Zbkb and Zbkx is incomplete in LLVM RISC-V backend. Also for Zknd, Zkne, Zknh, Zksed and Zksh, no pattern matching exists. Therefore, these instructions can be only used via builtin functions or from the assembler \cite{llvmextensionspage}.
+These extensions are supported by the compiler but pattern matching support for Zbkb and Zbkx is incomplete in the LLVM RISC-V backend. Also for Zknd, Zkne, Zknh, Zksed and Zksh, no pattern matching exists. Therefore, these instructions can be only used via builtin functions or from the assembler \cite{llvmextensionspage}.
 
 \begin{figure}
     \centering
@@ -100,6 +100,6 @@ These extensions are supported by the compiler but pattern matching support for 
     \label{fig:cryptography_extension_subgroups}
 \end{figure}
 
-The modular structure of these extensions is useful for hardware and software developers. For example the B extension is built in Clang so only an extra argument will provide the necessary instructions from the input extension.
+The modular structure of these extensions is useful for hardware and software developers. For example, the B extension is built in Clang so only an extra argument will provide the necessary instructions from the input extension.
 
 It is important for hardware developers to consider that developing accelerators targeting instructions in standard extensions will reduce the software workload significantly. The reason for this is LLVM supports RISC-V standard extensions and follows updates closely. Corner cases are thought out and optimization opportunities are utilized. RISC-V standard extensions are comprehensive and may already contain the extensions that we want to implement. After making sure that the extension we want is not present, we may try to implement non-standard extensions.

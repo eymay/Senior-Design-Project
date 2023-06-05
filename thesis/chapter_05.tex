@@ -3,9 +3,9 @@
 \clearpage
 \chapter{ADDING CUSTOM INSTRUCTIONS}\label{ch:custom_instr}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-The instruction selection system we focused on at the back-end of the LLVM compiler is SelectionDAG among FastISel and GlobalIsel. SelectionDAG is the most mature Instruction Selection framework with more target support. However, shortly it is worth considering GlobalISel as it is developed recently as an alternative to SelectionDAG. The reasons to replace it are to make it faster, smaller, more testable and open to low-level optimizations.
+The instruction selection system we focused on at the back end of the LLVM compiler is SelectionDAG among FastISel and GlobalIsel. SelectionDAG is the most mature Instruction Selection framework with more target support. However, shortly it is worth considering GlobalISel as it is developed recently as an alternative to SelectionDAG. The reasons to replace it are to make it faster, smaller, more testable and open to low-level optimizations.
 \section{TableGen Reference}
-TableGen is a domain-specific language used in the LLVM backend side to generate CPP header files. The purpose it serves is that it removes the redundancy of instruction declaration code which can be common to numerous architectures with minor differences. To maintain and scale the framework the minor differences are implemented level by level at a series of inheritance operations between TableGen classes. 
+TableGen is a domain-specific language used in the LLVM back end side to generate CPP header files. The purpose it serves is that it removes the redundancy of instruction declaration code which can be common to numerous architectures with minor differences. To maintain and scale the framework the minor differences are implemented level by level at a series of inheritance operations between TableGen classes. 
 
 \par
  LLVM Static Compiler, LLC, is responsible for converting LLVM IR to Assembly codes. To add new instructions, changes are made in TableGen files and LLC is recompiled. During the compilation operation of the LLC program, TableGen records are created which declare every instruction’s encoding and describe its features. Referring to the records, DAGs are used in the process of instruction selection. 
@@ -14,21 +14,21 @@ TableGen is a domain-specific language used in the LLVM backend side to generate
  Operations or functions are represented as nodes in the DAG. They are critical parts of declaring the logic or pattern of the new instruction. 
 \par
 
-The operations represented on the DAG can be LLVM intrinsics as well as instructions. LLVM instructions resemble conventional assembly instructions, in contrast, LLVM intrinsics have higher level abstraction depending on their functionality. Their instruction generation may vary depending on the target hardware. It is possible to define a new complicated instruction either by combining simple LLVM instructions and higher level intrinsics in DAG level or by creating a new LLVM intrinsic which gets created at the Intermediate Level of the compilation process.
+The operations represented on the DAG can be LLVM intrinsics as well as instructions. LLVM instructions resemble conventional assembly instructions, in contrast, LLVM intrinsics have higher level abstraction depending on their functionality. Their instruction generation may vary depending on the target hardware. It is possible to define a new complicated instruction either by combining simple LLVM instructions and higher-level intrinsics in the DAG level or by creating a new LLVM intrinsic which gets created at the Intermediate Level of the compilation process.
 
 \section{RISC-V TableGen Classes}
-The most general instruction class used for every target architecture is the “InstructionEncoding” TableGen class defined in llvm/include/llvm/Target/Target.td. This class holds the decoder method and size of instruction in addition to minor variables. It gets inherited to the generic “Instruction” class which is defined in the same class. This class holds input and output DAGs and information which is useful to the compiler and is generalizable to all architectures.
+The most general instruction class used for every target architecture is the “InstructionEncoding” TableGen class defined in llvm/include/llvm/Target/Target.td. This class holds the decoder method and size of instruction in addition to minor variables. It gets inherited by the generic “Instruction” class which is defined in the same class. This class holds input and output DAGs and information which is useful to the compiler and is generalizable to all architectures.
 \par
 
-The general class gets inherited to every target-specific class. In RISC-V’s case, the next stop of the instruction is the “RVInst” class which inherits from the general “Instruction” class and it resides in llvm/lib/Target/RISCV/RISCVInstrFormats.td TableGen file. It defines the general bit patterns of RISC-V instructions. For example, the opcode being the first 7 bits. It defines additional information like the assembly string pattern. This general class is inherited by every type of instruction of R, I, S, B, U, and J types. As a simple example, XOR instruction can be traced. As XOR is an R type, a register-register instruction, it continues its inheritance journey from “RVInstR”. It is common to R type instructions to have funct7, rs2, rs1, funct3, and rd format ordered from most significant bit (MSB) to least significant bit (LSB). These variables are assigned corresponding bit fields in the class. 
+The general class gets inherited by every target-specific class. In RISC-V’s case, the next stop of the instruction is the “RVInst” class which inherits from the general “Instruction” class and it resides in llvm/lib/Target/RISCV/RISCVInstrFormats.td TableGen file. It defines the general bit patterns of RISC-V instructions. For example, the opcode being the first 7 bits. It defines additional information like the assembly string pattern. This general class is inherited by every type of instruction of R, I, S, B, U, and J types. As a simple example, XOR instruction can be traced. As XOR is an R type, a register-register instruction, it continues its inheritance journey from “RVInstR”. It is common to R type instructions to have funct7, rs2, rs1, funct3, and rd format ordered from most significant bit (MSB) to least significant bit (LSB). These variables are assigned corresponding bit fields in the class. 
 \par
 
-The RISC-V formats mentioned are included in the llvm/lib/Target/RISCV/RISCVInstrInfo.td file which is in the same directory as the RISCVInstrFormats.td file. After inclusion, the “RVInstR” class gets inherited by the “ALU\_rr” class. The “ALU\_rr” class adds the commutability feature which means swapping source 1 and source 2 does not create a different result like in addition but not in subtraction. At the end, XOR’s record is defined by putting funct7, funct3 and assembly string manually in a single line with scheduling information added. 
+The RISC-V formats mentioned are included in the llvm/lib/Target/RISCV/RISCVInstrInfo.td file which is in the same directory as the RISCVInstrFormats.td file. After inclusion, the “RVInstR” class gets inherited by the “ALU\_rr” class. The “ALU\_rr” class adds the commutability feature which means swapping source 1 and source 2 does not create a different result like in addition but not in subtraction. In the end, XOR’s record is defined by putting funct7, funct3 and assembly string manually in a single line with scheduling information added. 
 
 \pagebreak
 \section{Adding a New Instruction Using TableGen}\label{sec:MLA_add_section}
 
-This section will guide the reader for introducing new instructions via TableGen.
+This section will guide the reader in introducing new instructions via TableGen.
 Create a new TableGen file for custom additions and include it at the end of the RISCVInstrInfo.td file. We named it RISCVInstrInfoCrypt.td as it is going to be cryptography related.
 \begin{lstlisting}[caption= Include file]
 include "RISCVInstrInfoCrypt.td"
@@ -38,7 +38,7 @@ The specifications of the instruction will be added to the RISCVInstrInfoCrypt.t
 
 \subsection{Introducing the ALU\_rrr TableGen Class}\label{sec:alurrr}
 
-Here we created a new class of instruction named as ALU\_rrr. MLA instruction requires three source registers and is defined to be ALU type so the specifications are:
+Here we created a new class of instruction named ALU\_rrr. MLA instruction requires three source registers and is defined to be ALU type so the specifications are:
 
 \begin{lstlisting}[caption={ALU\_rrr class definition},label={lst:ALU_rrr}]
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
@@ -68,7 +68,7 @@ class ALU_rrr<bits<2> funct2, bits<3> funct3, string opcodestr,
             bit Commutable = 0>
 \end{lstlisting}
 
-Class is defined with ALU\_rrr name. Variables are defined. \textit{funct2} is two bits of binary number as RVInstR4 is used which reserves 5 bits of \textit{funct7} for another register. \textit{funct3} is three bits of binary number. \textit{opcodestr} is the string that will be shown in the assembly file. \textit{Commutable} is a zero bit which determines the importance of the order of the inputs.
+Class is defined with ALU\_rrr name. Variables are defined. \textit{funct2} is a two-bit binary number as RVInstR4 is used which reserves 5 bits of \textit{funct7} for another register. \textit{funct3} is a three-bit binary number. \textit{opcodestr} is the string that will be shown in the assembly file. \textit{Commutable} is a zero bit which determines the importance of the order of the inputs.
 
 \begin{lstlisting}
 : RVInstR4<funct2, funct3, OPC_OP,
@@ -107,14 +107,14 @@ def : Pat< (add (mul GPR:$src1, GPR:$src2), GPR:$src3),
 Note that it is possible to define more patterns to introduce optimizations. There can be multiple source patterns for the same target pattern. The target pattern can also be a tree of SDNodes containing the custom instruction.
 
 \section{Adding Pattern Matching Support for New Instruction Using C++ in SelectionDAG}\label{sec:cpp}
-TableGen aims to provide a declarative way to introduce new patterns for new instruction developers. However, not all instructions can be described in this scheme.  Although it is called "dag" as a keyword in TableGen, it expects a tree of instructions. For certain usecases, custom C++ can be the only way to match until the TableGen based system improves. It is also possible to use C++ in complex patterns together with TableGen, which can make the most of the pattern declarative and only the necessary part in imperative style.
+TableGen aims to provide a declarative way to introduce new patterns for new instruction developers. However, not all instructions can be described in this scheme.  Although it is called "dag" as a keyword in TableGen, it expects a tree of instructions. For certain use cases, custom C++ can be the only way to match until the TableGen based system improves. It is also possible to use C++ in complex patterns together with TableGen, which can make the most of the pattern declarative and only the necessary part in imperative style.
 \par
-A domain that TableGen fails is matching a graph of instructions with dependant operands. As an example we can think of an instruction having two operands of Load Instructions. If the Load instructions are from an array, they must be related to each other by an offset and it might need to be detected for certain patterns.
+A domain that TableGen fails is matching a graph of instructions with dependant operands. As an example, we can think of an instruction having two operands of Load Instructions. If the Load instructions are from an array, they must be related to each other by an offset and it might need to be detected for certain patterns.
 
 
 \lstinputlisting[caption={Minimal Subtree of Optimized S-box LLVM IR},linerange={1-5} ,label={lst:sbox-xor},language=llvm,style=nasm]{../s-box/keccakO3.ll}
 
-In Code \ref{lst:sbox-xor}, it can be seen that the XOR instruction is between the first element of the input struct and the fifth element of it. As the locations of elements matters, they must be matched by not only looking at Load instructions but also their operands. What we are looking for is to have the base of Load instruction to be equal and the offset operand of it to evaluate to 4, designating the fifth element of struct. TableGen is not suitable for this operation and the source code of SelectionDAG's RISC-V backend should be analyzed to place the logic to pattern match this set of instructions.
+In Code \ref{lst:sbox-xor}, it can be seen that the XOR instruction is between the first element of the input struct and the fifth element of it. As the locations of elements matter, they must be matched by not only looking at Load instructions but also their operands. What we are looking for is to have the base of Load instruction to be equal and the offset operand of it to evaluate to 4, designating the fifth element of the struct. TableGen is not suitable for this operation and the source code of SelectionDAG's RISC-V backend should be analyzed to place the logic to pattern match this set of instructions.
 
 The process for adding an instruction via C++ is as follows:
 \begin{enumerate}
@@ -124,12 +124,12 @@ The process for adding an instruction via C++ is as follows:
     \item Implement pattern matching and replacement with SDnode.
 \end{enumerate}
 
-SelectionDAG consists of numerous files but the most relevant ones to the developer can be few if the complexity of the pattern is small. The order of files will be from IR to Assembly. RISCVCodeGenPrepare.cpp file provides mechanisms for matching in IR form. This file exists mainly due to the limitation of SelectionDAG which is running per basic-block. RISCVISelLowering.cpp contains the lowering of IR to SDnodes. It can decide on whether a type or expression should be legalized or expanded. RISCVISelDAGToDAG.cpp is the instruction selector in C++. Its implementation traverses the DAG from the root and runs the selection functions depending on the SDnode type which is parallel to instructions. 
+SelectionDAG consists of numerous files but the most relevant ones to the developer can be few if the complexity of the pattern is small. The order of files will be from IR to Assembly. RISCVCodeGenPrepare.cpp file provides mechanisms for matching in IR form. This file exists mainly due to the limitation of SelectionDAG which is running per basic block. RISCVISelLowering.cpp contains the lowering of IR to SDnodes. It can decide on whether a type or expression should be legalized or expanded. RISCVISelDAGToDAG.cpp is the instruction selector in C++. Its implementation traverses the DAG from the root and runs the selection functions depending on the SDnode type which is parallel to instructions. 
 
 
 \lstinputlisting[caption={The corresponding Optimized and Legalized DAG of Code \ref{lst:sbox-xor}},linerange={3-3,4-4,8-9,13-13,16-16} ,label={lst:sbox-xor-dag},language=llvm,style=nasm]{../s-box/opt-lowered-dag.td}
 
-In an attempt to match the three instructions in Code \ref{lst:sbox-xor}, the DAG in Code \ref{lst:sbox-xor-dag} is analyzed. First remark is that "getelementptr" is converted to an add instruction which calculates the offset. Another remark is that the load instructions have the same base address in first operand as expected pointing to the same node. If the pattern is large, we can introduce a new function which will contain the logic. The function's prototype should be added to the corresponding header file.
+In an attempt to match the three instructions in Code \ref{lst:sbox-xor}, the DAG in Code \ref{lst:sbox-xor-dag} is analyzed. The first remark is that "getelementptr" is converted to an add instruction which calculates the offset. Another remark is that the load instructions have the same base address in the first operand as expected pointing to the same node. If the pattern is large, we can introduce a new function which will contain the logic. The function's prototype should be added to the corresponding header file.
 
 
 \lstinputlisting[caption={Introduction of New Function for Pattern Matching in C++},label={lst:sbox-iseldagtodag},language=C++]{../s-box/custom_c++/iseldagtodagPlace.cpp}
@@ -139,7 +139,7 @@ The C++ logic for matching this pattern is provided below.
 
 \lstinputlisting[caption={C++ logic for Pattern Matching the DAG in Code \ref{lst:sbox-xor-dag}},label={lst:sbox-cpp},language=C++]{../s-box/custom_c++/xor_loads.cpp}
 
-The logic starts from the root of the DAG which in this case is XOR instruction or the ISD::XOR SDnode. Then we iterate through its leaves and check the distinctive features of the pattern. In this pattern we are interested in the distance of offset addresses of Load instructions so we progressively approach them by assuming the pattern holds and quitting if not. Progressive checking is a common theme in LLVM and as Instruction Selection is one of the stages affecting the compilation times significantly, patterns should not be checked in a single if statement by logical combinations. 
+The logic starts from the root of the DAG which in this case is XOR instruction or the ISD::XOR SDnode. Then we iterate through its leaves and check the distinctive features of the pattern. In this pattern, we are interested in the distance of offset addresses of Load instructions so we progressively approach them by assuming the pattern holds and quitting if not. Progressive checking is a common theme in LLVM and as Instruction Selection is one of the stages affecting the compilation times significantly, patterns should not be checked in a single if statement by logical combinations. 
 
 The checks, if statements are doing can be summarised in steps. As the function only runs when the instruction selection finds an XOR SDNode, the root can be assumed as XOR safely.
 \begin{enumerate}
@@ -156,15 +156,15 @@ At this point, it can be safely assumed that the only XOR that conforms to the p
 To interact with the DAG, SelectionDAG's API is used. We encourage the developers to read the source code and learn to use the public functions exposed by SelectionDAG in order to interact with the DAG most effectively. RISCVISelDAGToDAG.cpp file already has many instruction selection mechanisms in place which can be read through. 
 
 \section{Discussion of Pattern Matching in Other Stages of the Compiler}\label{sec:patmatchdisc}
-Pattern Matching can be assumed to mainly be an Instruction Selection problem where the pattern will be simply identified and replaced. However, when we take a look at the baseline problem any Compiler technology solves, it is to convert more familiar patterns in some language to a more unfamiliar pattern in machine language. Also this conversion occurs in a large number of steps through optimization in IR form as discussed in Section \ref{sec:opt}, to DAG formation in SelectionDAG to MCInstr form down the pipeline. Their data structures can differ in representing the instructions which can make some pattern matching schemes to be more fragile than others. Also, as the lowering gets performed high level information about the program is lost but the formation gets closer to the final output of Assembly. 
+Pattern Matching can be assumed to mainly be an Instruction Selection problem where the pattern will be simply identified and replaced. However, when we take a look at the baseline problem any Compiler technology solves, it is to convert more familiar patterns in some language to a more unfamiliar pattern in machine language. Also, this conversion occurs in a large number of steps through optimization in IR form as discussed in Section \ref{sec:opt}, to DAG formation in SelectionDAG to MCInstr form down the pipeline. Their data structures can differ in representing the instructions which can make some pattern matching schemes to be more fragile than others. Also, as the lowering gets performed high-level information about the program is lost but the formation gets closer to the final output of Assembly. 
 
-For simple cases where for example a combination of R-type instructions will be matched and replaced, Instruction Selection might be the most convenient stage to extend. However if the pattern requires the instruction selection to be performed already, pattern match can be done in MC layer. In contrary, if higher level information of the pattern is required, a pattern can be matched to an intrinsic function in IR level. 
+For simple cases where for example a combination of R-type instructions will be matched and replaced, Instruction Selection might be the most convenient stage to extend. However if the pattern requires the instruction selection to be performed already, pattern match can be done in the MC layer. On the contrary, if higher level information of the pattern is required, a pattern can be matched to an intrinsic function at the IR level. 
 
 Another reason to consider different stages is that there can be multiple patterns mapped to the same instruction. Further optimization opportunities can rise in further stages. 
 
 \subsection{Case Study: SH1ADD in SelectionDAG and MC Layer}
 
-It was discussed that dealing with the lowered DAG to MC layer can provide more optimization opportunities. In this section the case of "SH1ADD" instruction which is ratified in RISC-V Zba extension will be analyzed. The instruction shifts rs1 left by one, adds rs2 and writes to rd. Its encoding and pattern in the standard implementation of LLVM in TableGen is as follows:
+It was discussed that dealing with the lowered DAG to MC layer can provide more optimization opportunities. In this section, the case of "SH1ADD" instruction which is ratified in the RISC-V Zba extension will be analyzed. The instruction shifts rs1 left by one, adds rs2 and writes to rd. Its encoding and pattern in the standard implementation of LLVM in TableGen are as follows:
 
 \begin{lstlisting}[%language=TableGen,
 caption={Instruction Encoding of the Instructions} ]
@@ -227,7 +227,7 @@ return selectSHXADDOp(N, ShAmt, Val);
 }
 \end{lstlisting}
 
-The C++ logic can be found in RISCVISelDAGToDAG.cpp file, the implementation will be reduced to the patterns described in comments:
+The C++ logic can be found in RISCVISelDAGToDAG.cpp file, the implementation will be reduced to the patterns described in the comments:
 
 \begin{lstlisting}[language=C++, caption={Implementation of the ComplexPattern for "sh1add\_op"}]
 /// Look for various patterns that can be done with a SHL that can be 
@@ -353,7 +353,7 @@ InstSeq generateInstSeq(int64_t Val,
 
 \end{lstlisting}
 
-By using "SH1ADD" in immediate materialization, a single instruction can be used instead of two. It can be checked that in the standard testing suite there is the following function which returns a 64 bit integer:
+By using "SH1ADD" in immediate materialization, a single instruction can be used instead of two. It can be checked that in the standard testing suite, there is the following function which returns a 64-bit integer:
 \begin{minipage}{\linewidth}
 \begin{lstlisting}[language=llvm,style=nasm, caption={Function for Immediate Materialization}]
 define i64 @PR54812() {
@@ -375,11 +375,11 @@ define i64 @PR54812() {
 \end{lstlisting}
 \end{minipage}
 %TODO can be compared in more detail
-In the FileCheck lines which is explained in Section \ref{sec:llc_test}, we can see the Assembly lines that should be emmitted. It can be observed that the desired immediate can be obtained with "sh1add" in less instructions.
+In the FileCheck lines which are explained in Section \ref{sec:llc_test}, we can see the Assembly lines that should be emitted. It can be observed that the desired immediate can be obtained with "sh1add" in fewer instructions.
 
 \subsection{Case Study: ROR in SelectionDAG and IR Level}
 
-In LLVM, rotation instruction which is shifting and feeding the carry back to the shift point, is captured in IR level. To match in IR level, a new intrinsic function is defined in TableGen. TableGen is not only used in instruction selection, it is used wherever a declarative form is better suited such as in IR or MLIR levels.
+In LLVM, rotation instruction which is shifting and feeding the carry back to the shift point is captured at the IR level. To match in IR level, a new intrinsic function is defined in TableGen. TableGen is not only used in instruction selection, it is used wherever a declarative form is better suited such as in IR or MLIR levels.
 
 \begin{lstlisting}[language=C++, caption={Funnel Shift Intrinsic Definition}]
 //===-------------------- Bit Manipulation Intrinsics ---------===//
