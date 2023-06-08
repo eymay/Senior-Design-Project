@@ -1,3 +1,4 @@
+%! TEX root = bitirme.tex
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Beamer Presentation
 % LaTeX Template
@@ -200,12 +201,24 @@
 
 %\subtitle{Optional Subtitle} % Presentation subtitle, remove this command if a subtitle isn't required
 
-\author[Eymen Ünay]{Mehmet Eymen Ünay} % Presenter name(s), the optional parameter can contain a shortened version to appear on the bottom of every slide, while the main parameter will appear on the title slide
+\author[]{Mehmet Eymen Ünay \\ \and Bora İnan \\ \and Emrecan Yiğit} % Presenter name(s), the optional parameter can contain a shortened version to appear on the bottom of every slide, while the main parameter will appear on the title slide
 
-\institute[]{İstanbul Teknik Üniversitesi \\ \smallskip Elektronik ve Haberleşme \& Bilgisayar Mühendisliği} % Your institution, the optional parameter can be used for the institution shorthand and will appear on the bottom of every slide after author names, while the required parameter is used on the title slide and can include your email address or additional information on separate lines
+\institute[]{İstanbul Teknik Üniversitesi \\ \smallskip Elektronik ve Haberleşme Mühendisliği} % Your institution, the optional parameter can be used for the institution shorthand and will appear on the bottom of every slide after author names, while the required parameter is used on the title slide and can include your email address or additional information on separate lines
 
 \date[\today]{} % Presentation date or conference/meeting name, the optional parameter can contain a shortened version to appear on the bottom of every slide, while the required parameter value is output to the title slide
 
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+%----------------------------------------------------------------------------------------
+%	TITLE SLIDE
+%----------------------------------------------------------------------------------------
+
+\begin{frame}
+	\titlepage % Output the title slide, automatically created using the text entered in the PRESENTATION INFORMATION block above
+\end{frame}
 %----------------------------------------------------------------------------------------
 %	TABLE OF CONTENTS SLIDE
 %----------------------------------------------------------------------------------------
@@ -217,6 +230,7 @@
 	
 	\tableofcontents % Output the table of contents (all sections on one slide)
 	%\tableofcontents[pausesections] % Output the table of contents (break sections up across separate slides)
+\end{frame}
 
 %----------------------------------------------------------------------------------------
 %	PRESENTATION BODY SLIDES
@@ -228,4 +242,5 @@
 \input{sec_riscvDescr}
 \input{sec_patMatch}
 
-\end{frame}
+
+\end{document} 
