@@ -1,0 +1,108 @@
+
+\section{Pattern Matching}
+\subsection{TableGen Pattern}
+\begin{frame}[fragile]{TableGen Patterns}
+    RISC-V TableGen classes can be used to declare any instruction in a more structured way.
+    \par
+    The DAG pattern of the instruction can be declared in a Pattern declaration of TableGen. For the MLA (Multiply and Add) instruction, it is:
+
+\begin{lstlisting}
+def : Pat< (add (mul GPR:$src1, GPR:$src2), GPR:$src3),
+(MLA GPR:$src1, GPR:$src2, GPR:$src3)>;
+\end{lstlisting}
+LLVM IR assembly instructions and intrinsic functions are combined in DAG structure. 
+\end{frame}
+
+\subsection{Pattern Matching with C++ in SelectionDAG}
+\begin{frame}[fragile]{Limitations of TableGen}
+\begin{itemize}
+    \item TableGen patterns can only match tree structured patterns.
+    \item Cannot match pattern with input relations. All inputs should be independent of each other.
+    \item Limited by the language compared to C++.
+\end{itemize}
+
+\lstinputlisting[caption={Minimal IR Example of xor(load(x), load(x + 16)},linerange={1-5} ,label={lst:sbox-xor},language=llvm,style=nasm]{../s-box/keccakO3.ll}
+\end{frame}
+
+\begin{frame}{Pattern Matching with C++ in SelectionDAG}
+\begin{enumerate}
+    \item Create a record declaration in TableGen to provide the Assembler support, ignoring the Pattern declaration.
+    \item Observe the DAG in the debug output or dot file and locate the root of it. 
+    \item Add a function in RISCVISelDAGToDAG.cpp file in the root instruction case. 
+    \item Implement pattern matching and replacement with SelectionDAG node.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Example with C++}{LXR Instruction}
+\begin{itemize}
+    \item Our example instruction LXR, loads two elements from an array and XOR's them.
+    \item lxr rd, rs1, rs2 = xor(load(x), load(x + 16))
+
+    \item Because the instruction loads from an array, the address values are relative to each other. 
+    \item So TableGen cannot be used for pattern matching.
+    \item But TableGen can always be used for instruction encoding thus Assembler support.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Instruction Encoding of LXR in TableGen}{1.Create a Record}
+The input and outputs are registers so TableGen class can used for R-type instructions.
+
+We can override funct7 and funct3 for our custom instruction encoding.
+\begin{lstlisting}
+let mayLoad = 1 in{
+def LXR : ALU_rr<0b0011011, 0b101, "lxr">,
+Sched<[WriteIALU, ReadIALU, ReadIALU]>;
+}
+\end{lstlisting}
+llvm-mc assembler can be used for emitting binary from Assembly string.
+\end{frame}
+
+\begin{frame}[fragile]{DAG of LXR Pattern}{2.Observe the DAG}
+The LXR targeting pattern is produced and dumped in SelectionDAG.
+\lstinputlisting[caption={The corresponding Optimized and Legalized DAG}, linerange={3-3,4-4,8-9,13-13,16-16} ,label={lst:sbox-xor-dag},language=llvm,style=nasm]{../s-box/opt-lowered-dag.td}
+Instruction Selection works on optimized, legalized DAG in SelectionDAG.
+\end{frame}
+
+\begin{frame}[fragile]{Modify RISCVISelDAGToDAG.cpp}{3.Add function call}
+    RISCVISelDAGToDAG.cpp contains DAG to DAG transformations in C++.
+\lstinputlisting[caption={Introduction of New Function for Pattern Matching in C++},label={lst:sbox-iseldagtodag},language=C++]{../s-box/custom_c++/iseldagtodagPlace.cpp}
+\end{frame}
+
+
+\begin{frame}[fragile]{Pattern Matching Function in C++}{4.Pattern Match Logic}
+\lstinputlisting[caption={C++ logic, Part 1}, label={lst:sbox-cpp}, linerange={1-17} ,language=C++]{../s-box/custom_c++/xor_loads.cpp}
+\end{frame}
+
+\begin{frame}[fragile]{Pattern Matching Function in C++}{4.Pattern Match Logic}
+\lstinputlisting[caption={C++ logic, Part 2}, label={lst:sbox-cpp2}, linerange={19-33} ,language=C++]{../s-box/custom_c++/xor_loads.cpp}
+\end{frame}
+
+\begin{frame}{Pattern Checks in the Function}
+Check if..
+\begin{enumerate}
+    \item .. the operands are both Load instructions.
+    \item .. the Second Load instruction has an Add instruction in its second operand
+    \item .. the base offset of the first load and the first addendum of the second load are the same, as they should point to the beginning of the struct.
+    \item .. the second addendum is a constant.
+    \item .. the unsigned value of constant second addendum is equal to 16.
+\end{enumerate}
+\end{frame}
+
+\subsection{Pattern Matching with C++ in LLVM IR}
+\begin{frame}{Problems with SelectionDAG}
+    \begin{itemize}
+        \item Developed since 2005s
+        \item Monolithic, hard to test passes
+        \item Works on basic blocks, cannot access DAG of two functions at the same time.
+        \item Affects compile time significantly
+        \item Documentation is scarce
+        \item Hard to debug as the DAG is built in memory
+    \end{itemize}
+    The new alternative is GlobalISel which addresses these problems but is still under development for RISC-V target.
+
+    GlobalISel is default for AArch64 target.
+\end{frame}
+
+\begin{frame}{LLVM IR}
+It is possible to lift pattern matching from the backend to the LLVM IR level. A procedure similar to the backend 
+\end{frame}

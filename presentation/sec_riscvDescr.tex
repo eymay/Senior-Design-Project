@@ -1,0 +1,34 @@
+\section{RISC-V Description in SelectionDAG}
+\subsection{TableGen}
+\begin{frame}{TableGen}
+    \begin{itemize}
+        \item Domain-specific language used in LLVM backend side to generate CPP header files.
+        \item
+        Removes redundancy of instruction declaration code
+        \item
+        Classes are used to convey common information and get inherited to records
+        \item
+        Declarative instead of Imperative
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{RISC-V TableGen Classes}
+Target Independent Instruction Classes
+    \begin{itemize}
+        \item \textbf{InstructionEncoding}, decoder method, size of instruction
+        \item
+        \textbf{Instruction}, input and output DAGs
+    \end{itemize}
+RISC-V Instruction Classes Inherited to declare 'XOR' Instruction
+    \begin{itemize}
+        \item \textbf{RVInst}, universal bit patterns of RISC-V
+        \item
+        \textbf{RVInstR}, R type instruction
+        \item
+        \textbf{ALU\_rr}, features like Commutability declared
+    \end{itemize}
+\begin{lstlisting}
+def XOR  : ALU_rr<0b0000000, 0b100, "xor", /*Commutable*/1>,
+           Sched<[WriteIALU, ReadIALU, ReadIALU]>;
+\end{lstlisting}
+\end{frame}
