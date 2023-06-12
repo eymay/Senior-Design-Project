@@ -1,17 +1,5 @@
 
-\section{Pattern Matching}
-\subsection{TableGen Pattern}
-\begin{frame}[fragile]{TableGen Patterns}
-    RISC-V TableGen classes can be used to declare any instruction in a more structured way.
-    \par
-    The DAG pattern of the instruction can be declared in a Pattern declaration of TableGen. For the MLA (Multiply and Add) instruction, it is:
-
-\begin{lstlisting}
-def : Pat< (add (mul GPR:$src1, GPR:$src2), GPR:$src3),
-(MLA GPR:$src1, GPR:$src2, GPR:$src3)>;
-\end{lstlisting}
-LLVM IR assembly instructions and intrinsic functions are combined in DAG structure. 
-\end{frame}
+\section{Pattern Matching with C++}
 
 \subsection{Pattern Matching with C++ in SelectionDAG}
 \begin{frame}[fragile]{Limitations of TableGen}
