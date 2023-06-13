@@ -11,8 +11,8 @@
     \node [cloud, right of=opt1,node distance=2.5cm] (leg) {Legalize};
     \node [cloud, right of=leg,node distance=2.5cm] (opt2) {Optimize};
     \node [cloud, right of=opt2,node distance=2.5cm] (sel) {Instr. Selection};
-    \node [cloud, right of=opt2,node distance=2.5cm] (sched) {Instr. Scheduling};
-    \node [cloud, below of=sel,node distance=2.5cm] (reg) {Register Allocation};
+    \node [cloud, right of=sel,node distance=2.5cm] (sched) {Instr. Scheduling};
+    \node [cloud, below of=sched,node distance=2.5cm] (reg) {Register Allocation};
     \node [block, left of=reg,node distance=2.5cm] (assem) {Assembly};
 
     % Draw edges
