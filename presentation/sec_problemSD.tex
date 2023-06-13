@@ -1,0 +1,13 @@
+\begin{frame}{Problems with SelectionDAG}
+    \begin{itemize}
+        \item Developed since 2005s
+        \item Monolithic, hard to test passes
+        \item Works on basic blocks, cannot access DAG of two functions at the same time.
+        \item Affects compile time significantly
+        \item Documentation is scarce
+        \item Hard to debug as the DAG is built in memory
+    \end{itemize}
+    The new alternative is GlobalISel which addresses these problems but is still under development for RISC-V target.
+
+    GlobalISel is default for AArch64 target.
+\end{frame}

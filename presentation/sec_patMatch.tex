@@ -77,28 +77,30 @@ Check if..
 \end{frame}
 
 \subsection{Pattern Matching with C++ in Different Levels}
-\begin{frame}{Problems with SelectionDAG}
-    \begin{itemize}
-        \item Developed since 2005s
-        \item Monolithic, hard to test passes
-        \item Works on basic blocks, cannot access DAG of two functions at the same time.
-        \item Affects compile time significantly
-        \item Documentation is scarce
-        \item Hard to debug as the DAG is built in memory
-    \end{itemize}
-    The new alternative is GlobalISel which addresses these problems but is still under development for RISC-V target.
 
-    GlobalISel is default for AArch64 target.
-\end{frame}
 
 \begin{frame}{Pattern Matching in Different Levels}
 It is possible to perform pattern matching in a different level than the backend. 
 
 LLVM IR level and MCInst are the two alternatives for pattern matching.
+\begin{center}
+    \begin{tikzpicture}[node distance = 2cm, auto]
+\tikzstyle{every node}=[font=\footnotesize]
+    % Place nodes
+    \node [block] (init) {LLVM IR};
+    \node [cloud, right of=init,node distance=2.5cm] (ast) {Selection DAG};
+    \node [block, right of=ast,node distance=2.5cm] (llvmir) {MCInst};
+    % Draw edges
+    \path [line] (init) -- (ast);
+    \path [line] (ast) -- (llvmir);
+
+   
+\end{tikzpicture}
+\end{center}
 \end{frame}
 
 \begin{frame}{Pattern Matching with LLVM IR}
-Rotation operation is matched in LLVM IR in IR level.
+Rotation operation "ROTR" is matched in LLVM IR in IR level.
     \begin{itemize}
         \item Pattern matching in LLVM IR requires the definition of an intrinsic function.
         \item The intrinsic function is matched in optimization passes according to the pattern.
@@ -111,5 +113,6 @@ Rotation operation is matched in LLVM IR in IR level.
 MCInst which is a lower level than SelectionDAG can be used when further detail about instructions are required.
 
 "SH1ADD" is implemented in LLVM by matching materialized immediates. Constants can have different representations and if a specific constant is required, MCInst provides more control to match that. 
-
 \end{frame}
+
+
