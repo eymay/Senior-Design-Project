@@ -49,6 +49,7 @@ def : Pat< (xor (and (not GPR:$src1), GPR:$src2), GPR:$src3),
         
         
 
+\begin{frame}[fragile]{TableGen Patterns}
 \begin{lstlisting}
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
 class ALU_rrr<bits<2> funct2, bits<3> funct3, string opcodestr,
@@ -58,20 +59,22 @@ class ALU_rrr<bits<2> funct2, bits<3> funct3, string opcodestr,
   let isCommutable = Commutable;
 }
 \end{lstlisting}
-A custom class of instruction named ALU_rrr is created. MLA instruction requires three source registers and is defined to be ALU type. 
-
+A custom class of instruction named ALU\_rrr is created. MLA instruction requires three source registers and is defined to be ALU type. 
+\end{frame}
 
 
         
+\begin{frame}[fragile]{TableGen Patterns}
 \begin{lstlisting}
 def NAXOR     : ALU_rrr<0b11, 0b100, "naxor">,
 Sched<[WriteIMul, ReadIMul, ReadIMul]>;
 \end{lstlisting}
-MLA instruction is defined and ALU_rrr instruction type is used. funct2,funct3, opcode string and schedules are sufficient to have the full definition of the instruction thanks to the custom ALU_rrr class.
+MLA instruction is defined and ALU\_rrr instruction type is used. funct2,funct3, opcode string and schedules are sufficient to have the full definition of the instruction thanks to the custom ALU\_rrr class.
+\end{frame}
 
 
 
-
+\begin{frame}[fragile]{TableGen Patterns}
 \begin{figure}
     \centering
     \includegraphics[scale=0.3]{sbox_naxor_pattern.png}
@@ -79,10 +82,11 @@ MLA instruction is defined and ALU_rrr instruction type is used. funct2,funct3, 
     \label{fig:sbox_naxor_pattern}
 \end{figure}
 This pattern is repeated 5 times as emphasized in Figure \ref{fig:sbox_naxor_pattern}. NAXOR instruction reduces 15 instructions into 5 instructions.
+\end{frame}
 
 
 
-
+\begin{frame}[fragile]{TableGen Patterns}
 \begin{figure}
     \centering
     \includegraphics[scale=0.3]{naxor_instruction.png}
@@ -93,4 +97,4 @@ The S-box algorithm includes a certain pattern that is used repeatedly.
 NOT-AND-XOR pattern is used five times in an s-box cycle. This pattern is lowered
 into one instruction using TableGen. After matching this pattern 15 rows of the
 assembly file are reduced to one single instruction.
-
+\end{frame}
