@@ -231,11 +231,19 @@
 	%\tableofcontents[pausesections] % Output the table of contents (break sections up across separate slides)
 \end{frame}
 
+\newif\ifAdvanced
+\Advancedtrue
 %----------------------------------------------------------------------------------------
 %	PRESENTATION BODY SLIDES
 %----------------------------------------------------------------------------------------
+
 \input{sec_llvmintro}
-\input{sec_pathCtoAssem}
+\ifAdvanced
+    \input{sec_pathCtoAssem}
+\else
+    \input{sec_simple_pathCtoAssem}
+\fi
+
 \input{sec_riscvDescr}
 \input{sec_patMatch}
 \input{sec_compOpts}
