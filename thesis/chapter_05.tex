@@ -112,7 +112,7 @@ TableGen aims to provide a declarative way to introduce new patterns for new ins
 A domain that TableGen fails is matching a graph of instructions with dependant operands. As an example, we can think of an instruction having two operands of Load Instructions. If the Load instructions are from an array, they must be related to each other by an offset and it might need to be detected for certain patterns.
 
 
-\lstinputlisting[caption={Minimal Subtree of Optimized S-box LLVM IR},linerange={1-5} ,label={lst:sbox-xor},language=llvm,style=nasm]{../s-box/keccakO3.ll}
+\lstinputlisting[caption={Minimal Subtree of Optimized S-box LLVM IR},linerange={1-5},label={lst:sbox-xor},language=llvm,style=nasm]{../s-box/keccakO3.ll}
 
 In Code \ref{lst:sbox-xor}, it can be seen that the XOR instruction is between the first element of the input struct and the fifth element of it. As the locations of elements matter, they must be matched by not only looking at Load instructions but also their operands. What we are looking for is to have the base of Load instruction to be equal and the offset operand of it to evaluate to 4, designating the fifth element of the struct. TableGen is not suitable for this operation and the source code of SelectionDAG's RISC-V backend should be analyzed to place the logic to pattern match this set of instructions.
 
@@ -127,7 +127,7 @@ The process for adding an instruction via C++ is as follows:
 SelectionDAG consists of numerous files but the most relevant ones to the developer can be few if the complexity of the pattern is small. The order of files will be from IR to Assembly. RISCVCodeGenPrepare.cpp file provides mechanisms for matching in IR form. This file exists mainly due to the limitation of SelectionDAG which is running per basic block. RISCVISelLowering.cpp contains the lowering of IR to SDnodes. It can decide on whether a type or expression should be legalized or expanded. RISCVISelDAGToDAG.cpp is the instruction selector in C++. Its implementation traverses the DAG from the root and runs the selection functions depending on the SDnode type which is parallel to instructions. 
 
 
-\lstinputlisting[caption={The corresponding Optimized and Legalized DAG of Code \ref{lst:sbox-xor}},linerange={3-3,4-4,8-9,13-13,16-16} ,label={lst:sbox-xor-dag},language=llvm,style=nasm]{../s-box/opt-lowered-dag.td}
+\lstinputlisting[caption={The corresponding Optimized and Legalized DAG of Code \ref{lst:sbox-xor}},linerange={3-3,4-4,8-9,13-13,16-16},label={lst:sbox-xor-dag},language=llvm,style=nasm]{../s-box/opt-lowered-dag.td}
 
 In an attempt to match the three instructions in Code \ref{lst:sbox-xor}, the DAG in Code \ref{lst:sbox-xor-dag} is analyzed. The first remark is that "getelementptr" is converted to an add instruction which calculates the offset. Another remark is that the load instructions have the same base address in the first operand as expected pointing to the same node. If the pattern is large, we can introduce a new function which will contain the logic. The function's prototype should be added to the corresponding header file.
 
