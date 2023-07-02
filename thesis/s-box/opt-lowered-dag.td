@@ -1,0 +1,43 @@
+Optimized legalized selection DAG: %bb.0 'sbox:'
+SelectionDAG has 47 nodes:
+  t0: ch,glue = EntryToken
+  t2: i32,ch = CopyFromReg t0, Register:i32 %0
+  t18: i32 = add nuw t2, Constant:i32<8>
+  t15: i32 = add nuw t2, Constant:i32<4>
+  t11: i32 = add nuw t2, Constant:i32<12>
+  t8: i32,ch = load<(load (s32) from %ir.0, !tbaa !7)> t0, t2, undef:i32
+  t4: i32 = add nuw t2, Constant:i32<16>
+  t19: i32,ch = load<(load (s32) from %ir.11, !tbaa !7)> t0, t18, undef:i32
+  t16: i32,ch = load<(load (s32) from %ir.9, !tbaa !7)> t0, t15, undef:i32
+  t12: i32,ch = load<(load (s32) from %ir.6, !tbaa !7)> t0, t11, undef:i32
+  t7: i32,ch = load<(load (s32) from %ir.2, !tbaa !7)> t0, t4, undef:i32
+  t20: i32 = xor t19, t16
+  t13: i32 = xor t12, t7
+  t9: i32 = xor t8, t7
+      t23: i32 = xor t16, Constant:i32<-1>
+    t28: i32 = and t19, t23
+  t32: i32 = xor t28, t9
+      t25: i32 = xor t12, Constant:i32<-1>
+    t30: i32 = and t7, t25
+  t34: i32 = xor t20, t30
+      t22: i32 = xor t9, Constant:i32<-1>
+    t27: i32 = and t16, t22
+  t36: i32 = xor t27, t13
+        t45: i32 = xor t34, Constant:i32<-1>
+      t48: ch = store<(store (s32) into %ir.11, !tbaa !7)> t19:1, t45, t18, undef:i32
+        t41: i32 = xor t32, t36
+      t42: ch = store<(store (s32) into %ir.0, !tbaa !7)> t8:1, t41, t2, undef:i32
+              t26: i32 = xor t13, Constant:i32<-1>
+            t31: i32 = and t9, t26
+          t35: i32 = xor t31, t12
+        t43: i32 = xor t34, t35
+      t50: ch = store<(store (s32) into %ir.6, !tbaa !7)> t12:1, t43, t11, undef:i32
+              t24: i32 = xor t20, Constant:i32<-1>
+            t29: i32 = and t12, t24
+          t33: i32 = xor t29, t16
+        t39: i32 = xor t33, t32
+      t53: ch = store<(store (s32) into %ir.9, !tbaa !7)> t16:1, t39, t15, undef:i32
+      t56: ch = store<(store (s32) into %ir.2, !tbaa !7)> t7:1, t36, t4, undef:i32
+    t59: ch = TokenFactor t48, t42, t50, t53, t56
+  t47: ch = RISCVISD::RET_FLAG t59
+
