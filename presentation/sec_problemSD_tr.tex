@@ -1,0 +1,13 @@
+\begin{frame}{SelectionDAG ile İlgili Sorunlar}
+    \begin{itemize}
+        \item 2005'lerden beri geliştiriliyor
+        \item Monolitik, geçişleri (pass) test etmesi zor
+        \item Temel bloklar üzerinde çalışır, aynı anda iki fonksiyonun DAG'ına erişemez.
+        \item Derleme süresini önemli ölçüde etkiler
+        \item Dokümantasyon az
+        \item DAG bellekte inşa edildiği için hata ayıklaması zor
+    \end{itemize}
+    Bu sorunları ele alan yeni alternatif GlobalISel'dir, ancak RISC-V hedefi için hala geliştirme aşamasındadır.
+
+    GlobalISel, AArch64 hedefi için varsayılandır.
+\end{frame}

@@ -1,0 +1,120 @@
+
+\section{C++ ile Desen Eşleştirme}
+
+\subsection{C++ ile Desen Eşleştirme in SelectionDAG}
+\begin{frame}[fragile]{TableGen'in Sınırlamaları}
+\begin{itemize}
+    \item TableGen desenleri yalnızca ağaç yapılandırılmış desenleri eşleştirebilir.
+    \item Giriş ilişkileriyle desen eşleştirilemez. Tüm girişler birbirinden bağımsız olmalıdır.
+    \item C++ ile karşılaştırıldığında dil tarafından sınırlıdır.
+\end{itemize}
+
+\lstinputlisting[caption={Minimal IR Example of xor(load(x), load(x + 16))},linerange={1-5} ,label={lst:sbox-xor},language=llvm,style=nasm]{../s-box/keccakO3.ll}
+\end{frame}
+
+\begin{frame}{C++ ile Desen Eşleştirme in SelectionDAG}
+\begin{enumerate}
+    \item Assembler desteği sağlamak için TableGen'de bir kayıt bildirimi oluşturun, Desen bildirimi şimdilik yoksayılır.
+    \item Hata ayıklama çıktısında veya dot dosyasında DAG'ı gözlemleyin ve grafın kökünü bulun. 
+    \item Kök talimat durumunda RISCVISelDAGToDAG.cpp dosyasına bir fonksiyon ekleyin. 
+    \item SelectionDAG düğümü ile desen eşleştirmeyi ve değiştirmeyi uygulayın.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{C++ ile Örnek}{LXR Talimatı}
+\begin{itemize}
+    \item Örnek talimatımız LXR, bir diziden iki öğe yükler ve bunları XOR yapar.
+    \item lxr rd, rs1, rs2 = xor(load(x), load(x + 16))
+
+    \item Talimat bir diziden yüklendiği için, adres değerleri birbirine göreli. 
+    \item Bu yüzden TableGen desen eşleştirme için kullanılamaz.
+    \item Ancak TableGen her zaman talimat kodlaması ve dolayısıyla Assembler desteği için kullanılabilir.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{TableGen'de LXR'in Talimat Kodlaması}{1.Kayıt Oluştur}
+Giriş ve çıkışlar kayıtlar olduğu için TableGen sınıfı R-tipi talimatlar için kullanılabilir.
+
+Özel talimat kodlamamız için funct7 ve funct3'ü geçersiz kılabiliriz.
+\begin{lstlisting}
+let mayLoad = 1 in{
+def LXR : ALU_rr<0b0011011, 0b101, "lxr">,
+Sched<[WriteIALU, ReadIALU, ReadIALU]>;
+}
+\end{lstlisting}
+llvm-mc assembler, Assembly dizesinden ikili (binary) yayınlamak için kullanılabilir.
+\end{frame}
+
+\begin{frame}[fragile]{LXR Deseninin DAG'ı}{2.DAG'ı Gözlemleyin}
+Hedeflenen LXR deseni SelectionDAG'de üretilir ve dökülür (dump()).
+\lstinputlisting[caption={Karşılık gelen Optimize Edilmiş ve Yasallaştırılmış DAG}, linerange={3-3,4-4,8-9,13-13,16-16} ,label={lst:sbox-xor-dag},language=llvm,style=nasm]{../s-box/opt-lowered-dag.td}
+Talimat Seçimi, SelectionDAG'de optimize edilmiş, yasallaştırılmış DAG üzerinde çalışır.
+\end{frame}
+
+\begin{frame}[fragile]{RISCVISelDAGToDAG.cpp'yi Değiştirin}{3.Fonksiyon çağrısı ekleyin}
+    RISCVISelDAGToDAG.cpp, C++'da DAG'dan DAG'ye dönüşümleri içerir.
+\lstinputlisting[caption={C++'da Desen Eşleştirmesi için Yeni Fonksiyonun Tanıtımı},label={lst:sbox-iseldagtodag},language=C++]{../s-box/custom_c++/iseldagtodagPlace.cpp}
+\end{frame}
+
+
+\begin{frame}[fragile]{C++'da Desen Eşleştirme Fonksiyonu}{4.Desen Eşleştirme Mantığı}
+\lstinputlisting[caption={C++ mantığı, Bölüm 1}, label={lst:sbox-cpp}, linerange={1-17} ,language=C++]{../s-box/custom_c++/xor_loads.cpp}
+\end{frame}
+
+\begin{frame}[fragile]{C++'da Desen Eşleştirme Fonksiyonu}{4.Desen Eşleştirme Mantığı}
+\lstinputlisting[caption={C++ mantığı, Bölüm 2}, label={lst:sbox-cpp2}, linerange={19-33} ,language=C++]{../s-box/custom_c++/xor_loads.cpp}
+\end{frame}
+
+\begin{frame}{Fonksiyondaki Desen Kontrolleri}
+Kontrol edin eğer..
+\begin{enumerate}
+    \item .. işlenenler her ikisi de yükleme (load) talimatlarıysa.
+    \item .. İkinci yükleme talimatının ikinci operandı bir ekleme (add) talimatıysa.
+    \item .. ilk yüklemenin taban ofseti ve ikinci yüklemenin ilk ekleneceği aynıysa, çünkü yapı'nın başlangıcını göstermelidirler.
+    \item .. ikinci eklenen sabit bir değerse.
+    \item .. sabit ikinci eklenecek değerin işaretsiz değeri 16'ya eşitse.
+\end{enumerate}
+\end{frame}
+
+\ifAdvanced
+    \input{sec_problemSD_tr}
+\fi
+
+\subsection{Farklı Seviyelerde C++ ile Desen Eşleştirme}
+
+
+\begin{frame}{Farklı Seviyelerde Desen Eşleştirme}
+Desen eşleştirmeyi arka uçtan (backend) farklı bir seviyede gerçekleştirmek mümkündür.
+
+LLVM IR seviyesi ve MCInst, desen eşleştirmesi için iki alternatiftir.
+\begin{center}
+    \begin{tikzpicture}[node distance = 2cm, auto]
+\tikzstyle{every node}=[font=\footnotesize]
+    % Düğümleri yerleştir
+    \node [block] (init) {LLVM IR};
+    \node [cloud, right of=init,node distance=2.5cm] (ast) {Selection DAG};
+    \node [block, right of=ast,node distance=2.5cm] (llvmir) {MCInst};
+    % Kenarları çiz
+    \path [line] (init) -- (ast);
+    \path [line] (ast) -- (llvmir);
+
+   
+\end{tikzpicture}
+\end{center}
+\end{frame}
+
+\begin{frame}{LLVM IR ile Desen Eşleştirme}
+Döndürme işlemi "ROTR", IR seviyesinde LLVM IR'de eşleştirilir.
+    \begin{itemize}
+        \item LLVM IR'de desen eşleştirme, bir içsel fonksiyonunun (intrinsic function) tanımını gerektirir.
+        \item İçsel fonksiyon, desene göre optimizasyon geçişlerinde eşleştirilir.
+        \item Eşleştirilen özdeşimler arka uca aktarılır ve yeni talimat yayınlanır.
+    \end{itemize}
+    LLVM IR'de desen eşleştirme daha esnek olabilir, ancak uygulamak daha karmaşık olabilir.
+\end{frame}
+
+\begin{frame}{MCInst ile Desen Eşleştirme}
+SelectionDAG'den daha düşük bir seviye olan MCInst, talimatlar hakkında daha fazla ayrıntı gerektiğinde kullanılabilir.
+
+"SH1ADD", materyalize edilmiş sabitlerin eşleştirilmesiyle LLVM'de uygulanmıştır. Sabitlerin farklı temsilleri olabilir ve belirli bir sabite ihtiyaç duyulursa, MCInst o sabiti eşleştirmek için daha fazla kontrol sağlar.
+\end{frame}
